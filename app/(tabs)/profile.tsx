@@ -45,6 +45,7 @@ export default function ProfileScreen() {
   const setSoundOn = useSettingsStore((s) => s.setSoundOn);
   const hapticsOn = useSettingsStore((s) => s.hapticsOn);
   const setHapticsOn = useSettingsStore((s) => s.setHapticsOn);
+  const dailyReminderTime = useSettingsStore((s) => s.dailyReminderTime);
 
   const [editing, setEditing] = useState(false);
   const [draftName, setDraftName] = useState('');
@@ -205,6 +206,14 @@ export default function ProfileScreen() {
             description="Vibration feedback on tap and answer"
             value={hapticsOn}
             onChange={setHapticsOn}
+          />
+          <SettingsRow
+            kind="nav"
+            emoji="⏰"
+            label="Daily reminder"
+            description="Pick a time that works for you"
+            rightLabel={dailyReminderTime ?? 'Off'}
+            onPress={() => router.push('/settings/reminder')}
           />
           {authState === 'authenticated' && (
             <SettingsRow
