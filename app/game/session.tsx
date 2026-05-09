@@ -1,36 +1,32 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Dimensions,
 } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withTiming,
-  withSequence,
-  runOnJS,
   FadeIn,
-  FadeOut,
-  SlideInRight,
-  SlideOutLeft,
   ZoomIn,
 } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
-import { Timer } from '@/components/Timer';
+import { TimerRing } from '@/components/TimerRing';
+import { QuestionCard } from '@/components/QuestionCard';
+import { AnswerButton, AnswerState } from '@/components/AnswerButton';
+import { XPBar } from '@/components/XPBar';
+import { ConfettiBurst } from '@/components/ConfettiBurst';
 import { Button } from '@/components/Button';
 import { Colors, Spacing, FontSize, Radius } from '@/constants/theme';
+import { Config } from '@/constants/config';
 import { useGameStore } from '@/store/useGameStore';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const ROUND_TIME = 15;
+import { haptics } from '@/lib/haptics';
+import { audio } from '@/lib/audio';
+import { shouldPrefetch, prefetchNextRound } from '@/lib/prefetch';
+import { getXPForNextLevel } from '@/lib/trivia';
+import { useUserStore } from '@/store/useUserStore';
 
 export default function GameSessionScreen() {
   const {
@@ -49,22 +45,47 @@ export default function GameSessionScreen() {
     timeExpired,
     setTimeLeft,
     timeLeft,
+    category,
+    prefetchedQuestions,
+    setPrefetched,
   } = useGameStore();
+
+  const profile = useUserStore((s) => s.profile);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number>(Date.now());
+  const tickedRef = useRef<Set<number>>(new Set());
+  const prefetchedKickedRef = useRef(false);
 
-  // Countdown phase (3-2-1)
-  const [countdownNum, setCountdownNum] = useState(3);
+  const [countdownNum, setCountdownNum] = useState<number>(Config.COUNTDOWN_SECONDS);
 
-  // Timer logic
+  const handleTimeExpired = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    haptics.warning();
+    audio.wrong();
+    timeExpired();
+  };
+
   useEffect(() => {
     if (phase === 'playing') {
-      setTimeLeft(ROUND_TIME);
+      setTimeLeft(Config.ROUND_TIME_SECONDS);
       startTimeRef.current = Date.now();
+      tickedRef.current = new Set();
 
       timerRef.current = setInterval(() => {
-        setTimeLeft(Math.max(0, ROUND_TIME - Math.floor((Date.now() - startTimeRef.current) / 1000)));
+        const remaining = Math.max(
+          0,
+          Config.ROUND_TIME_SECONDS - Math.floor((Date.now() - startTimeRef.current) / 1000)
+        );
+        setTimeLeft(remaining);
+        if (remaining <= 3 && remaining > 0 && !tickedRef.current.has(remaining)) {
+          tickedRef.current.add(remaining);
+          audio.tick();
+        }
+        if (remaining === 0 && !tickedRef.current.has(0)) {
+          tickedRef.current.add(0);
+          handleTimeExpired();
+        }
       }, 200);
     }
     return () => {
@@ -72,33 +93,47 @@ export default function GameSessionScreen() {
     };
   }, [phase, currentIndex]);
 
-  // Countdown
   useEffect(() => {
     if (phase === 'countdown') {
-      setCountdownNum(3);
-      const t1 = setTimeout(() => setCountdownNum(2), 1000);
-      const t2 = setTimeout(() => setCountdownNum(1), 2000);
-      return () => { clearTimeout(t1); clearTimeout(t2); };
+      setCountdownNum(Config.COUNTDOWN_SECONDS);
+      const timers: ReturnType<typeof setTimeout>[] = [];
+      for (let i = 1; i < Config.COUNTDOWN_SECONDS; i++) {
+        timers.push(setTimeout(() => setCountdownNum(Config.COUNTDOWN_SECONDS - i), i * 1000));
+      }
+      return () => timers.forEach(clearTimeout);
     }
   }, [phase]);
+
+  useEffect(() => {
+    if (phase !== 'playing' && phase !== 'result') return;
+    const should = shouldPrefetch({
+      currentIndex,
+      totalQuestions: questions.length,
+      alreadyPrefetched: !!prefetchedQuestions || prefetchedKickedRef.current,
+    });
+    if (should) {
+      prefetchedKickedRef.current = true;
+      prefetchNextRound(category)
+        .then((qs) => setPrefetched(qs, category))
+        .catch(() => {});
+    }
+  }, [currentIndex, phase]);
 
   const handleAnswer = (answer: string) => {
     if (timerRef.current) clearInterval(timerRef.current);
     const timeTaken = Math.floor((Date.now() - startTimeRef.current) / 1000);
     const isCorrect = answer === currentQuestion?.correct_answer;
-    Haptics.impactAsync(
-      isCorrect ? Haptics.ImpactFeedbackStyle.Medium : Haptics.ImpactFeedbackStyle.Heavy
-    ).catch(() => {});
+    if (isCorrect) {
+      haptics.medium();
+      audio.correct();
+    } else {
+      haptics.heavy();
+      audio.wrong();
+    }
     selectAnswer(answer, timeTaken);
   };
 
-  const handleTimeExpired = () => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
-    timeExpired();
-  };
-
-  // ── Countdown Screen ─────────────────────────────────────────────────────
+  // ── Countdown ──────────────────────────────────────────────────────────
   if (phase === 'countdown') {
     return (
       <LinearGradient colors={[Colors.bg, '#1A0A3A']} style={styles.fullscreen}>
@@ -110,7 +145,7 @@ export default function GameSessionScreen() {
     );
   }
 
-  // ── Game Over Screen ──────────────────────────────────────────────────────
+  // ── Game Over ──────────────────────────────────────────────────────────
   if (phase === 'gameover') {
     const accuracy = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
     const grade =
@@ -119,8 +154,16 @@ export default function GameSessionScreen() {
       accuracy >= 40 ? { label: 'Not bad 👍', color: Colors.accent } :
       { label: 'Keep trying 💪', color: Colors.primaryLight };
 
+    const xpForNext = getXPForNextLevel(profile.level);
+    const showConfetti = accuracy >= 60;
+
+    if (showConfetti) {
+      audio.fanfare();
+    }
+
     return (
       <SafeAreaView style={styles.container}>
+        {showConfetti && <ConfettiBurst trigger={true} />}
         <ScrollView contentContainerStyle={styles.gameoverScroll} showsVerticalScrollIndicator={false}>
           <Animated.View entering={ZoomIn.springify()}>
             <LinearGradient colors={[Colors.primary, Colors.primaryDark]} style={styles.gameoverCard}>
@@ -146,7 +189,10 @@ export default function GameSessionScreen() {
             </LinearGradient>
           </Animated.View>
 
-          {/* Round by Round */}
+          <View style={styles.xpWrap}>
+            <XPBar level={profile.level} xp={profile.totalXP} xpForNext={xpForNext} />
+          </View>
+
           <Text style={styles.breakdownTitle}>Round Breakdown</Text>
           {roundResults.map((r, i) => (
             <Animated.View key={i} entering={FadeIn.delay(i * 80).springify()}>
@@ -170,7 +216,6 @@ export default function GameSessionScreen() {
               label="Play Again 🎮"
               onPress={() => {
                 resetGame();
-                router.replace('/game/session' as any);
                 router.back();
               }}
               style={{ flex: 1 }}
@@ -191,14 +236,23 @@ export default function GameSessionScreen() {
     );
   }
 
-  // ── Playing / Result Screen ───────────────────────────────────────────────
+  // ── Playing / Result ───────────────────────────────────────────────────
   if (!currentQuestion) return null;
 
   const progress = ((currentIndex + 1) / questions.length) * 100;
+  const showResult = phase === 'result';
+
+  function answerStateFor(answer: string): AnswerState {
+    if (!showResult) {
+      return selectedAnswer === answer ? 'selected' : 'idle';
+    }
+    if (answer === currentQuestion!.correct_answer) return 'correct';
+    if (selectedAnswer === answer) return 'wrong';
+    return 'idle';
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Top Bar */}
       <View style={styles.topBar}>
         <TouchableOpacity
           onPress={() => { resetGame(); router.back(); }}
@@ -212,81 +266,38 @@ export default function GameSessionScreen() {
         <Text style={styles.scoreTxt}>{totalScore}</Text>
       </View>
 
-      {/* Progress Bar */}
       <View style={styles.progressBg}>
         <Animated.View style={[styles.progressFill, { width: `${progress}%` }]} />
       </View>
 
-      {/* Timer */}
       {phase === 'playing' && (
         <View style={styles.timerWrap}>
-          <Timer timeLeft={timeLeft} totalTime={ROUND_TIME} onExpire={handleTimeExpired} />
+          <TimerRing timeLeft={timeLeft} totalTime={Config.ROUND_TIME_SECONDS} />
         </View>
       )}
 
-      {/* Question */}
-      <Animated.View
-        key={`q_${currentIndex}`}
-        entering={SlideInRight.springify()}
-        exiting={SlideOutLeft.springify()}
-        style={styles.questionWrap}
-      >
-        <View style={styles.categoryBadge}>
-          <Text style={styles.categoryTxt}>{currentQuestion.category}</Text>
-          <Text style={styles.diffBadge}>{currentQuestion.difficulty.toUpperCase()}</Text>
-        </View>
-        <Text style={styles.questionText}>{currentQuestion.question}</Text>
-      </Animated.View>
+      <QuestionCard
+        question={currentQuestion.question}
+        category={currentQuestion.category}
+        difficulty={currentQuestion.difficulty}
+        questionKey={`q_${currentIndex}`}
+      />
 
-      {/* Answer Options */}
       <View style={styles.answersWrap}>
-        {currentQuestion.answers.map((answer, i) => {
-          const isSelected = selectedAnswer === answer;
-          const isCorrect = answer === currentQuestion.correct_answer;
-          const showResult = phase === 'result';
-
-          let borderColor = Colors.border;
-          let bgColor = Colors.bgCard;
-          let textColor = Colors.textPrimary;
-
-          if (showResult) {
-            if (isCorrect) {
-              borderColor = Colors.success;
-              bgColor = `${Colors.success}20`;
-              textColor = Colors.successLight;
-            } else if (isSelected && !isCorrect) {
-              borderColor = Colors.danger;
-              bgColor = `${Colors.danger}15`;
-              textColor = Colors.dangerLight;
-            }
-          } else if (isSelected) {
-            borderColor = Colors.primary;
-            bgColor = `${Colors.primary}20`;
-          }
-
-          return (
-            <Animated.View key={`${currentIndex}_${i}`} entering={FadeIn.delay(i * 60).springify()}>
-              <TouchableOpacity
-                onPress={() => handleAnswer(answer)}
-                disabled={phase === 'result'}
-                style={[styles.answerChip, { borderColor, backgroundColor: bgColor }]}
-              >
-                <View style={styles.answerInner}>
-                  <Text style={styles.answerLetter}>
-                    {['A', 'B', 'C', 'D'][i]}
-                  </Text>
-                  <Text style={[styles.answerText, { color: textColor }]}>{answer}</Text>
-                  {showResult && isCorrect && <Text style={{ fontSize: 16 }}>✅</Text>}
-                  {showResult && isSelected && !isCorrect && <Text style={{ fontSize: 16 }}>❌</Text>}
-                </View>
-              </TouchableOpacity>
-            </Animated.View>
-          );
-        })}
+        {currentQuestion.answers.map((answer, i) => (
+          <Animated.View key={`${currentIndex}_${i}`} entering={FadeIn.delay(i * 60).springify()}>
+            <AnswerButton
+              letter={(['A', 'B', 'C', 'D'] as const)[i]}
+              text={answer}
+              state={answerStateFor(answer)}
+              onPress={() => handleAnswer(answer)}
+              disabled={showResult}
+            />
+          </Animated.View>
+        ))}
       </View>
 
-      {/* Next Button (after answer) */}
-      {phase === 'result' && (
+      {showResult && (
         <Animated.View entering={FadeIn.springify()} style={styles.nextWrap}>
           <Button
             label={currentIndex + 1 >= questions.length ? 'See Results 🏆' : 'Next Question →'}
@@ -356,6 +367,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
   },
   gameoverStatDiv: { width: 1, height: 30, backgroundColor: 'rgba(255,255,255,0.2)' },
+  xpWrap: { marginBottom: Spacing.lg },
   breakdownTitle: {
     fontSize: FontSize.lg,
     color: Colors.textPrimary,
@@ -436,72 +448,13 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   timerWrap: {
-    paddingHorizontal: Spacing.md,
     paddingTop: Spacing.md,
-  },
-  questionWrap: {
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.lg,
-    paddingBottom: Spacing.md,
-    flex: 0,
-  },
-  categoryBadge: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: Spacing.sm,
     alignItems: 'center',
-  },
-  categoryTxt: {
-    fontSize: FontSize.xs,
-    color: Colors.textSecondary,
-    fontFamily: 'Inter_600SemiBold',
-    backgroundColor: Colors.bgElevated,
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 20,
-  },
-  diffBadge: {
-    fontSize: FontSize.xs,
-    color: Colors.gold,
-    fontFamily: 'Outfit_700Bold',
-  },
-  questionText: {
-    fontSize: FontSize.xl,
-    color: Colors.textPrimary,
-    fontFamily: 'Outfit_700Bold',
-    lineHeight: 28,
   },
   answersWrap: {
     paddingHorizontal: Spacing.md,
     gap: 10,
     flex: 1,
-  },
-  answerChip: {
-    borderRadius: Radius.md,
-    borderWidth: 1.5,
-    overflow: 'hidden',
-  },
-  answerInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: Spacing.md,
-    gap: 12,
-  },
-  answerLetter: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: Colors.bgOverlay,
-    textAlign: 'center',
-    lineHeight: 28,
-    fontSize: FontSize.sm,
-    color: Colors.textSecondary,
-    fontFamily: 'Outfit_700Bold',
-  },
-  answerText: {
-    flex: 1,
-    fontSize: FontSize.md,
-    fontFamily: 'Inter_400Regular',
   },
   nextWrap: {
     paddingHorizontal: Spacing.md,
