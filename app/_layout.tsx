@@ -4,9 +4,11 @@ import { useEffect } from 'react';
 import { useFonts, Outfit_400Regular, Outfit_700Bold, Outfit_900Black } from '@expo-google-fonts/outfit';
 import { Inter_400Regular, Inter_600SemiBold } from '@expo-google-fonts/inter';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { View, StyleSheet } from 'react-native';
-import { Colors } from '@/constants/theme';
+import { StyleSheet } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
+import { Colors } from '@/constants/theme';
+import { useUserStore } from '@/store/useUserStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -19,13 +21,18 @@ export default function RootLayout() {
     Inter_600SemiBold,
   });
 
-  useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
+  const userHydrated = useUserStore((s) => s.hydrated);
+  const settingsHydrated = useSettingsStore((s) => s.hydrated);
 
-  if (!fontsLoaded) return null;
+  const ready = fontsLoaded && userHydrated && settingsHydrated;
+
+  useEffect(() => {
+    if (ready) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [ready]);
+
+  if (!ready) return null;
 
   return (
     <GestureHandlerRootView style={styles.root}>
