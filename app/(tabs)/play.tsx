@@ -131,7 +131,7 @@ export default function PlayScreen() {
               ['⚡', 'Answer 5 questions as fast as you can'],
               ['⏱️', '15 seconds per question — speed = bonus points'],
               ['🔥', 'Play daily to build your streak'],
-              ['🏆', 'Climb the leaderboard with your score'],
+              ['🧠', 'Earn XP and level up your brain'],
             ].map(([emoji, text]) => (
               <View key={text} style={styles.howRow}>
                 <Text style={styles.howEmoji}>{emoji}</Text>
