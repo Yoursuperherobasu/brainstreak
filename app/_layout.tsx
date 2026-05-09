@@ -10,6 +10,13 @@ import * as SplashScreen from 'expo-splash-screen';
 import { Colors } from '@/constants/theme';
 import { useUserStore } from '@/store/useUserStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
+import { ensureForegroundHandler, getPermissionStatus } from '@/lib/notifications';
+
+// Install foreground notification handler at module load — needs to run
+// before any notification arrives, including ones the OS shows on cold start.
+if (Platform.OS !== 'web') {
+  ensureForegroundHandler();
+}
 
 SplashScreen.preventAutoHideAsync();
 
@@ -26,6 +33,8 @@ export default function RootLayout() {
   const settingsHydrated = useSettingsStore((s) => s.hydrated);
   const bootstrapAuth = useUserStore((s) => s.bootstrapAuth);
   const onboarded = useSettingsStore((s) => s.onboarded);
+  const dailyReminderTime = useSettingsStore((s) => s.dailyReminderTime);
+  const applyReminder = useSettingsStore((s) => s.applyReminder);
   const segments = useSegments();
 
   // On native, we wait for fonts + stores to hydrate before showing UI to
@@ -53,6 +62,20 @@ export default function RootLayout() {
       router.replace('/onboarding/welcome');
     }
   }, [stable, onboarded, segments]);
+
+  // A3: re-apply the daily reminder once per launch. CALENDAR repeats means
+  // the OS schedules the recurrence, but we still call applyReminder so a
+  // fresh install or settings change gets the right time. Skip on web.
+  useEffect(() => {
+    if (!stable || Platform.OS === 'web') return;
+    if (!dailyReminderTime) return;
+    (async () => {
+      const status = await getPermissionStatus();
+      if (status === 'granted') {
+        applyReminder().catch(() => {});
+      }
+    })();
+  }, [stable]);
 
   // Don't gate render on fonts — let the Stack mount with system-font fallback
   // until @expo-google-fonts loads. Stores are local and rehydrate fast.
