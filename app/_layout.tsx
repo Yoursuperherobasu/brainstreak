@@ -23,8 +23,15 @@ export default function RootLayout() {
 
   const userHydrated = useUserStore((s) => s.hydrated);
   const settingsHydrated = useSettingsStore((s) => s.hydrated);
+  const bootstrapAuth = useUserStore((s) => s.bootstrapAuth);
 
   const ready = fontsLoaded && userHydrated && settingsHydrated;
+
+  useEffect(() => {
+    if (userHydrated) {
+      bootstrapAuth();
+    }
+  }, [userHydrated]);
 
   useEffect(() => {
     if (ready) {
