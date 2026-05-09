@@ -96,6 +96,7 @@ export default function RootLayout() {
           options={{
             animation: 'slide_from_bottom',
             presentation: 'fullScreenModal',
+            gestureEnabled: false, // A12: prevent swipe-to-dismiss losing game state
           }}
         />
         <Stack.Screen

@@ -1,10 +1,12 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Alert,
+  BackHandler,
 } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -38,6 +40,7 @@ export default function GameSessionScreen() {
     totalScore,
     correctCount,
     xpEarned,
+    leveledUp,
     roundResults,
     selectAnswer,
     nextQuestion,
@@ -56,15 +59,47 @@ export default function GameSessionScreen() {
   const startTimeRef = useRef<number>(Date.now());
   const tickedRef = useRef<Set<number>>(new Set());
   const prefetchedKickedRef = useRef(false);
+  const correctStreakRef = useRef(0); // C7: in-game correct-streak for milestone haptic
+  const fanfarePlayedRef = useRef(false); // play fanfare exactly once
 
   const [countdownNum, setCountdownNum] = useState<number>(Config.COUNTDOWN_SECONDS);
 
-  const handleTimeExpired = () => {
+  // ── Quit confirmation (A12) ────────────────────────────────────────────
+  const confirmQuit = useCallback(() => {
+    Alert.alert(
+      'Quit game?',
+      'Your progress in this round will be lost.',
+      [
+        { text: 'Keep playing', style: 'cancel' },
+        {
+          text: 'Quit',
+          style: 'destructive',
+          onPress: () => {
+            resetGame();
+            router.back();
+          },
+        },
+      ]
+    );
+  }, [resetGame]);
+
+  // Hardware back button on Android during play / result (not gameover).
+  useEffect(() => {
+    if (phase !== 'playing' && phase !== 'result' && phase !== 'countdown') return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      confirmQuit();
+      return true; // we handled it; don't let the system pop the screen
+    });
+    return () => sub.remove();
+  }, [phase, confirmQuit]);
+
+  const handleTimeExpired = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
     haptics.warning();
     audio.wrong();
+    correctStreakRef.current = 0;
     timeExpired();
-  };
+  }, [timeExpired]);
 
   useEffect(() => {
     if (phase === 'playing') {
@@ -91,14 +126,21 @@ export default function GameSessionScreen() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [phase, currentIndex]);
+  }, [phase, currentIndex, setTimeLeft, handleTimeExpired]);
 
+  // A10: 3-2-1 countdown ticks audibly on every transition.
   useEffect(() => {
     if (phase === 'countdown') {
       setCountdownNum(Config.COUNTDOWN_SECONDS);
+      audio.tick();
       const timers: ReturnType<typeof setTimeout>[] = [];
       for (let i = 1; i < Config.COUNTDOWN_SECONDS; i++) {
-        timers.push(setTimeout(() => setCountdownNum(Config.COUNTDOWN_SECONDS - i), i * 1000));
+        timers.push(
+          setTimeout(() => {
+            setCountdownNum(Config.COUNTDOWN_SECONDS - i);
+            audio.tick();
+          }, i * 1000)
+        );
       }
       return () => timers.forEach(clearTimeout);
     }
@@ -117,16 +159,23 @@ export default function GameSessionScreen() {
         .then((qs) => setPrefetched(qs, category))
         .catch(() => {});
     }
-  }, [currentIndex, phase]);
+  }, [currentIndex, phase, questions.length, prefetchedQuestions, category, setPrefetched]);
 
   const handleAnswer = (answer: string) => {
     if (timerRef.current) clearInterval(timerRef.current);
     const timeTaken = Math.floor((Date.now() - startTimeRef.current) / 1000);
     const isCorrect = answer === currentQuestion?.correct_answer;
     if (isCorrect) {
-      haptics.medium();
+      correctStreakRef.current += 1;
+      // C7 fix: heavy haptic on every 5-correct milestone within the round.
+      if (correctStreakRef.current > 0 && correctStreakRef.current % 5 === 0) {
+        haptics.heavy();
+      } else {
+        haptics.medium();
+      }
       audio.correct();
     } else {
+      correctStreakRef.current = 0;
       haptics.heavy();
       audio.wrong();
     }
@@ -155,9 +204,12 @@ export default function GameSessionScreen() {
       { label: 'Keep trying 💪', color: Colors.primaryLight };
 
     const xpForNext = getXPForNextLevel(profile.level);
-    const showConfetti = accuracy >= 60;
+    // A9 fix: confetti fires on level-up (the actual "you progressed" moment),
+    // not on accuracy. Accuracy already drives the grade label.
+    const showConfetti = leveledUp;
 
-    if (showConfetti) {
+    if (showConfetti && !fanfarePlayedRef.current) {
+      fanfarePlayedRef.current = true;
       audio.fanfare();
     }
 
@@ -168,6 +220,9 @@ export default function GameSessionScreen() {
           <Animated.View entering={ZoomIn.springify()}>
             <LinearGradient colors={[Colors.primary, Colors.primaryDark]} style={styles.gameoverCard}>
               <Text style={styles.gameoverTitle}>{grade.label}</Text>
+              {leveledUp && (
+                <Text style={styles.levelUp}>LEVEL UP → {profile.level}</Text>
+              )}
               <Text style={styles.gameoverScore}>{totalScore.toLocaleString()}</Text>
               <Text style={styles.gameoverScoreLabel}>points</Text>
               <View style={styles.gameoverStats}>
@@ -254,10 +309,7 @@ export default function GameSessionScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.topBar}>
-        <TouchableOpacity
-          onPress={() => { resetGame(); router.back(); }}
-          style={styles.closeBtn}
-        >
+        <TouchableOpacity onPress={confirmQuit} style={styles.closeBtn}>
           <Text style={styles.closeTxt}>✕</Text>
         </TouchableOpacity>
         <Text style={styles.progressLabel}>
@@ -336,6 +388,13 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xxl,
     color: Colors.textPrimary,
     fontFamily: 'Outfit_700Bold',
+    marginBottom: Spacing.sm,
+  },
+  levelUp: {
+    fontSize: FontSize.sm,
+    color: Colors.goldLight,
+    fontFamily: 'Outfit_900Black',
+    letterSpacing: 1.2,
     marginBottom: Spacing.sm,
   },
   gameoverScore: {
