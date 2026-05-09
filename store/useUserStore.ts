@@ -7,6 +7,8 @@ import {
   LocalProfile,
   DEFAULT_USERNAME,
 } from '@/lib/storage';
+import { getCurrentSession } from '@/lib/auth';
+import { pullAndMerge, pushProfile } from '@/lib/sync';
 
 export type AuthState = 'unknown' | 'anonymous' | 'authenticated';
 
@@ -16,6 +18,7 @@ export interface UserState {
   authState: AuthState;
   authedUserId: string | null;
   hydrated: boolean;
+  bootstrapped: boolean;
 
   setUsername: (username: string) => void;
   setProfile: (profile: LocalProfile) => void;
@@ -23,6 +26,11 @@ export interface UserState {
   setAuthenticated: (userId: string) => void;
   setAnonymous: () => void;
   reset: () => void;
+
+  bootstrapAuth: () => Promise<void>;
+  signInAndSync: (userId: string) => Promise<void>;
+  pushIfAuthed: () => Promise<void>;
+
   _setHydrated: (value: boolean) => void;
 }
 
@@ -41,12 +49,13 @@ const initialStreak: StreakData = {
 
 export const useUserStore = create<UserState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       profile: initialProfile,
       streak: initialStreak,
       authState: 'unknown',
       authedUserId: null,
       hydrated: false,
+      bootstrapped: false,
 
       setUsername: (username) =>
         set((s) => ({ profile: { ...s.profile, username } })),
@@ -62,6 +71,44 @@ export const useUserStore = create<UserState>()(
           authState: 'anonymous',
           authedUserId: null,
         }),
+
+      bootstrapAuth: async () => {
+        if (get().bootstrapped) return;
+        try {
+          const { userId } = await getCurrentSession();
+          if (userId) {
+            set({ authState: 'authenticated', authedUserId: userId });
+            await get().signInAndSync(userId);
+          } else if (get().authState === 'unknown') {
+            set({ authState: 'anonymous' });
+          }
+        } finally {
+          set({ bootstrapped: true });
+        }
+      },
+
+      signInAndSync: async (userId) => {
+        const { profile, streak } = get();
+        try {
+          const merged = await pullAndMerge(userId, profile, streak);
+          set({
+            profile: merged.profile,
+            streak: merged.streak,
+            authState: 'authenticated',
+            authedUserId: userId,
+          });
+          await pushProfile(userId, merged.profile, merged.streak);
+        } catch (e) {
+          console.warn('[useUserStore] signInAndSync failed:', e);
+        }
+      },
+
+      pushIfAuthed: async () => {
+        const { authState, authedUserId, profile, streak } = get();
+        if (authState !== 'authenticated' || !authedUserId) return;
+        await pushProfile(authedUserId, profile, streak);
+      },
+
       _setHydrated: (value) => set({ hydrated: value }),
     }),
     {
