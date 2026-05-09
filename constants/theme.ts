@@ -5,57 +5,60 @@
 // soft shadows instead of borders. Big editorial type. No dark gradients.
 
 export const Colors = {
-  // Brand Palette
-  primary: '#7C3AED',       // Electric Violet
-  primaryLight: '#A78BFA',  // Soft Lavender
-  primaryDark: '#5B21B6',   // Deep Violet
+  // Brand Palette — warm coral primary, sand accents
+  primary: '#E85D40',       // Warm coral (was electric violet)
+  primaryLight: '#F4836B',  // Soft coral
+  primaryDark: '#C44A30',   // Deep coral
 
-  accent: '#06B6D4',        // Cyan
-  accentLight: '#A5F3FC',   // Pale Cyan
+  accent: '#3B7A8D',        // Muted teal — pairs with coral
+  accentLight: '#85C1CE',   // Pale teal
 
-  gold: '#F59E0B',          // Achievement Gold
-  goldLight: '#FDE68A',     // Soft Gold
+  gold: '#D4A017',          // Honey gold (warmer than amber)
+  goldLight: '#F4D673',     // Soft honey
 
-  danger: '#EF4444',        // Red
-  dangerLight: '#FECACA',   // Soft Red
+  danger: '#C84441',        // Brick red
+  dangerLight: '#F5C9C7',   // Soft brick
 
-  success: '#10B981',       // Green
-  successLight: '#A7F3D0',  // Soft Green
+  success: '#5C9E5E',       // Sage green
+  successLight: '#B5D9B5',  // Soft sage
 
-  // Neutrals (LIGHT THEME)
-  bg: '#FAFAF7',            // Warm cream — main background
-  bgCard: '#FFFFFF',        // White card surface
-  bgElevated: '#F1F1ED',    // Slightly recessed surface (e.g. tab bar)
-  bgOverlay: '#E9E9E4',     // Tracks/bars background
+  // Neutrals — warm off-white / brownish paper
+  bg: '#F4ECE0',            // Warm sand background
+  bgCard: '#FBF5EA',        // Cream paper card
+  bgElevated: '#EBE0CE',    // Recessed surface (tab bar)
+  bgOverlay: '#DBCDB6',     // Tracks/bars background
 
-  // Text
-  textPrimary: '#1A1A2E',   // Near-black ink
-  textSecondary: '#4B4B5E', // Muted ink for sub-copy
-  textMuted: '#8E8E9C',     // Hints / placeholders
+  // Text — warm brown ink, not black
+  textPrimary: '#3D2914',   // Rich espresso brown
+  textSecondary: '#6B523A', // Coffee brown
+  textMuted: '#9C8770',     // Muted tan
 
   // Borders
-  border: '#E5E5DF',        // Hairline divider
-  borderBright: '#D4D4CC',  // Visible divider
+  border: '#E0D2BC',        // Hairline divider
+  borderBright: '#C9B89A',  // Visible divider
 
-  // Category Colors
-  catScience: '#06B6D4',
-  catHistory: '#F59E0B',
-  catTech: '#7C3AED',
-  catSports: '#10B981',
-  catPop: '#EC4899',
-  catMixed: '#6366F1',
+  // Category Colors — distinct hues that all sit on warm cream
+  catMath:    '#E85D40',  // coral
+  catEnglish: '#3B7A8D',  // teal
+  catGK:      '#D4A017',  // honey
+  catScience: '#3B7A8D',
+  catHistory: '#D4A017',
+  catTech:    '#7E5DB0',  // muted plum
+  catSports:  '#5C9E5E',
+  catPop:     '#D86CB7',  // dusty rose
+  catMixed:   '#7E5DB0',
 };
 
-// Gradients are now subtle on-light, not the dark navy showpieces.
+// Gradients tuned for the warm sand palette.
 export const Gradients = {
-  primary: ['#7C3AED', '#A78BFA'] as const,
-  accent: ['#06B6D4', '#67E8F9'] as const,
-  gold: ['#F59E0B', '#FCD34D'] as const,
-  hero: ['#FFFFFF', '#FAFAF7'] as const,
-  card: ['#FFFFFF', '#F8F8F4'] as const,
-  danger: ['#EF4444', '#F87171'] as const,
-  success: ['#10B981', '#34D399'] as const,
-  fire: ['#F97316', '#FB923C'] as const,
+  primary: ['#E85D40', '#F4836B'] as const,
+  accent: ['#3B7A8D', '#85C1CE'] as const,
+  gold: ['#D4A017', '#F4D673'] as const,
+  hero: ['#FBF5EA', '#F4ECE0'] as const,
+  card: ['#FFFFFF', '#FBF5EA'] as const,
+  danger: ['#C84441', '#E08482'] as const,
+  success: ['#5C9E5E', '#9DC89D'] as const,
+  fire: ['#E85D40', '#F4A74A'] as const,
 };
 
 // Soft drop-shadow recipe for cards. RN style fragments — spread into style.
@@ -112,12 +115,13 @@ export const FontSize = {
 };
 
 export const CATEGORIES = [
-  { id: 'mixed',   label: 'Mixed',   emoji: '🌀', color: Colors.catMixed,   apiId: 0 },
-  { id: 'science', label: 'Science', emoji: '🔬', color: Colors.catScience, apiId: 17 },
-  { id: 'history', label: 'History', emoji: '🏛️', color: Colors.catHistory, apiId: 23 },
-  { id: 'tech',    label: 'Tech',    emoji: '💻', color: Colors.catTech,    apiId: 18 },
-  { id: 'sports',  label: 'Sports',  emoji: '⚽', color: Colors.catSports,  apiId: 21 },
-  { id: 'pop',     label: 'Pop',     emoji: '🎬', color: Colors.catPop,     apiId: 11 },
+  // BrainRush — the new default. Math + English + GK, no network needed.
+  { id: 'brain',   label: 'BrainRush', emoji: '🧠', color: Colors.primary,   apiId: -1 },
+  { id: 'mixed',   label: 'Mixed',     emoji: '🌀', color: Colors.catMixed,   apiId: 0 },
+  { id: 'science', label: 'Science',   emoji: '🔬', color: Colors.catScience, apiId: 17 },
+  { id: 'history', label: 'History',   emoji: '🏛️', color: Colors.catHistory, apiId: 23 },
+  { id: 'tech',    label: 'Tech',      emoji: '💻', color: Colors.catTech,    apiId: 18 },
+  { id: 'pop',     label: 'Pop',       emoji: '🎬', color: Colors.catPop,     apiId: 11 },
 ] as const;
 
 export const MOTIVATIONAL_QUOTES = [

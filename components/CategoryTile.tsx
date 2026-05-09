@@ -1,12 +1,12 @@
 import React from 'react';
-import { Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, StyleSheet, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-import { Colors, FontSize, Radius } from '@/constants/theme';
+import { Colors, FontSize, Radius, Shadow } from '@/constants/theme';
 import { haptics } from '@/lib/haptics';
 
 interface CategoryTileProps {
@@ -16,8 +16,6 @@ interface CategoryTileProps {
   selected: boolean;
   onPress: () => void;
 }
-
-const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
 export function CategoryTile({ emoji, label, color, selected, onPress }: CategoryTileProps) {
   const scale = useSharedValue(1);
@@ -35,36 +33,41 @@ export function CategoryTile({ emoji, label, color, selected, onPress }: Categor
   };
 
   const gradient: [string, string] = selected
-    ? [color, `${color}99`]
-    : [Colors.bgCard, Colors.bgElevated];
+    ? [color, `${color}DD`]
+    : [Colors.bgCard, Colors.bg];
 
   return (
-    <AnimatedTouchable
-      activeOpacity={0.9}
-      onPress={handlePress}
+    <Animated.View
       style={[
         styles.outer,
         animStyle,
         { borderColor: selected ? color : Colors.border },
+        Shadow.sm,
       ]}
     >
-      <LinearGradient
-        colors={gradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.inner}
+      <Pressable
+        onPress={handlePress}
+        style={styles.pressable}
+        android_ripple={{ color: `${color}22` }}
       >
-        <Text style={styles.emoji}>{emoji}</Text>
-        <Text
-          style={[
-            styles.label,
-            { color: selected ? Colors.textPrimary : Colors.textSecondary },
-          ]}
+        <LinearGradient
+          colors={gradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.inner}
         >
-          {label}
-        </Text>
-      </LinearGradient>
-    </AnimatedTouchable>
+          <Text style={styles.emoji}>{emoji}</Text>
+          <Text
+            style={[
+              styles.label,
+              { color: selected ? '#FFFFFF' : Colors.textPrimary },
+            ]}
+          >
+            {label}
+          </Text>
+        </LinearGradient>
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -77,6 +80,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     overflow: 'hidden',
   },
+  pressable: { flex: 1 },
   inner: {
     flex: 1,
     alignItems: 'center',

@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  TouchableOpacity,
+  Pressable,
   Text,
   StyleSheet,
   ActivityIndicator,
@@ -15,7 +15,7 @@ import Animated, {
   withSequence,
 } from 'react-native-reanimated';
 import { haptics } from '@/lib/haptics';
-import { Colors, Radius, FontSize } from '@/constants/theme';
+import { Colors, Radius, FontSize, Shadow } from '@/constants/theme';
 
 interface ButtonProps {
   label: string;
@@ -29,8 +29,6 @@ interface ButtonProps {
   textStyle?: TextStyle;
   gradient?: [string, string];
 }
-
-const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
 export function Button({
   label,
@@ -73,42 +71,45 @@ export function Button({
   };
 
   const variantColors: Record<string, [string, string]> = {
-    primary: [Colors.primary, Colors.primaryDark],
-    secondary: [Colors.bgElevated, Colors.bgCard],
-    danger: [Colors.danger, '#B91C1C'],
+    primary: [Colors.primary, Colors.primaryLight],
+    secondary: [Colors.bgElevated, Colors.bgOverlay],
+    danger: [Colors.danger, '#E08482'],
     ghost: ['transparent', 'transparent'],
   };
 
   const colors = gradient ?? variantColors[variant];
   const isGhost = variant === 'ghost';
+  const isSecondary = variant === 'secondary';
+  const labelColor = isGhost || isSecondary ? Colors.textPrimary : '#FFFFFF';
 
   return (
-    <AnimatedTouchable
-      onPress={handlePress}
-      activeOpacity={0.9}
-      disabled={disabled || loading}
-      style={[animatedStyle, style]}
-    >
-      <LinearGradient
-        colors={colors as [string, string]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[
-          styles.base,
-          sizeStyles[size],
-          isGhost && styles.ghostBorder,
-          (disabled || loading) && styles.disabled,
-        ]}
+    <Animated.View style={[animatedStyle, !isGhost && Shadow.md, style]}>
+      <Pressable
+        onPress={handlePress}
+        disabled={disabled || loading}
+        android_ripple={{ color: 'rgba(255,255,255,0.18)' }}
       >
-        {loading ? (
-          <ActivityIndicator color={Colors.textPrimary} size="small" />
-        ) : (
-          <Text style={[styles.label, { fontSize: textSizes[size] }, textStyle]}>
-            {icon ? `${icon}  ` : ''}{label}
-          </Text>
-        )}
-      </LinearGradient>
-    </AnimatedTouchable>
+        <LinearGradient
+          colors={colors as [string, string]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[
+            styles.base,
+            sizeStyles[size],
+            isGhost && styles.ghostBorder,
+            (disabled || loading) && styles.disabled,
+          ]}
+        >
+          {loading ? (
+            <ActivityIndicator color={labelColor} size="small" />
+          ) : (
+            <Text style={[styles.label, { fontSize: textSizes[size], color: labelColor }, textStyle]}>
+              {icon ? `${icon}  ` : ''}{label}
+            </Text>
+          )}
+        </LinearGradient>
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -119,13 +120,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   label: {
-    color: Colors.textPrimary,
+    fontFamily: 'Outfit_700Bold',
     fontWeight: '700',
     letterSpacing: 0.3,
   },
   ghostBorder: {
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: Colors.borderBright,
   },
   disabled: {
     opacity: 0.5,

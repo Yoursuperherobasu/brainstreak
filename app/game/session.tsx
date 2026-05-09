@@ -345,6 +345,7 @@ export default function GameSessionScreen() {
               state={answerStateFor(answer)}
               onPress={() => handleAnswer(answer)}
               disabled={showResult}
+              bobIndex={i}
             />
           </MotionView>
         ))}

@@ -18,7 +18,9 @@ import { SectionHeader } from '@/components/SectionHeader';
 import { MotionView } from '@/components/MotionView';
 import { Colors, Spacing, FontSize, CATEGORIES, Radius } from '@/constants/theme';
 import { fetchTriviaQuestions } from '@/lib/trivia';
+import { generateBrainRush } from '@/lib/quiz-bank';
 import { useGameStore } from '@/store/useGameStore';
+import { useUserStore } from '@/store/useUserStore';
 import { Config } from '@/constants/config';
 
 type Difficulty = 'any' | 'easy' | 'medium' | 'hard';
@@ -31,19 +33,29 @@ const DIFFICULTIES: { id: Difficulty; label: string; emoji: string; color: strin
 ];
 
 export default function PlayScreen() {
-  const [selectedCategory, setSelectedCategory] = useState('mixed');
+  const [selectedCategory, setSelectedCategory] = useState('brain');
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('any');
   const [loading, setLoading] = useState(false);
   const { startGame, consumePrefetched } = useGameStore();
+  const userLevel = useUserStore((s) => s.profile.level);
 
   const handlePlay = async () => {
     if (loading) return;
     setLoading(true);
     try {
-      const prefetched = consumePrefetched();
-      const questions = prefetched && prefetched.category === selectedCategory
-        ? prefetched.questions
-        : await fetchTriviaQuestions(Config.QUESTIONS_PER_GAME, selectedCategory, selectedDifficulty);
+      // BrainRush mode (the new default): math + english + GK mixed,
+      // generated locally so Play is instant on every platform — no
+      // network round-trip, no OpenTDB dependency, no CORS surprises.
+      // We still fall through to OpenTDB for the legacy trivia categories.
+      let questions;
+      if (selectedCategory === 'brain') {
+        questions = generateBrainRush(Config.QUESTIONS_PER_GAME, userLevel);
+      } else {
+        const prefetched = consumePrefetched();
+        questions = prefetched && prefetched.category === selectedCategory
+          ? prefetched.questions
+          : await fetchTriviaQuestions(Config.QUESTIONS_PER_GAME, selectedCategory, selectedDifficulty);
+      }
 
       if (!questions || questions.length === 0) {
         Alert.alert('Oops!', 'Could not load questions. Try again.');
