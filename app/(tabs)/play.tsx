@@ -9,13 +9,16 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { CategoryTile } from '@/components/CategoryTile';
+import { SectionHeader } from '@/components/SectionHeader';
 import { Colors, Spacing, FontSize, CATEGORIES, Radius } from '@/constants/theme';
 import { fetchTriviaQuestions } from '@/lib/trivia';
 import { useGameStore } from '@/store/useGameStore';
+import { Config } from '@/constants/config';
 
 type Difficulty = 'any' | 'easy' | 'medium' | 'hard';
 
@@ -30,24 +33,31 @@ export default function PlayScreen() {
   const [selectedCategory, setSelectedCategory] = useState('mixed');
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('any');
   const [loading, setLoading] = useState(false);
-  const { startGame } = useGameStore();
+  const { startGame, consumePrefetched } = useGameStore();
 
   const handlePlay = async () => {
     setLoading(true);
     try {
-      const questions = await fetchTriviaQuestions(5, selectedCategory, selectedDifficulty === 'any' ? 'any' : selectedDifficulty);
+      const prefetched = consumePrefetched();
+      const questions = prefetched && prefetched.category === selectedCategory
+        ? prefetched.questions
+        : await fetchTriviaQuestions(Config.QUESTIONS_PER_GAME, selectedCategory, selectedDifficulty);
+
       if (!questions.length) {
-        Alert.alert('Oops!', 'Could not load questions. Try again!');
+        Alert.alert('Oops!', 'Could not load questions. Try again.');
         return;
       }
       startGame(questions, selectedCategory);
       router.push('/game/session');
-    } catch (err) {
-      Alert.alert('Error', 'Something went wrong. Check your internet connection.');
+    } catch {
+      Alert.alert('Error', 'Something went wrong. Check your connection.');
     } finally {
       setLoading(false);
     }
   };
+
+  const selectedCat = CATEGORIES.find((c) => c.id === selectedCategory);
+  const selectedDiff = DIFFICULTIES.find((d) => d.id === selectedDifficulty);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -55,46 +65,28 @@ export default function PlayScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
       >
-        {/* Header */}
         <Animated.View entering={FadeInDown.springify()} style={styles.header}>
-          <Text style={styles.title}>Play 🎮</Text>
-          <Text style={styles.subtitle}>5 questions · 15 seconds each</Text>
+          <Text style={styles.title}>Pick a category</Text>
+          <Text style={styles.subtitle}>{Config.QUESTIONS_PER_GAME} questions · {Config.ROUND_TIME_SECONDS} seconds each</Text>
         </Animated.View>
 
-        {/* Category Selection */}
         <Animated.View entering={FadeInDown.delay(100).springify()}>
-          <Text style={styles.sectionLabel}>Choose Category</Text>
           <View style={styles.categoryGrid}>
-            {CATEGORIES.map((cat) => {
-              const isSelected = selectedCategory === cat.id;
-              return (
-                <TouchableOpacity
-                  key={cat.id}
-                  onPress={() => setSelectedCategory(cat.id)}
-                  style={[
-                    styles.categoryChip,
-                    { borderColor: isSelected ? cat.color : Colors.border },
-                    isSelected && { backgroundColor: `${cat.color}20` },
-                  ]}
-                >
-                  <Text style={styles.categoryEmoji}>{cat.emoji}</Text>
-                  <Text
-                    style={[
-                      styles.categoryLabel,
-                      { color: isSelected ? cat.color : Colors.textSecondary },
-                    ]}
-                  >
-                    {cat.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+            {CATEGORIES.map((cat) => (
+              <CategoryTile
+                key={cat.id}
+                emoji={cat.emoji}
+                label={cat.label}
+                color={cat.color}
+                selected={selectedCategory === cat.id}
+                onPress={() => setSelectedCategory(cat.id)}
+              />
+            ))}
           </View>
         </Animated.View>
 
-        {/* Difficulty Selection */}
         <Animated.View entering={FadeInDown.delay(200).springify()}>
-          <Text style={styles.sectionLabel}>Difficulty</Text>
+          <SectionHeader title="Difficulty" />
           <View style={styles.diffRow}>
             {DIFFICULTIES.map((d) => {
               const isSelected = selectedDifficulty === d.id;
@@ -123,10 +115,9 @@ export default function PlayScreen() {
           </View>
         </Animated.View>
 
-        {/* How to Play Card */}
         <Animated.View entering={FadeInDown.delay(300).springify()}>
           <Card style={styles.howCard}>
-            <Text style={styles.howTitle}>How to Play</Text>
+            <Text style={styles.howTitle}>How to play</Text>
             {[
               ['⚡', 'Answer 5 questions as fast as you can'],
               ['⏱️', '15 seconds per question — speed = bonus points'],
@@ -141,25 +132,21 @@ export default function PlayScreen() {
           </Card>
         </Animated.View>
 
-        {/* Selected Summary */}
         <Animated.View entering={FadeInDown.delay(350).springify()}>
           <LinearGradient
             colors={[Colors.primary, Colors.primaryDark]}
             style={styles.summaryCard}
           >
             <Text style={styles.summaryText}>
-              {CATEGORIES.find((c) => c.id === selectedCategory)?.emoji}{' '}
-              {CATEGORIES.find((c) => c.id === selectedCategory)?.label} ·{' '}
-              {DIFFICULTIES.find((d) => d.id === selectedDifficulty)?.label}
+              {selectedCat?.emoji} {selectedCat?.label} · {selectedDiff?.label}
             </Text>
             <Text style={styles.summaryXP}>+up to 750 XP</Text>
           </LinearGradient>
         </Animated.View>
 
-        {/* Play Button */}
         <Animated.View entering={FadeInDown.delay(400).springify()}>
           <Button
-            label={loading ? 'Loading...' : 'Start Game 🚀'}
+            label={loading ? 'Loading...' : 'Start game 🚀'}
             onPress={handlePlay}
             loading={loading}
             size="lg"
@@ -176,11 +163,12 @@ export default function PlayScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
   scroll: { paddingHorizontal: Spacing.md, paddingTop: Spacing.sm },
-  header: { marginBottom: Spacing.lg },
+  header: { marginBottom: Spacing.md },
   title: {
     fontSize: FontSize.xxxl,
     color: Colors.textPrimary,
     fontFamily: 'Outfit_900Black',
+    letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: FontSize.md,
@@ -188,32 +176,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
     marginTop: 4,
   },
-  sectionLabel: {
-    fontSize: FontSize.md,
-    color: Colors.textSecondary,
-    fontFamily: 'Outfit_700Bold',
-    marginBottom: Spacing.sm,
-    marginTop: Spacing.md,
-  },
   categoryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.sm,
-  },
-  categoryChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: Radius.full,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-  },
-  categoryEmoji: { fontSize: 18 },
-  categoryLabel: {
-    fontSize: FontSize.sm,
-    fontFamily: 'Outfit_700Bold',
+    marginBottom: Spacing.md,
   },
   diffRow: {
     flexDirection: 'row',
