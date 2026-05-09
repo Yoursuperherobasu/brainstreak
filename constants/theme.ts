@@ -1,37 +1,41 @@
-// BrainStreak — Color System, Theme & Design Tokens
+// BrainStreak — Color System, Theme & Design Tokens (light, playful)
+//
+// Design direction: Wordle / NYT Mini / Heads Up.
+// White-cream background, single bold violet accent, generous whitespace,
+// soft shadows instead of borders. Big editorial type. No dark gradients.
 
 export const Colors = {
   // Brand Palette
   primary: '#7C3AED',       // Electric Violet
   primaryLight: '#A78BFA',  // Soft Lavender
   primaryDark: '#5B21B6',   // Deep Violet
-  
-  accent: '#06B6D4',        // Cyan
-  accentLight: '#67E8F9',   // Light Cyan
-  
-  gold: '#F59E0B',          // Achievement Gold
-  goldLight: '#FCD34D',     // Bright Gold
-  
-  danger: '#EF4444',        // Red
-  dangerLight: '#FCA5A5',   // Light Red
-  
-  success: '#10B981',       // Green
-  successLight: '#6EE7B7',  // Light Green
 
-  // Neutrals (Dark Theme)
-  bg: '#0A0A1A',            // Deep Navy Black
-  bgCard: '#12122A',        // Card Background
-  bgElevated: '#1A1A35',    // Elevated Surface
-  bgOverlay: '#22224A',     // Overlay / Modal
+  accent: '#06B6D4',        // Cyan
+  accentLight: '#A5F3FC',   // Pale Cyan
+
+  gold: '#F59E0B',          // Achievement Gold
+  goldLight: '#FDE68A',     // Soft Gold
+
+  danger: '#EF4444',        // Red
+  dangerLight: '#FECACA',   // Soft Red
+
+  success: '#10B981',       // Green
+  successLight: '#A7F3D0',  // Soft Green
+
+  // Neutrals (LIGHT THEME)
+  bg: '#FAFAF7',            // Warm cream — main background
+  bgCard: '#FFFFFF',        // White card surface
+  bgElevated: '#F1F1ED',    // Slightly recessed surface (e.g. tab bar)
+  bgOverlay: '#E9E9E4',     // Tracks/bars background
 
   // Text
-  textPrimary: '#F0F0FF',   // Near White
-  textSecondary: '#A0A0C0', // Muted Purple-Grey
-  textMuted: '#6060A0',     // Dimmed
+  textPrimary: '#1A1A2E',   // Near-black ink
+  textSecondary: '#4B4B5E', // Muted ink for sub-copy
+  textMuted: '#8E8E9C',     // Hints / placeholders
 
   // Borders
-  border: '#2A2A4A',        // Subtle border
-  borderBright: '#4A4A7A',  // Visible border
+  border: '#E5E5DF',        // Hairline divider
+  borderBright: '#D4D4CC',  // Visible divider
 
   // Category Colors
   catScience: '#06B6D4',
@@ -42,15 +46,41 @@ export const Colors = {
   catMixed: '#6366F1',
 };
 
+// Gradients are now subtle on-light, not the dark navy showpieces.
 export const Gradients = {
-  primary: ['#7C3AED', '#5B21B6'] as const,
-  accent: ['#06B6D4', '#0891B2'] as const,
-  gold: ['#F59E0B', '#D97706'] as const,
-  hero: ['#0A0A1A', '#1A0A3A'] as const,
-  card: ['#12122A', '#1A1A35'] as const,
-  danger: ['#EF4444', '#B91C1C'] as const,
-  success: ['#10B981', '#059669'] as const,
-  fire: ['#F97316', '#EF4444'] as const,
+  primary: ['#7C3AED', '#A78BFA'] as const,
+  accent: ['#06B6D4', '#67E8F9'] as const,
+  gold: ['#F59E0B', '#FCD34D'] as const,
+  hero: ['#FFFFFF', '#FAFAF7'] as const,
+  card: ['#FFFFFF', '#F8F8F4'] as const,
+  danger: ['#EF4444', '#F87171'] as const,
+  success: ['#10B981', '#34D399'] as const,
+  fire: ['#F97316', '#FB923C'] as const,
+};
+
+// Soft drop-shadow recipe for cards. RN style fragments — spread into style.
+export const Shadow = {
+  sm: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  md: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  lg: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.10,
+    shadowRadius: 14,
+    elevation: 6,
+  },
 };
 
 export const Spacing = {
@@ -65,8 +95,8 @@ export const Spacing = {
 export const Radius = {
   sm: 8,
   md: 12,
-  lg: 16,
-  xl: 24,
+  lg: 18,
+  xl: 26,
   full: 9999,
 };
 
@@ -76,9 +106,9 @@ export const FontSize = {
   md: 15,
   lg: 17,
   xl: 20,
-  xxl: 24,
-  xxxl: 32,
-  hero: 42,
+  xxl: 26,
+  xxxl: 34,
+  hero: 48,
 };
 
 export const CATEGORIES = [

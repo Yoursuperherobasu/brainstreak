@@ -87,7 +87,7 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={styles.root}>
-      <StatusBar style="light" backgroundColor={Colors.bg} />
+      <StatusBar style="dark" backgroundColor={Colors.bg} />
       <LayoutAnimationConfig skipEntering={skipEntering} skipExiting={skipEntering}>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.bg } }}>
         <Stack.Screen name="(tabs)" />
@@ -95,7 +95,7 @@ export default function RootLayout() {
           name="game/session"
           options={{
             animation: 'slide_from_bottom',
-            presentation: 'fullScreenModal',
+            presentation: 'card', // simpler on web; native still slides up
             gestureEnabled: false, // A12: prevent swipe-to-dismiss losing game state
           }}
         />

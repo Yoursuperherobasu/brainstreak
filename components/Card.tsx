@@ -12,7 +12,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-import { Colors, Radius, Spacing, FontSize } from '@/constants/theme';
+import { Colors, Radius, Spacing, FontSize, Shadow } from '@/constants/theme';
 
 interface CardProps {
   children: React.ReactNode;
@@ -99,6 +99,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.bgCard,
     borderWidth: 1,
     borderColor: Colors.border,
+    ...Shadow.sm,
   },
   noPad: {
     padding: 0,
@@ -111,6 +112,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     borderWidth: 1,
+    ...Shadow.sm,
   },
   statEmoji: {
     fontSize: 22,

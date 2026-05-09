@@ -37,6 +37,7 @@ export default function PlayScreen() {
   const { startGame, consumePrefetched } = useGameStore();
 
   const handlePlay = async () => {
+    if (loading) return;
     setLoading(true);
     try {
       const prefetched = consumePrefetched();
@@ -44,13 +45,16 @@ export default function PlayScreen() {
         ? prefetched.questions
         : await fetchTriviaQuestions(Config.QUESTIONS_PER_GAME, selectedCategory, selectedDifficulty);
 
-      if (!questions.length) {
+      if (!questions || questions.length === 0) {
         Alert.alert('Oops!', 'Could not load questions. Try again.');
         return;
       }
       startGame(questions, selectedCategory);
+      // Navigate after the store update so the session screen reads
+      // the right phase on first paint.
       router.push('/game/session');
-    } catch {
+    } catch (err) {
+      console.warn('[Play] failed to start game:', err);
       Alert.alert('Error', 'Something went wrong. Check your connection.');
     } finally {
       setLoading(false);

@@ -186,7 +186,7 @@ export default function GameSessionScreen() {
   // ── Countdown ──────────────────────────────────────────────────────────
   if (phase === 'countdown') {
     return (
-      <LinearGradient colors={[Colors.bg, '#1A0A3A']} style={styles.fullscreen}>
+      <LinearGradient colors={[Colors.bg, Colors.bgElevated]} style={styles.fullscreen}>
         <MotionView key={countdownNum} entering={ZoomIn.duration(400)} style={styles.countdownContainer}>
           <Text style={styles.countdownNumber}>{countdownNum}</Text>
           <Text style={styles.countdownLabel}>Get Ready!</Text>
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
   countdownContainer: { alignItems: 'center' },
   countdownNumber: {
     fontSize: 120,
-    color: Colors.textPrimary,
+    color: Colors.primary,
     fontFamily: 'Outfit_900Black',
     lineHeight: 130,
   },
