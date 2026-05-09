@@ -14,7 +14,7 @@ import Animated, {
   withSpring,
   withSequence,
 } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
+import { haptics } from '@/lib/haptics';
 import { Colors, Radius, FontSize } from '@/constants/theme';
 
 interface ButtonProps {
@@ -56,7 +56,7 @@ export function Button({
       withSpring(0.94, { damping: 10, stiffness: 300 }),
       withSpring(1, { damping: 10, stiffness: 300 })
     );
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    haptics.light();
     onPress();
   };
 
