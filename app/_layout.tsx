@@ -1,8 +1,19 @@
 import { Stack, router, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { useFonts, Outfit_400Regular, Outfit_700Bold, Outfit_900Black } from '@expo-google-fonts/outfit';
-import { Inter_400Regular, Inter_600SemiBold } from '@expo-google-fonts/inter';
+import { useFonts } from 'expo-font';
+import {
+  BricolageGrotesque_400Regular,
+  BricolageGrotesque_700Bold,
+  BricolageGrotesque_800ExtraBold,
+} from '@expo-google-fonts/bricolage-grotesque';
+import { BagelFatOne_400Regular } from '@expo-google-fonts/bagel-fat-one';
+import {
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+} from '@expo-google-fonts/plus-jakarta-sans';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StyleSheet, Platform } from 'react-native';
 import { LayoutAnimationConfig } from 'react-native-reanimated';
@@ -22,11 +33,14 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    Outfit_400Regular,
-    Outfit_700Bold,
-    Outfit_900Black,
-    Inter_400Regular,
-    Inter_600SemiBold,
+    BricolageGrotesque_400Regular,
+    BricolageGrotesque_700Bold,
+    BricolageGrotesque_800ExtraBold,
+    BagelFatOne_400Regular,
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
   });
 
   const userHydrated = useUserStore((s) => s.hydrated);
