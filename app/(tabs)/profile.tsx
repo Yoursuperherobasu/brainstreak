@@ -6,6 +6,7 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -22,6 +23,7 @@ import { Config } from '@/constants/config';
 import { useUserStore } from '@/store/useUserStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { getXPForNextLevel } from '@/lib/trivia';
+import { signOut } from '@/lib/auth';
 
 const BADGES = [
   { id: 'first_game', emoji: '🎮', label: 'First Game', desc: 'Play your first game', xpReq: 0 },
@@ -37,6 +39,7 @@ export default function ProfileScreen() {
   const streak = useUserStore((s) => s.streak);
   const setUsername = useUserStore((s) => s.setUsername);
   const authState = useUserStore((s) => s.authState);
+  const setAnonymous = useUserStore((s) => s.setAnonymous);
 
   const soundOn = useSettingsStore((s) => s.soundOn);
   const setSoundOn = useSettingsStore((s) => s.setSoundOn);
@@ -54,6 +57,24 @@ export default function ProfileScreen() {
     }
     setUsername(trimmed);
     setEditing(false);
+  };
+
+  const handleSignOut = () => {
+    Alert.alert(
+      'Sign out',
+      'Your local progress stays on this device. Sign in again to resume sync.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign out',
+          style: 'destructive',
+          onPress: async () => {
+            await signOut();
+            setAnonymous();
+          },
+        },
+      ]
+    );
   };
 
   const xpForNext = getXPForNextLevel(profile.level);
@@ -185,6 +206,15 @@ export default function ProfileScreen() {
             value={hapticsOn}
             onChange={setHapticsOn}
           />
+          {authState === 'authenticated' && (
+            <SettingsRow
+              kind="nav"
+              emoji="🚪"
+              label="Sign out"
+              description="Stop syncing on this device"
+              onPress={handleSignOut}
+            />
+          )}
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(280).springify()}>
