@@ -39,3 +39,10 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# graphify tool artifacts (transient)
+.graphify_*
+graphify-out/
+
+# local env
+.env
