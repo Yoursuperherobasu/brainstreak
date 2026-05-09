@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors, Radius } from '@/constants/theme';
+import { OfflineBanner } from '@/components/OfflineBanner';
 
 function TabIcon({ emoji, label, focused }: { emoji: string; label: string; focused: boolean }) {
   return (
@@ -15,36 +16,40 @@ function TabIcon({ emoji, label, focused }: { emoji: string; label: string; focu
 
 export default function TabsLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: styles.tabBar,
-        tabBarShowLabel: false,
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" label="Home" focused={focused} />,
+    <View style={styles.root}>
+      <OfflineBanner />
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: styles.tabBar,
+          tabBarShowLabel: false,
         }}
-      />
-      <Tabs.Screen
-        name="play"
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="🎮" label="Play" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="👤" label="Profile" focused={focused} />,
-        }}
-      />
-    </Tabs>
+      >
+        <Tabs.Screen
+          name="index"
+          options={{
+            tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" label="Home" focused={focused} />,
+          }}
+        />
+        <Tabs.Screen
+          name="play"
+          options={{
+            tabBarIcon: ({ focused }) => <TabIcon emoji="🎮" label="Play" focused={focused} />,
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            tabBarIcon: ({ focused }) => <TabIcon emoji="👤" label="Profile" focused={focused} />,
+          }}
+        />
+      </Tabs>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: Colors.bg },
   tabBar: {
     backgroundColor: Colors.bgCard,
     borderTopWidth: 1,
