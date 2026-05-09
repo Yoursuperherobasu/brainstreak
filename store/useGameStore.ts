@@ -1,31 +1,30 @@
 import { create } from 'zustand';
 import { TriviaQuestion, RoundResult, calculatePoints, calculateXP } from '@/lib/trivia';
 import { updateStreakAfterGame, updateXP } from '@/lib/storage';
+import { Config } from '@/constants/config';
 
 export type GamePhase = 'idle' | 'countdown' | 'playing' | 'result' | 'gameover';
 
 interface GameState {
-  // Session info
   phase: GamePhase;
   category: string;
   difficulty: 'easy' | 'medium' | 'hard' | 'any';
 
-  // Questions
   questions: TriviaQuestion[];
   currentIndex: number;
   currentQuestion: TriviaQuestion | null;
 
-  // Round state
   selectedAnswer: string | null;
   timeLeft: number;
   roundResults: RoundResult[];
 
-  // Totals
   totalScore: number;
   xpEarned: number;
   correctCount: number;
 
-  // Actions
+  prefetchedQuestions: TriviaQuestion[] | null;
+  prefetchedCategory: string | null;
+
   startGame: (questions: TriviaQuestion[], category: string) => void;
   selectAnswer: (answer: string, timeTaken: number) => void;
   nextQuestion: () => void;
@@ -33,6 +32,8 @@ interface GameState {
   resetGame: () => void;
   setTimeLeft: (t: number) => void;
   timeExpired: () => void;
+  setPrefetched: (questions: TriviaQuestion[], category: string) => void;
+  consumePrefetched: () => { questions: TriviaQuestion[]; category: string } | null;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -43,11 +44,13 @@ export const useGameStore = create<GameState>((set, get) => ({
   currentIndex: 0,
   currentQuestion: null,
   selectedAnswer: null,
-  timeLeft: 15,
+  timeLeft: Config.ROUND_TIME_SECONDS,
   roundResults: [],
   totalScore: 0,
   xpEarned: 0,
   correctCount: 0,
+  prefetchedQuestions: null,
+  prefetchedCategory: null,
 
   startGame: (questions, category) => {
     set({
@@ -57,14 +60,13 @@ export const useGameStore = create<GameState>((set, get) => ({
       currentIndex: 0,
       currentQuestion: questions[0] ?? null,
       selectedAnswer: null,
-      timeLeft: 15,
+      timeLeft: Config.ROUND_TIME_SECONDS,
       roundResults: [],
       totalScore: 0,
       xpEarned: 0,
       correctCount: 0,
     });
-    // Brief countdown then playing
-    setTimeout(() => set({ phase: 'playing' }), 3000);
+    setTimeout(() => set({ phase: 'playing' }), Config.COUNTDOWN_SECONDS * 1000);
   },
 
   selectAnswer: (answer, timeTaken) => {
@@ -100,7 +102,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       question: currentQuestion,
       selectedAnswer: null,
       isCorrect: false,
-      timeTaken: 15,
+      timeTaken: Config.ROUND_TIME_SECONDS,
       pointsEarned: 0,
     };
 
@@ -122,7 +124,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         currentIndex: next,
         currentQuestion: questions[next],
         selectedAnswer: null,
-        timeLeft: 15,
+        timeLeft: Config.ROUND_TIME_SECONDS,
         phase: 'playing',
       });
     }
@@ -133,7 +135,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ phase: 'gameover' });
 
     try {
-      // Update streak and XP
       const streak = await updateStreakAfterGame();
       const xp = calculateXP(totalScore, streak.current);
       await updateXP(xp);
@@ -150,7 +151,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       currentIndex: 0,
       currentQuestion: null,
       selectedAnswer: null,
-      timeLeft: 15,
+      timeLeft: Config.ROUND_TIME_SECONDS,
       roundResults: [],
       totalScore: 0,
       xpEarned: 0,
@@ -159,4 +160,14 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   setTimeLeft: (t) => set({ timeLeft: t }),
+
+  setPrefetched: (questions, category) =>
+    set({ prefetchedQuestions: questions, prefetchedCategory: category }),
+
+  consumePrefetched: () => {
+    const { prefetchedQuestions, prefetchedCategory } = get();
+    if (!prefetchedQuestions || !prefetchedCategory) return null;
+    set({ prefetchedQuestions: null, prefetchedCategory: null });
+    return { questions: prefetchedQuestions, category: prefetchedCategory };
+  },
 }));
