@@ -38,7 +38,10 @@ export default function WelcomeScreen() {
         <MotionView entering={FadeInDown.delay(550).springify()} style={styles.footer}>
           <Button
             label="Let's go 🚀"
-            onPress={() => router.push('/onboarding/username')}
+            onPress={() => {
+              console.log('[Onboarding] Welcome → Username');
+              router.push('/onboarding/username');
+            }}
             size="lg"
           />
         </MotionView>

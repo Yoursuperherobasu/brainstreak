@@ -40,6 +40,7 @@ export default function PlayScreen() {
   const userLevel = useUserStore((s) => s.profile.level);
 
   const handlePlay = async () => {
+    console.log('[Play] Start game tapped, category=', selectedCategory, 'difficulty=', selectedDifficulty);
     if (loading) return;
     setLoading(true);
     try {
@@ -61,6 +62,7 @@ export default function PlayScreen() {
         Alert.alert('Oops!', 'Could not load questions. Try again.');
         return;
       }
+      console.log('[Play] starting with', questions.length, 'questions');
       startGame(questions, selectedCategory);
       // Navigate after the store update so the session screen reads
       // the right phase on first paint.

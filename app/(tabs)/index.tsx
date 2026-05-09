@@ -173,7 +173,10 @@ export default function HomeScreen() {
         <MotionView entering={FadeInDown.delay(400).springify()} style={styles.ctaWrap}>
           <Button
             label={playedToday ? 'Play another round 🎮' : "Start today's game 🚀"}
-            onPress={() => router.push('/(tabs)/play')}
+            onPress={() => {
+              console.log('[Home] CTA tapped — navigating to /play');
+              router.push('/play');
+            }}
             size="lg"
           />
         </MotionView>

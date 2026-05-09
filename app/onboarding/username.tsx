@@ -24,6 +24,7 @@ export default function UsernameScreen() {
   );
 
   const handleNext = () => {
+    console.log('[Onboarding] Username → SignInPrompt, draft=', draft);
     const trimmed = draft.trim();
     if (trimmed) {
       setUsername(trimmed.slice(0, 20));
