@@ -35,18 +35,6 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="leaderboard"
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="🏆" label="Ranks" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="habits"
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="✅" label="Habits" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
         name="profile"
         options={{
           tabBarIcon: ({ focused }) => <TabIcon emoji="👤" label="Profile" focused={focused} />,
