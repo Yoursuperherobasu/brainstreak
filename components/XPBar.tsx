@@ -15,8 +15,21 @@ interface XPBarProps {
   showLabel?: boolean;
 }
 
+// A7 fix: bar shows progress WITHIN the current level, not absolute XP / next-threshold.
+// xpForCurrentLevel is the XP at which the user reached this level.
+// The thresholds follow level² × 50 (see lib/trivia.ts getXPForNextLevel).
+function thresholdAtLevel(level: number): number {
+  if (level <= 1) return 0;
+  return Math.pow(level - 1, 2) * 50;
+}
+
 export function XPBar({ level, xp, xpForNext, showLabel = true }: XPBarProps) {
-  const ratio = Math.max(0, Math.min(1, xpForNext > 0 ? xp / xpForNext : 0));
+  const xpForCurrent = thresholdAtLevel(level);
+  const span = Math.max(1, xpForNext - xpForCurrent);
+  const into = Math.max(0, xp - xpForCurrent);
+  const ratio = Math.max(0, Math.min(1, into / span));
+  const remaining = Math.max(0, xpForNext - xp);
+
   const fill = useSharedValue(0);
 
   useEffect(() => {
@@ -32,7 +45,7 @@ export function XPBar({ level, xp, xpForNext, showLabel = true }: XPBarProps) {
       {showLabel && (
         <View style={styles.headerRow}>
           <Text style={styles.label}>Level {level} → {level + 1}</Text>
-          <Text style={styles.value}>{xp.toLocaleString()} / {xpForNext.toLocaleString()} XP</Text>
+          <Text style={styles.value}>{remaining.toLocaleString()} XP to go</Text>
         </View>
       )}
       <View style={styles.barBg}>

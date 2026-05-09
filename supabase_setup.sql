@@ -12,8 +12,13 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   current_streak  INTEGER NOT NULL DEFAULT 0,
   longest_streak  INTEGER NOT NULL DEFAULT 0,
   games_played    INTEGER NOT NULL DEFAULT 0,
+  last_play_date  DATE,
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Idempotent migration for existing v1 deployments without last_play_date
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS last_play_date DATE;
 
 -- 2. Trigger to auto-create a profile row on user signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()

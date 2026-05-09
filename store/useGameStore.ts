@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { TriviaQuestion, RoundResult, calculatePoints, calculateXP } from '@/lib/trivia';
-import { updateStreakAfterGame, updateXP } from '@/lib/storage';
+import { updateStreakAfterGame, updateXP, recordGame } from '@/lib/storage';
 import { Config } from '@/constants/config';
 
 export type GamePhase = 'idle' | 'countdown' | 'playing' | 'result' | 'gameover';
@@ -21,6 +21,7 @@ interface GameState {
   totalScore: number;
   xpEarned: number;
   correctCount: number;
+  leveledUp: boolean; // A9: drives confetti on recap
 
   prefetchedQuestions: TriviaQuestion[] | null;
   prefetchedCategory: string | null;
@@ -49,6 +50,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   totalScore: 0,
   xpEarned: 0,
   correctCount: 0,
+  leveledUp: false,
   prefetchedQuestions: null,
   prefetchedCategory: null,
 
@@ -65,6 +67,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       totalScore: 0,
       xpEarned: 0,
       correctCount: 0,
+      leveledUp: false,
     });
     setTimeout(() => set({ phase: 'playing' }), Config.COUNTDOWN_SECONDS * 1000);
   },
@@ -131,26 +134,47 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   finishGame: async () => {
-    const { totalScore, correctCount } = get();
-    set({ phase: 'gameover' });
+    const { totalScore, correctCount, category, questions } = get();
+
+    // A9: capture pre-game level so we can detect a level-up.
+    // require() avoids a circular import between the two stores.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { useUserStore } = require('@/store/useUserStore');
+    const previousLevel: number = useUserStore.getState().profile.level;
 
     try {
       const streak = await updateStreakAfterGame();
       const xp = calculateXP(totalScore, streak.current);
       const updatedProfile = await updateXP(xp);
-      set({ xpEarned: xp });
 
-      // Sync useUserStore in-memory copy with what we persisted to AsyncStorage,
-      // then push to Supabase if signed in. require() avoids a circular import.
-      const { useUserStore } = require('@/store/useUserStore');
+      // A11: persist this game to the recent-games ring buffer.
+      await recordGame({
+        category,
+        score: totalScore,
+        xp,
+        correct: correctCount,
+        total: questions.length,
+        at: new Date().toISOString(),
+      });
+
+      // A8: set phase + xpEarned + leveledUp atomically so the recap renders
+      // the final values on first paint (no +0 XP flicker).
+      set({
+        phase: 'gameover',
+        xpEarned: xp,
+        leveledUp: updatedProfile.level > previousLevel,
+      });
+
+      // Sync useUserStore in-memory copy with persisted state.
       useUserStore.getState().setProfile(updatedProfile);
       useUserStore.getState().setStreak(streak);
-      await useUserStore.getState().pushIfAuthed();
+      // Cloud push is best-effort and must not block the UI.
+      useUserStore.getState().pushIfAuthed().catch(() => {});
     } catch (err) {
       console.warn('[GameStore] Failed to save results:', err);
+      // Still advance to recap so the player isn't stuck on the last question.
+      set({ phase: 'gameover' });
     }
-
-    void correctCount;
   },
 
   resetGame: () => {
@@ -165,6 +189,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       totalScore: 0,
       xpEarned: 0,
       correctCount: 0,
+      leveledUp: false,
     });
   },
 
