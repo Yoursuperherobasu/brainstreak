@@ -1,29 +1,27 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TextInput,
-  Alert,
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from 'expo-router';
-import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import { router } from 'expo-router';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Button } from '@/components/Button';
 import { Card, StatCard } from '@/components/Card';
 import { StreakBadge } from '@/components/StreakBadge';
+import { XPBar } from '@/components/XPBar';
+import { SectionHeader } from '@/components/SectionHeader';
+import { SettingsRow } from '@/components/SettingsRow';
+import { Button } from '@/components/Button';
 import { Colors, Spacing, FontSize, Radius, Gradients } from '@/constants/theme';
-import {
-  getLocalProfile,
-  getStreakData,
-  saveLocalProfile,
-  LocalProfile,
-  StreakData,
-} from '@/lib/storage';
-import { getLevelFromXP, getXPForNextLevel } from '@/lib/trivia';
+import { Config } from '@/constants/config';
+import { useUserStore } from '@/store/useUserStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
+import { getXPForNextLevel } from '@/lib/trivia';
 
 const BADGES = [
   { id: 'first_game', emoji: '🎮', label: 'First Game', desc: 'Play your first game', xpReq: 0 },
@@ -32,57 +30,46 @@ const BADGES = [
   { id: 'xp_100', emoji: '⚡', label: 'Charged', desc: '100 XP earned', xpReq: 100 },
   { id: 'xp_500', emoji: '🧠', label: 'Big Brain', desc: '500 XP earned', xpReq: 500 },
   { id: 'xp_1000', emoji: '🏆', label: 'Champion', desc: '1000 XP earned', xpReq: 1000 },
-  { id: 'perfect', emoji: '⭐', label: 'Perfect', desc: '5/5 correct', xpReq: 200 },
 ];
 
 export default function ProfileScreen() {
-  const [profile, setProfile] = useState<LocalProfile | null>(null);
-  const [streak, setStreak] = useState<StreakData>({ current: 0, longest: 0, lastPlayDate: null });
+  const profile = useUserStore((s) => s.profile);
+  const streak = useUserStore((s) => s.streak);
+  const setUsername = useUserStore((s) => s.setUsername);
+  const authState = useUserStore((s) => s.authState);
+
+  const soundOn = useSettingsStore((s) => s.soundOn);
+  const setSoundOn = useSettingsStore((s) => s.setSoundOn);
+  const hapticsOn = useSettingsStore((s) => s.hapticsOn);
+  const setHapticsOn = useSettingsStore((s) => s.setHapticsOn);
+
   const [editing, setEditing] = useState(false);
   const [draftName, setDraftName] = useState('');
 
-  const loadData = async () => {
-    const [p, s] = await Promise.all([getLocalProfile(), getStreakData()]);
-    setProfile(p);
-    setStreak(s);
-  };
-
-  useFocusEffect(useCallback(() => { loadData(); }, []));
-
-  const handleSaveName = async () => {
-    if (!draftName.trim()) return;
-    const p = profile ?? {
-      userId: `local_${Date.now()}`,
-      username: 'BrainPlayer',
-      totalXP: 0,
-      level: 1,
-      gamesPlayed: 0,
-    };
-    const updated = { ...p, username: draftName.trim() };
-    await saveLocalProfile(updated);
-    setProfile(updated);
+  const handleSaveName = () => {
+    const trimmed = draftName.trim();
+    if (!trimmed) {
+      setEditing(false);
+      return;
+    }
+    setUsername(trimmed);
     setEditing(false);
   };
 
-  const xp = profile?.totalXP ?? 0;
-  const level = profile?.level ?? 1;
-  const xpForNext = getXPForNextLevel(level);
-  const xpProgress = Math.min(xp / xpForNext, 1);
-
-  const earnedBadges = BADGES.filter((b) => xp >= b.xpReq || (b.id === 'first_game' && (profile?.gamesPlayed ?? 0) > 0));
+  const xpForNext = getXPForNextLevel(profile.level);
+  const earnedBadges = BADGES.filter(
+    (b) => profile.totalXP >= b.xpReq || (b.id === 'first_game' && profile.gamesPlayed > 0)
+  );
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        {/* Hero */}
         <Animated.View entering={FadeInDown.springify()}>
           <LinearGradient colors={Gradients.primary} style={styles.heroCard}>
-            {/* Avatar */}
             <View style={styles.avatar}>
               <Text style={styles.avatarEmoji}>🧠</Text>
             </View>
 
-            {/* Name (editable) */}
             {editing ? (
               <View style={styles.editRow}>
                 <TextInput
@@ -100,28 +87,28 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
               </View>
             ) : (
-              <TouchableOpacity onPress={() => { setDraftName(profile?.username ?? 'BrainPlayer'); setEditing(true); }}>
-                <Text style={styles.heroName}>{profile?.username ?? 'BrainPlayer'} ✏️</Text>
+              <TouchableOpacity onPress={() => { setDraftName(profile.username); setEditing(true); }}>
+                <Text style={styles.heroName}>{profile.username} ✏️</Text>
               </TouchableOpacity>
             )}
 
-            <Text style={styles.heroLevel}>Level {level} Brain</Text>
+            <Text style={styles.heroLevel}>Level {profile.level} Brain</Text>
 
-            {/* XP Bar */}
-            <View style={styles.xpBarBg}>
-              <View style={[styles.xpBarFill, { width: `${Math.round(xpProgress * 100)}%` }]} />
+            <View style={styles.heroXp}>
+              <XPBar level={profile.level} xp={profile.totalXP} xpForNext={xpForNext} showLabel={false} />
+              <Text style={styles.heroXpText}>
+                {profile.totalXP.toLocaleString()} / {xpForNext.toLocaleString()} XP to Level {profile.level + 1}
+              </Text>
             </View>
-            <Text style={styles.xpText}>{xp} / {xpForNext} XP to Level {level + 1}</Text>
           </LinearGradient>
         </Animated.View>
 
-        {/* Streak */}
-        <Animated.View entering={FadeInDown.delay(100).springify()}>
+        <Animated.View entering={FadeInDown.delay(80).springify()}>
           <Card style={styles.streakCard}>
             <StreakBadge streak={streak.current} size="md" />
             <View style={styles.streakRight}>
-              <Text style={styles.streakBestLabel}>Best Streak</Text>
-              <Text style={styles.streakBest}>🏆 {streak.longest} days</Text>
+              <Text style={styles.streakBestLabel}>Best streak</Text>
+              <Text style={styles.streakBest}>🏆 {streak.longest} {streak.longest === 1 ? 'day' : 'days'}</Text>
               <Text style={styles.streakLast}>
                 Last played: {streak.lastPlayDate ?? 'Never'}
               </Text>
@@ -129,19 +116,35 @@ export default function ProfileScreen() {
           </Card>
         </Animated.View>
 
-        {/* Stats */}
-        <Animated.View entering={FadeInDown.delay(150).springify()}>
-          <Text style={styles.sectionTitle}>Stats</Text>
+        {authState !== 'authenticated' && (
+          <Animated.View entering={FadeInDown.delay(120).springify()}>
+            <Card style={styles.signInCard}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.signInTitle}>Sync across devices</Text>
+                <Text style={styles.signInBody}>
+                  Sign in to keep your XP, streak, and level safe on every device.
+                </Text>
+              </View>
+              <Button
+                label="Sign in"
+                size="sm"
+                onPress={() => router.push('/auth/sign-in')}
+              />
+            </Card>
+          </Animated.View>
+        )}
+
+        <Animated.View entering={FadeInDown.delay(160).springify()}>
+          <SectionHeader title="Stats" />
           <View style={styles.statsRow}>
-            <StatCard label="Level" value={level} emoji="⚡" color={Colors.primaryLight} />
-            <StatCard label="Total XP" value={xp.toLocaleString()} emoji="🧠" color={Colors.accent} />
-            <StatCard label="Games" value={profile?.gamesPlayed ?? 0} emoji="🎮" color={Colors.gold} />
+            <StatCard label="Level" value={profile.level} emoji="⚡" color={Colors.primaryLight} />
+            <StatCard label="Total XP" value={profile.totalXP.toLocaleString()} emoji="🧠" color={Colors.accent} />
+            <StatCard label="Games" value={profile.gamesPlayed} emoji="🎮" color={Colors.gold} />
           </View>
         </Animated.View>
 
-        {/* Badges */}
         <Animated.View entering={FadeInDown.delay(200).springify()}>
-          <Text style={styles.sectionTitle}>Badges</Text>
+          <SectionHeader title="Badges" />
           <View style={styles.badgeGrid}>
             {BADGES.map((badge) => {
               const earned = earnedBadges.some((b) => b.id === badge.id);
@@ -157,24 +160,41 @@ export default function ProfileScreen() {
                     {badge.label}
                   </Text>
                   <Text style={styles.badgeDesc}>{badge.desc}</Text>
-                  {!earned && (
-                    <Text style={styles.badgeLockText}>🔒</Text>
-                  )}
+                  {!earned && <Text style={styles.badgeLockText}>🔒</Text>}
                 </View>
               );
             })}
           </View>
         </Animated.View>
 
-        {/* Settings */}
-        <Animated.View entering={FadeInDown.delay(250).springify()}>
-          <Text style={styles.sectionTitle}>App Info</Text>
+        <Animated.View entering={FadeInDown.delay(240).springify()}>
+          <SectionHeader title="Settings" />
+          <SettingsRow
+            kind="toggle"
+            emoji="🔊"
+            label="Sound effects"
+            description="Tick, ding, buzz, fanfare"
+            value={soundOn}
+            onChange={setSoundOn}
+          />
+          <SettingsRow
+            kind="toggle"
+            emoji="📳"
+            label="Haptics"
+            description="Vibration feedback on tap and answer"
+            value={hapticsOn}
+            onChange={setHapticsOn}
+          />
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(280).springify()}>
+          <SectionHeader title="App info" />
           <Card style={styles.infoCard}>
             {[
-              ['🧠', 'BrainStreak', 'v1.0.0'],
-              ['🎮', 'Game Engine', 'Open Trivia DB'],
-              ['☁️', 'Backend', 'Supabase'],
-              ['📱', 'Platform', 'iOS · Android · Web'],
+              ['🧠', 'Version', `v${Config.APP_VERSION}`],
+              ['🎮', 'Questions', 'Open Trivia DB'],
+              ['☁️', 'Sync', authState === 'authenticated' ? 'On' : 'Off (anonymous)'],
+              ['📱', 'Platform', 'Android'],
             ].map(([emoji, label, value]) => (
               <View key={label} style={styles.infoRow}>
                 <Text style={styles.infoEmoji}>{emoji}</Text>
@@ -221,6 +241,13 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.7)',
     fontFamily: 'Inter_400Regular',
   },
+  heroXp: { width: '100%', gap: 6, marginTop: 6 },
+  heroXpText: {
+    fontSize: FontSize.xs,
+    color: 'rgba(255,255,255,0.7)',
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
+  },
   editRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   nameInput: {
     fontSize: FontSize.xl,
@@ -241,23 +268,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   saveTxt: { color: Colors.textPrimary, fontSize: 20, fontWeight: '700' },
-  xpBarBg: {
-    height: 8,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: 4,
-    width: '100%',
-    overflow: 'hidden',
-  },
-  xpBarFill: {
-    height: '100%',
-    backgroundColor: Colors.goldLight,
-    borderRadius: 4,
-  },
-  xpText: {
-    fontSize: FontSize.xs,
-    color: 'rgba(255,255,255,0.7)',
-    fontFamily: 'Inter_400Regular',
-  },
   streakCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -280,12 +290,23 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     fontFamily: 'Inter_400Regular',
   },
-  sectionTitle: {
-    fontSize: FontSize.lg,
+  signInCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  signInTitle: {
+    fontSize: FontSize.md,
     color: Colors.textPrimary,
     fontFamily: 'Outfit_700Bold',
-    marginBottom: Spacing.sm,
-    marginTop: Spacing.sm,
+    marginBottom: 2,
+  },
+  signInBody: {
+    fontSize: FontSize.xs,
+    color: Colors.textSecondary,
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 16,
   },
   statsRow: { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.md },
   badgeGrid: {
@@ -320,11 +341,7 @@ const styles = StyleSheet.create({
   },
   badgeLockText: { fontSize: 12 },
   infoCard: { gap: 10, marginBottom: Spacing.md },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
+  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   infoEmoji: { fontSize: 18, width: 24 },
   infoLabel: {
     flex: 1,
