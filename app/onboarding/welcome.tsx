@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     right: 12,
     fontSize: 9,
     color: Colors.textMuted,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
   },
   body: {
     flex: 1,
@@ -128,14 +128,14 @@ const styles = StyleSheet.create({
   emoji: { fontSize: 110 },
   title: {
     fontSize: 56,
-    fontFamily: 'Outfit_900Black',
+    fontFamily: 'BagelFatOne_400Regular',
     color: Colors.textPrimary,
     letterSpacing: -1.5,
     marginTop: 4,
   },
   tagline: {
     fontSize: FontSize.lg,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
     color: Colors.textSecondary,
     textAlign: 'center',
     maxWidth: 320,
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: FontSize.md,
     color: Colors.textPrimary,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
   },
   footer: { padding: Spacing.lg, paddingBottom: Spacing.xl, alignItems: 'center' },
   cta: {
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   ctaText: {
-    fontFamily: 'Outfit_900Black',
+    fontFamily: 'BagelFatOne_400Regular',
     fontSize: 22,
     color: '#FFFFFF',
     letterSpacing: 0.5,
@@ -176,6 +176,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 11,
     color: Colors.success,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
   },
 });

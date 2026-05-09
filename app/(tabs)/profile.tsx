@@ -287,25 +287,25 @@ const styles = StyleSheet.create({
   heroName: {
     fontSize: FontSize.xxl,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
   heroLevel: {
     fontSize: FontSize.md,
     color: 'rgba(255,255,255,0.7)',
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
   },
   heroXp: { width: '100%', gap: 6, marginTop: 6 },
   heroXpText: {
     fontSize: FontSize.xs,
     color: 'rgba(255,255,255,0.7)',
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
     textAlign: 'center',
   },
   editRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   nameInput: {
     fontSize: FontSize.xl,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
     borderBottomWidth: 2,
     borderBottomColor: Colors.primaryLight,
     minWidth: 150,
@@ -331,17 +331,17 @@ const styles = StyleSheet.create({
   streakBestLabel: {
     fontSize: FontSize.xs,
     color: Colors.textMuted,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
   },
   streakBest: {
     fontSize: FontSize.xl,
     color: Colors.goldLight,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
   streakLast: {
     fontSize: FontSize.xs,
     color: Colors.textMuted,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
   },
   signInCard: {
     flexDirection: 'row',
@@ -352,13 +352,13 @@ const styles = StyleSheet.create({
   signInTitle: {
     fontSize: FontSize.md,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
     marginBottom: 2,
   },
   signInBody: {
     fontSize: FontSize.xs,
     color: Colors.textSecondary,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
     lineHeight: 16,
   },
   statsRow: { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.md },
@@ -383,14 +383,14 @@ const styles = StyleSheet.create({
   badgeLabel: {
     fontSize: FontSize.xs,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
     textAlign: 'center',
   },
   badgeDesc: {
     fontSize: 9,
     color: Colors.textMuted,
     textAlign: 'center',
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
   },
   badgeLockText: { fontSize: 12 },
   infoCard: { gap: 10, marginBottom: Spacing.md },
@@ -400,11 +400,11 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: FontSize.sm,
     color: Colors.textSecondary,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
   },
   infoValue: {
     fontSize: FontSize.sm,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
 });

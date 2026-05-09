@@ -32,11 +32,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FontSize.lg,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
   accessory: {
     fontSize: FontSize.sm,
     color: Colors.primaryLight,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
   },
 });

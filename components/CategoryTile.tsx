@@ -90,6 +90,6 @@ const styles = StyleSheet.create({
   emoji: { fontSize: 38 },
   label: {
     fontSize: FontSize.md,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
 });

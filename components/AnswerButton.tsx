@@ -162,15 +162,15 @@ const styles = StyleSheet.create({
   },
   letter: {
     fontSize: FontSize.sm,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
   text: {
     flex: 1,
     fontSize: FontSize.md,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
   },
   badge: {
     fontSize: 22,
-    fontFamily: 'Outfit_900Black',
+    fontFamily: 'BagelFatOne_400Regular',
   },
 });

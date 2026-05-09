@@ -206,12 +206,12 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: FontSize.sm,
     color: Colors.textSecondary,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
   },
   username: {
     fontSize: FontSize.xxl,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
   heroCard: {
     borderRadius: 20,
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: FontSize.xl,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
   heroSub: {
     fontSize: FontSize.sm,
@@ -239,14 +239,14 @@ const styles = StyleSheet.create({
   quoteText: {
     fontSize: FontSize.md,
     color: Colors.textPrimary,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
     fontStyle: 'italic',
     lineHeight: 22,
   },
   quoteAuthor: {
     fontSize: FontSize.xs,
     color: Colors.textSecondary,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
   },
   ctaWrap: { marginTop: Spacing.sm },
   recentCard: { gap: 10, marginBottom: Spacing.md },
@@ -255,17 +255,17 @@ const styles = StyleSheet.create({
   recentTitle: {
     fontSize: FontSize.sm,
     color: Colors.textPrimary,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
   },
   recentSub: {
     fontSize: FontSize.xs,
     color: Colors.textMuted,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
     marginTop: 1,
   },
   recentXP: {
     fontSize: FontSize.sm,
     color: Colors.gold,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
 });

@@ -116,14 +116,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FontSize.xxxl,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_900Black',
+    fontFamily: 'BagelFatOne_400Regular',
     letterSpacing: -0.5,
     marginBottom: 6,
   },
   subtitle: {
     fontSize: FontSize.md,
     color: Colors.textSecondary,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
     marginBottom: Spacing.lg,
   },
   presetGrid: {
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   },
   presetText: {
     fontSize: FontSize.lg,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
     color: Colors.textSecondary,
   },
   presetTextActive: { color: Colors.primaryLight },
@@ -163,20 +163,20 @@ const styles = StyleSheet.create({
   disableText: {
     fontSize: FontSize.md,
     color: Colors.textSecondary,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
   },
   disableTextActive: { color: Colors.danger },
   note: {
     marginTop: Spacing.md,
     fontSize: FontSize.xs,
     color: Colors.textMuted,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
     textAlign: 'center',
   },
   cancelWrap: { marginTop: Spacing.md, alignItems: 'center' },
   cancelText: {
     fontSize: FontSize.sm,
     color: Colors.textMuted,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
   },
 });

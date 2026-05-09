@@ -84,21 +84,21 @@ const styles = StyleSheet.create({
   label: {
     fontSize: FontSize.md,
     color: Colors.textPrimary,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
   },
   description: {
     fontSize: FontSize.xs,
     color: Colors.textMuted,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
   },
   navAccessory: {
     fontSize: FontSize.lg,
     color: Colors.textSecondary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
   value: {
     fontSize: FontSize.sm,
     color: Colors.primaryLight,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
 });

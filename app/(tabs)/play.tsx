@@ -186,13 +186,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FontSize.xxxl,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_900Black',
+    fontFamily: 'BagelFatOne_400Regular',
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: FontSize.md,
     color: Colors.textSecondary,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
     marginTop: 4,
   },
   categoryGrid: {
@@ -219,13 +219,13 @@ const styles = StyleSheet.create({
   diffEmoji: { fontSize: 20 },
   diffLabel: {
     fontSize: FontSize.xs,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
   howCard: { marginTop: Spacing.md, gap: 10 },
   howTitle: {
     fontSize: FontSize.lg,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
     marginBottom: 4,
   },
   howRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: FontSize.sm,
     color: Colors.textSecondary,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
   },
   summaryCard: {
     marginTop: Spacing.md,
@@ -247,12 +247,12 @@ const styles = StyleSheet.create({
   summaryText: {
     fontSize: FontSize.md,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
   summaryXP: {
     fontSize: FontSize.sm,
     color: Colors.goldLight,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
   playBtn: { marginTop: Spacing.lg },
 });

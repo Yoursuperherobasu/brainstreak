@@ -372,13 +372,13 @@ const styles = StyleSheet.create({
   countdownNumber: {
     fontSize: 120,
     color: Colors.primary,
-    fontFamily: 'Outfit_900Black',
+    fontFamily: 'BagelFatOne_400Regular',
     lineHeight: 130,
   },
   countdownLabel: {
     fontSize: FontSize.xl,
     color: Colors.textSecondary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
   gameoverScroll: { paddingHorizontal: Spacing.md, paddingTop: Spacing.lg },
   gameoverCard: {
@@ -390,26 +390,26 @@ const styles = StyleSheet.create({
   gameoverTitle: {
     fontSize: FontSize.xxl,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
     marginBottom: Spacing.sm,
   },
   levelUp: {
     fontSize: FontSize.sm,
     color: Colors.goldLight,
-    fontFamily: 'Outfit_900Black',
+    fontFamily: 'BagelFatOne_400Regular',
     letterSpacing: 1.2,
     marginBottom: Spacing.sm,
   },
   gameoverScore: {
     fontSize: 72,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_900Black',
+    fontFamily: 'BagelFatOne_400Regular',
     lineHeight: 80,
   },
   gameoverScoreLabel: {
     fontSize: FontSize.md,
     color: 'rgba(255,255,255,0.7)',
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
     marginBottom: Spacing.md,
   },
   gameoverStats: {
@@ -421,19 +421,19 @@ const styles = StyleSheet.create({
   gameoverStatVal: {
     fontSize: FontSize.xl,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
   gameoverStatLabel: {
     fontSize: FontSize.xs,
     color: 'rgba(255,255,255,0.6)',
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
   },
   gameoverStatDiv: { width: 1, height: 30, backgroundColor: 'rgba(255,255,255,0.2)' },
   xpWrap: { marginBottom: Spacing.lg },
   breakdownTitle: {
     fontSize: FontSize.lg,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
     marginBottom: Spacing.sm,
   },
   roundRow: {
@@ -450,17 +450,17 @@ const styles = StyleSheet.create({
   roundQ: {
     fontSize: FontSize.sm,
     color: Colors.textPrimary,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
   },
   roundCorrect: {
     fontSize: FontSize.xs,
     color: Colors.successLight,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
     marginTop: 2,
   },
   roundPoints: {
     fontSize: FontSize.sm,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
     width: 36,
     textAlign: 'right',
   },
@@ -488,12 +488,12 @@ const styles = StyleSheet.create({
   progressLabel: {
     fontSize: FontSize.md,
     color: Colors.textSecondary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
   scoreTxt: {
     fontSize: FontSize.md,
     color: Colors.primaryLight,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
     minWidth: 36,
     textAlign: 'right',
   },

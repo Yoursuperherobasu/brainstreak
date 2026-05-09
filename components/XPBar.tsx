@@ -65,12 +65,12 @@ const styles = StyleSheet.create({
   label: {
     fontSize: FontSize.sm,
     color: Colors.textSecondary,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
   },
   value: {
     fontSize: FontSize.sm,
     color: Colors.primaryLight,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
   barBg: {
     height: 8,

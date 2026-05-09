@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   label: {
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
     fontWeight: '700',
     letterSpacing: 0.3,
   },

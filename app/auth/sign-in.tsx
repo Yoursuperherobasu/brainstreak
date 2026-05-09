@@ -204,13 +204,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FontSize.xxl,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
     textAlign: 'center',
   },
   subtitle: {
     fontSize: FontSize.md,
     color: Colors.textSecondary,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
     textAlign: 'center',
   },
   tabs: {
@@ -232,14 +232,14 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: FontSize.sm,
     color: Colors.textSecondary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
   tabTextActive: { color: Colors.textPrimary },
   field: { marginBottom: Spacing.md, gap: 6 },
   label: {
     fontSize: FontSize.sm,
     color: Colors.textSecondary,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
   },
   input: {
     backgroundColor: Colors.bgCard,
@@ -249,31 +249,31 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 14,
     color: Colors.textPrimary,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
     fontSize: FontSize.md,
   },
   errorText: {
     color: Colors.dangerLight,
     fontSize: FontSize.sm,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
     marginTop: 4,
   },
   infoText: {
     color: Colors.successLight,
     fontSize: FontSize.sm,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
     marginTop: 4,
   },
   forgotWrap: { marginTop: Spacing.md, alignItems: 'center' },
   forgotText: {
     color: Colors.primaryLight,
     fontSize: FontSize.sm,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
   },
   skipWrap: { marginTop: Spacing.lg, alignItems: 'center' },
   skipText: {
     color: Colors.textMuted,
     fontSize: FontSize.sm,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
   },
 });

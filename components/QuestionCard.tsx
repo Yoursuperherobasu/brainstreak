@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full,
   },
   categoryText: {
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
     fontSize: FontSize.xs,
     color: Colors.textSecondary,
   },
@@ -70,12 +70,12 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full,
   },
   difficultyText: {
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
     fontSize: FontSize.xs,
     letterSpacing: 0.5,
   },
   question: {
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
     fontSize: FontSize.xl,
     color: Colors.textPrimary,
     lineHeight: 30,

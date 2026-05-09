@@ -175,20 +175,20 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   letter: {
-    fontFamily: 'Outfit_900Black',
+    fontFamily: 'BagelFatOne_400Regular',
     fontSize: 22,
     color: 'rgba(255,255,255,0.85)',
     letterSpacing: 0.5,
   },
   text: {
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
     fontSize: FontSize.md,
     color: '#FFFFFF',
     textAlign: 'center',
     paddingHorizontal: 8,
   },
   badge: {
-    fontFamily: 'Outfit_900Black',
+    fontFamily: 'BagelFatOne_400Regular',
     fontSize: 28,
     color: '#FFFFFF',
     marginTop: 2,

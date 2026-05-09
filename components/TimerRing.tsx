@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   number: {
-    fontFamily: 'Outfit_900Black',
+    fontFamily: 'BagelFatOne_400Regular',
     fontSize: FontSize.xxl,
     lineHeight: FontSize.xxl + 2,
   },

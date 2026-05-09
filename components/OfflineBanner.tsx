@@ -43,6 +43,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: FontSize.xs,
     color: Colors.textSecondary,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
   },
 });

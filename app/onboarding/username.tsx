@@ -77,20 +77,20 @@ const styles = StyleSheet.create({
   step: {
     fontSize: FontSize.sm,
     color: Colors.textSecondary,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
     marginBottom: 4,
   },
   title: {
     fontSize: FontSize.xxxl,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_900Black',
+    fontFamily: 'BagelFatOne_400Regular',
     letterSpacing: -0.5,
     marginBottom: Spacing.sm,
   },
   subtitle: {
     fontSize: FontSize.md,
     color: Colors.textSecondary,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
     marginBottom: Spacing.lg,
   },
   input: {
@@ -101,14 +101,14 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 16,
     color: Colors.textPrimary,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'BricolageGrotesque_700Bold',
     fontSize: FontSize.xl,
   },
   hint: {
     marginTop: 6,
     fontSize: FontSize.xs,
     color: Colors.textMuted,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'PlusJakartaSans_400Regular',
   },
   footer: { padding: Spacing.lg, paddingBottom: Spacing.xl },
 });
