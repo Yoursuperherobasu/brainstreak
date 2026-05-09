@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BrainStreak — Screen Mockups</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0A0A1A;
+    --bg-card: #12122A;
+    --bg-elevated: #1A1A35;
+    --bg-overlay: #22224A;
+    --primary: #7C3AED;
+    --primary-light: #A78BFA;
+    --primary-dark: #5B21B6;
+    --accent: #06B6D4;
+    --gold: #F59E0B;
+    --gold-light: #FCD34D;
+    --success: #10B981;
+    --danger: #EF4444;
+    --text: #F0F0FF;
+    --text-secondary: #A0A0C0;
+    --text-muted: #6060A0;
+    --border: #2A2A4A;
+    --cat-mixed: #6366F1;
+    --cat-science: #06B6D4;
+    --cat-history: #F59E0B;
+    --cat-tech: #7C3AED;
+    --cat-sports: #10B981;
+    --cat-pop: #EC4899;
+  }
+  body {
+    background: radial-gradient(ellipse at top, #1A0A3A 0%, #0A0A1A 60%);
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--text);
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+  }
+  h1.page-title {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 900;
+    font-size: 36px;
+    letter-spacing: -1px;
+    background: linear-gradient(120deg, #A78BFA, #06B6D4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .page-sub { color: var(--text-secondary); font-size: 14px; }
+  .frames {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .phone {
+    width: 390px;
+    height: 844px;
+    background: var(--bg);
+    border-radius: 44px;
+    border: 12px solid #1f1f3a;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 0 1px #2a2a4a;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .notch {
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 28px;
+    background: #1f1f3a;
+    border-radius: 0 0 18px 18px;
+    z-index: 10;
+  }
+  .scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 56px 16px 80px;
+    scrollbar-width: none;
+  }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  /* Top tab bar */
+  .tabbar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 72px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding-bottom: 8px;
+  }
+  .tabbar-item {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 6px 14px;
+    border-radius: 12px;
+  }
+  .tabbar-item.active { background: rgba(124,58,237,0.12); }
+  .tabbar-item .tab-emoji { font-size: 22px; }
+  .tabbar-item .tab-label { font-size: 10px; font-weight: 600; color: var(--text-muted); }
+  .tabbar-item.active .tab-label { color: var(--primary-light); }
+
+  /* Common */
+  .row { display: flex; align-items: center; }
+  .col { display: flex; flex-direction: column; }
+  .stack { display: flex; flex-direction: column; gap: 16px; }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .h-hero { font-family: 'Outfit'; font-weight: 900; font-size: 56px; line-height: 1; letter-spacing: -2px; }
+  .h-display { font-family: 'Outfit'; font-weight: 900; font-size: 32px; letter-spacing: -0.5px; }
+  .h-title { font-family: 'Outfit'; font-weight: 700; font-size: 20px; }
+  .h-section { font-family: 'Outfit'; font-weight: 700; font-size: 17px; }
+  .body-em { font-weight: 600; font-size: 15px; }
+  .body { font-size: 14px; line-height: 1.5; color: var(--text); }
+  .muted { color: var(--text-secondary); font-size: 13px; }
+
+  /* HOME */
+  .home-greeting { color: var(--text-secondary); font-size: 13px; }
+  .home-username { font-family: 'Outfit'; font-weight: 700; font-size: 24px; }
+
+  .hero-streak {
+    border-radius: 24px;
+    padding: 24px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    display: flex; gap: 20px; align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-streak::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(252,211,77,0.18) 0%, transparent 70%);
+  }
+  .flame {
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #F97316 0%, #EF4444 80%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 56px;
+    box-shadow: 0 0 40px rgba(249,115,22,0.5);
+  }
+  .flame.cold {
+    background: radial-gradient(circle, var(--bg-elevated) 0%, var(--bg-overlay) 100%);
+    box-shadow: none;
+  }
+  .hero-streak .number {
+    font-family: 'Outfit'; font-weight: 900;
+    font-size: 64px; line-height: 1;
+    color: var(--text);
+  }
+  .hero-streak .label {
+    font-family: 'Outfit'; font-weight: 700;
+    font-size: 17px;
+    color: var(--text);
+  }
+  .hero-streak .sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 4px;
+  }
+
+  /* Stats */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .stat-tile {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .stat-tile .stat-emoji { font-size: 22px; }
+  .stat-tile .stat-val { font-family: 'Outfit'; font-weight: 800; font-size: 20px; }
+  .stat-tile .stat-label { font-size: 11px; color: var(--text-secondary); font-weight: 600; }
+
+  .xp-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .xp-headline {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+  }
+  .xp-label { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+  .xp-value { font-family: 'Outfit'; font-weight: 700; font-size: 13px; color: var(--primary-light); }
+  .xp-bar { height: 8px; border-radius: 999px; background: var(--bg-overlay); overflow: hidden; }
+  .xp-fill { height: 100%; width: 38%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+  }
+
+  .quote-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    border-left: 3px solid var(--gold);
+  }
+  .quote-emoji { font-size: 18px; margin-bottom: 4px; }
+  .quote-text { font-style: italic; line-height: 1.5; }
+  .quote-author { font-size: 11px; color: var(--text-secondary); margin-top: 6px; font-weight: 600; }
+
+  .cta-button {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: 18px;
+    padding: 16px 24px;
+    text-align: center;
+    font-family: 'Outfit'; font-weight: 700; font-size: 17px;
+    color: var(--text);
+    letter-spacing: 0.3px;
+    box-shadow: 0 8px 24px rgba(124,58,237,0.35);
+  }
+  .cta-secondary {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--text);
+  }
+  .cta-button.sm { padding: 10px 16px; font-size: 13px; box-shadow: none; }
+
+  /* PLAY */
+  .play-title { font-family: 'Outfit'; font-weight: 900; font-size: 32px; letter-spacing: -0.5px; }
+  .play-sub { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
+
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .cat-tile {
+    aspect-ratio: 1;
+    border-radius: 18px;
+    border: 1.5px solid var(--border);
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-elevated));
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cat-tile.selected.science {
+    background: linear-gradient(135deg, var(--cat-science) 0%, rgba(6,182,212,0.6) 100%);
+    border-color: var(--cat-science);
+  }
+  .cat-tile.selected .cat-label { color: var(--text); font-weight: 700; }
+  .cat-emoji { font-size: 38px; }
+  .cat-label { font-family: 'Outfit'; font-weight: 700; font-size: 14px; color: var(--text-secondary); }
+
+  .diff-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .diff-chip {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 4px;
+    text-align: center;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-family: 'Outfit'; font-weight: 700;
+  }
+  .diff-chip.selected.medium {
+    border-color: var(--gold);
+    background: rgba(245,158,11,0.15);
+    color: var(--gold);
+  }
+  .diff-emoji { font-size: 18px; display: block; margin-bottom: 2px; }
+
+  .summary-bar {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .summary-text { font-family: 'Outfit'; font-weight: 700; font-size: 15px; }
+  .summary-xp { font-family: 'Outfit'; font-weight: 700; font-size: 13px; color: var(--gold-light); }
+
+  .how-list { display: flex; flex-direction: column; gap: 10px; }
+  .how-row { display: flex; align-items: center; gap: 10px; }
+  .how-emoji { font-size: 18px; width: 26px; }
+  .how-text { font-size: 13px; color: var(--text-secondary); flex: 1; }
+
+  /* PROFILE */
+  .profile-hero {
+    border-radius: 24px;
+    padding: 24px 16px 20px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .profile-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -50px; left: -50px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(6,182,212,0.2), transparent 70%);
+  }
+  .avatar {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px;
+    border: 2px solid rgba(255,255,255,0.18);
+  }
+  .username { font-family: 'Outfit'; font-weight: 700; font-size: 24px; }
+  .level-badge {
+    background: rgba(0,0,0,0.25);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--gold-light);
+  }
+  .profile-xp-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 12px;
+  }
+  .profile-xp-fill {
+    height: 100%;
+    width: 38%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 999px;
+  }
+  .profile-xp-text {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 4px;
+  }
+
+  .signin-card {
+    display: flex; align-items: center; gap: 12px;
+    background: linear-gradient(135deg, rgba(6,182,212,0.18), rgba(124,58,237,0.18));
+    border: 1px solid rgba(6,182,212,0.4);
+    border-radius: 16px;
+    padding: 14px 16px;
+  }
+  .signin-card .col { flex: 1; gap: 2px; }
+  .signin-title { font-family: 'Outfit'; font-weight: 700; font-size: 15px; }
+  .signin-body { font-size: 11px; color: var(--text-secondary); line-height: 1.4; }
+
+  .settings-row {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 16px;
+  }
+  .settings-row + .settings-row { margin-top: 8px; }
+  .settings-emoji { font-size: 22px; width: 28px; }
+  .settings-col { flex: 1; }
+  .settings-label { font-weight: 600; font-size: 15px; }
+  .settings-desc { font-size: 11px; color: var(--text-muted); }
+  .toggle {
+    width: 48px; height: 28px;
+    background: var(--primary); border-radius: 999px;
+    position: relative;
+  }
+  .toggle::after {
+    content: ''; position: absolute; top: 3px; right: 3px;
+    width: 22px; height: 22px; background: var(--primary-light);
+    border-radius: 50%;
+  }
+  .toggle.off { background: var(--bg-overlay); }
+  .toggle.off::after { left: 3px; right: auto; background: var(--text-muted); }
+
+  .badge-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .badge {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 6px;
+    text-align: center;
+    position: relative;
+  }
+  .badge .b-emoji { font-size: 28px; }
+  .badge .b-label { font-family: 'Outfit'; font-weight: 700; font-size: 11px; margin-top: 2px; }
+  .badge .b-desc { font-size: 9px; color: var(--text-muted); margin-top: 1px; }
+  .badge.locked { border-style: dashed; opacity: 0.55; }
+  .badge.locked .b-emoji { opacity: 0.4; }
+
+  .info-card { display: flex; flex-direction: column; gap: 10px; }
+  .info-row { display: flex; align-items: center; gap: 10px; }
+  .info-emoji { font-size: 18px; width: 24px; }
+  .info-label { flex: 1; color: var(--text-secondary); font-size: 13px; font-weight: 600; }
+  .info-val { font-family: 'Outfit'; font-weight: 700; font-size: 13px; }
+
+  /* Section header */
+  .section-h {
+    font-family: 'Outfit'; font-weight: 700; font-size: 17px;
+    margin: 18px 0 8px;
+  }
+
+  /* Streak summary card */
+  .streak-summary {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 16px;
+  }
+  .streak-summary .col { flex: 1; gap: 2px; }
+  .streak-current { font-family: 'Outfit'; font-weight: 900; font-size: 28px; }
+  .streak-best-label { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+  .streak-best { font-family: 'Outfit'; font-weight: 700; font-size: 18px; color: var(--gold-light); }
+
+  .frame-label {
+    color: var(--text-secondary);
+    font-size: 13px;
+    text-align: center;
+    margin-top: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div class="col" style="align-items: center; gap: 8px; margin-bottom: 12px;">
+  <h1 class="page-title">BrainStreak — Screen Direction</h1>
+  <div class="page-sub">Visual brief for Phase 3 implementation. Translate look-and-feel to React Native.</div>
+</div>
+
+<div class="frames">
+
+  <!-- HOME -->
+  <div class="col">
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="scroll">
+      <!-- Top -->
+      <div class="row" style="justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+        <div class="col">
+          <div class="home-greeting">Good evening ✨</div>
+          <div class="home-username">Yoursuperherobasu</div>
+        </div>
+        <div class="pill">🔥 12</div>
+      </div>
+
+      <!-- Hero -->
+      <div class="hero-streak">
+        <div class="flame">🔥</div>
+        <div class="col" style="flex: 1; gap: 4px;">
+          <div class="number">12</div>
+          <div class="label">Day streak — keep going!</div>
+          <div class="sub">Best: 18 days</div>
+        </div>
+      </div>
+
+      <div class="section-h">Your stats</div>
+      <div class="stats">
+        <div class="stat-tile"><div class="stat-emoji">⚡</div><div class="stat-val">7</div><div class="stat-label">Level</div></div>
+        <div class="stat-tile"><div class="stat-emoji">🧠</div><div class="stat-val">2,440</div><div class="stat-label">Total XP</div></div>
+        <div class="stat-tile"><div class="stat-emoji">🎮</div><div class="stat-val">86</div><div class="stat-label">Games</div></div>
+      </div>
+
+      <div class="xp-card" style="margin-top: 12px;">
+        <div class="xp-headline">
+          <div class="xp-label">Level 7 → 8</div>
+          <div class="xp-value">2,440 / 6,400 XP</div>
+        </div>
+        <div class="xp-bar"><div class="xp-fill"></div></div>
+      </div>
+
+      <div class="quote-card" style="margin-top: 12px;">
+        <div class="quote-emoji">💡</div>
+        <div class="quote-text">"The brain is a muscle. Flex it daily."</div>
+        <div class="quote-author">— BrainStreak</div>
+      </div>
+
+      <div class="cta-button" style="margin-top: 16px;">Play another round 🎮</div>
+    </div>
+    <div class="tabbar">
+      <div class="tabbar-item active"><div class="tab-emoji">🏠</div><div class="tab-label">Home</div></div>
+      <div class="tabbar-item"><div class="tab-emoji">🎮</div><div class="tab-label">Play</div></div>
+      <div class="tabbar-item"><div class="tab-emoji">👤</div><div class="tab-label">Profile</div></div>
+    </div>
+  </div>
+  <div class="frame-label">Home</div>
+  </div>
+
+  <!-- PLAY -->
+  <div class="col">
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="scroll">
+      <div class="play-title">Pick a category</div>
+      <div class="play-sub">5 questions · 15 seconds each</div>
+
+      <div class="cat-grid" style="margin-top: 18px;">
+        <div class="cat-tile">
+          <div class="cat-emoji">🌀</div><div class="cat-label">Mixed</div>
+        </div>
+        <div class="cat-tile selected science">
+          <div class="cat-emoji">🔬</div><div class="cat-label" style="color: white;">Science</div>
+        </div>
+        <div class="cat-tile">
+          <div class="cat-emoji">🏛️</div><div class="cat-label">History</div>
+        </div>
+        <div class="cat-tile">
+          <div class="cat-emoji">💻</div><div class="cat-label">Tech</div>
+        </div>
+        <div class="cat-tile">
+          <div class="cat-emoji">⚽</div><div class="cat-label">Sports</div>
+        </div>
+        <div class="cat-tile">
+          <div class="cat-emoji">🎬</div><div class="cat-label">Pop</div>
+        </div>
+      </div>
+
+      <div class="section-h">Difficulty</div>
+      <div class="diff-row">
+        <div class="diff-chip"><span class="diff-emoji">🎲</span>Mixed</div>
+        <div class="diff-chip"><span class="diff-emoji">😊</span>Easy</div>
+        <div class="diff-chip selected medium"><span class="diff-emoji">🤔</span>Medium</div>
+        <div class="diff-chip"><span class="diff-emoji">🔥</span>Hard</div>
+      </div>
+
+      <div class="card" style="margin-top: 16px;">
+        <div class="h-section" style="margin-bottom: 8px;">How to play</div>
+        <div class="how-list">
+          <div class="how-row"><div class="how-emoji">⚡</div><div class="how-text">Answer 5 questions as fast as you can</div></div>
+          <div class="how-row"><div class="how-emoji">⏱️</div><div class="how-text">15 seconds per question — speed = bonus points</div></div>
+          <div class="how-row"><div class="how-emoji">🔥</div><div class="how-text">Play daily to build your streak</div></div>
+          <div class="how-row"><div class="how-emoji">🧠</div><div class="how-text">Earn XP and level up your brain</div></div>
+        </div>
+      </div>
+
+      <div class="summary-bar" style="margin-top: 16px;">
+        <div class="summary-text">🔬 Science · Medium</div>
+        <div class="summary-xp">+up to 750 XP</div>
+      </div>
+
+      <div class="cta-button" style="margin-top: 18px;">Start game 🚀</div>
+    </div>
+    <div class="tabbar">
+      <div class="tabbar-item"><div class="tab-emoji">🏠</div><div class="tab-label">Home</div></div>
+      <div class="tabbar-item active"><div class="tab-emoji">🎮</div><div class="tab-label">Play</div></div>
+      <div class="tabbar-item"><div class="tab-emoji">👤</div><div class="tab-label">Profile</div></div>
+    </div>
+  </div>
+  <div class="frame-label">Play</div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="col">
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="scroll">
+      <div class="profile-hero">
+        <div class="avatar">🧠</div>
+        <div class="username">Yoursuperherobasu ✏️</div>
+        <div class="level-badge">LEVEL 7 BRAIN</div>
+        <div class="profile-xp-bar"><div class="profile-xp-fill"></div></div>
+        <div class="profile-xp-text">2,440 / 6,400 XP to Level 8</div>
+      </div>
+
+      <div class="streak-summary" style="margin-top: 14px;">
+        <div class="flame" style="width: 56px; height: 56px; font-size: 32px; box-shadow: 0 0 24px rgba(249,115,22,0.4);">🔥</div>
+        <div class="col">
+          <div class="streak-current">12 days</div>
+          <div class="streak-best-label">Best streak</div>
+          <div class="streak-best">🏆 18 days</div>
+        </div>
+      </div>
+
+      <div class="signin-card" style="margin-top: 14px;">
+        <div style="font-size: 28px;">☁️</div>
+        <div class="col">
+          <div class="signin-title">Sync across devices</div>
+          <div class="signin-body">Sign in to keep your XP, streak, and level safe on every device.</div>
+        </div>
+        <div class="cta-button sm">Sign in</div>
+      </div>
+
+      <div class="section-h">Stats</div>
+      <div class="stats">
+        <div class="stat-tile"><div class="stat-emoji">⚡</div><div class="stat-val">7</div><div class="stat-label">Level</div></div>
+        <div class="stat-tile"><div class="stat-emoji">🧠</div><div class="stat-val">2,440</div><div class="stat-label">Total XP</div></div>
+        <div class="stat-tile"><div class="stat-emoji">🎮</div><div class="stat-val">86</div><div class="stat-label">Games</div></div>
+      </div>
+
+      <div class="section-h">Badges</div>
+      <div class="badge-grid">
+        <div class="badge"><div class="b-emoji">🎮</div><div class="b-label">First Game</div><div class="b-desc">Play first game</div></div>
+        <div class="badge"><div class="b-emoji">🔥</div><div class="b-label">On Fire</div><div class="b-desc">3 day streak</div></div>
+        <div class="badge"><div class="b-emoji">💎</div><div class="b-label">Diamond</div><div class="b-desc">7 day streak</div></div>
+        <div class="badge"><div class="b-emoji">⚡</div><div class="b-label">Charged</div><div class="b-desc">100 XP</div></div>
+        <div class="badge locked"><div class="b-emoji">🧠</div><div class="b-label">Big Brain</div><div class="b-desc">500 XP</div></div>
+        <div class="badge locked"><div class="b-emoji">🏆</div><div class="b-label">Champion</div><div class="b-desc">1000 XP</div></div>
+      </div>
+
+      <div class="section-h">Settings</div>
+      <div class="settings-row">
+        <div class="settings-emoji">🔊</div>
+        <div class="settings-col">
+          <div class="settings-label">Sound effects</div>
+          <div class="settings-desc">Tick, ding, buzz, fanfare</div>
+        </div>
+        <div class="toggle"></div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-emoji">📳</div>
+        <div class="settings-col">
+          <div class="settings-label">Haptics</div>
+          <div class="settings-desc">Vibration feedback</div>
+        </div>
+        <div class="toggle"></div>
+      </div>
+
+      <div class="section-h">App info</div>
+      <div class="card info-card">
+        <div class="info-row"><div class="info-emoji">🧠</div><div class="info-label">Version</div><div class="info-val">v1.0.0</div></div>
+        <div class="info-row"><div class="info-emoji">🎮</div><div class="info-label">Questions</div><div class="info-val">Open Trivia DB</div></div>
+        <div class="info-row"><div class="info-emoji">☁️</div><div class="info-label">Sync</div><div class="info-val">Off (anonymous)</div></div>
+        <div class="info-row"><div class="info-emoji">📱</div><div class="info-label">Platform</div><div class="info-val">Android</div></div>
+      </div>
+    </div>
+    <div class="tabbar">
+      <div class="tabbar-item"><div class="tab-emoji">🏠</div><div class="tab-label">Home</div></div>
+      <div class="tabbar-item"><div class="tab-emoji">🎮</div><div class="tab-label">Play</div></div>
+      <div class="tabbar-item active"><div class="tab-emoji">👤</div><div class="tab-label">Profile</div></div>
+    </div>
+  </div>
+  <div class="frame-label">Profile</div>
+  </div>
+
+</div>
+
+<div style="max-width: 800px; padding: 16px 24px; color: var(--text-secondary); font-size: 13px; line-height: 1.6; margin-top: 12px;">
+  <strong>Notes for the React Native build:</strong>
+  Hero gradient is the same primary→primaryDark used elsewhere; the radial decoration behind it should be optional ornament. The streak flame is a recurring metaphor — use 🔥 emoji at varying sizes; the orange glow halo is achievable with shadow color. The sign-in card uses a violet/cyan blended fill to set itself apart from regular cards. Settings rows mirror native iOS settings with toggle on the right. Difficulty selector is segmented across 4 columns, gap 8px. Category grid is 3 columns × 2 rows, square aspect ratio.
+</div>
+
+</body>
+</html>
