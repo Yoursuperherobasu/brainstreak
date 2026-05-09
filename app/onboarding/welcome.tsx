@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,11 +9,11 @@ import Animated, {
   withRepeat,
   withSequence,
   withTiming,
-  withSpring,
   Easing,
   FadeIn,
 } from 'react-native-reanimated';
-import { Colors, Gradients, Spacing, FontSize, Shadow, Radius } from '@/constants/theme';
+import { Button } from '@/components/Button';
+import { Colors, Gradients, Spacing, FontSize } from '@/constants/theme';
 
 // Build timestamp baked into the bundle so the user can confirm they
 // reloaded the new build. If they see today's date in the corner, the
@@ -39,16 +39,11 @@ export default function WelcomeScreen() {
     transform: [{ translateY: float.value }],
   }));
 
-  // Button press: visible scale, count taps so the user can SEE clicks
-  // are firing even before navigation completes.
-  const pressScale = useSharedValue(1);
-  const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: pressScale.value }] }));
+  // Use the Button component (which renders a native HTML <button> on web).
+  // We still increment a visible counter so the user can SEE the click
+  // event firing even before navigation completes.
   const handleStart = () => {
     setTapped((n) => n + 1);
-    pressScale.value = withSequence(
-      withSpring(0.94, { damping: 10, stiffness: 320 }),
-      withSpring(1, { damping: 10, stiffness: 320 })
-    );
     console.log('[Welcome] Let’s go tapped, navigating to /onboarding/username');
     router.push('/onboarding/username');
   };
@@ -82,22 +77,7 @@ export default function WelcomeScreen() {
         </View>
 
         <View style={styles.footer}>
-          <Animated.View style={[pressStyle, Shadow.lg]}>
-            <Pressable
-              onPress={handleStart}
-              style={({ pressed }) => [styles.cta, pressed && { opacity: 0.92 }]}
-              android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
-            >
-              <LinearGradient
-                colors={Gradients.primary}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.ctaInner}
-              >
-                <Text style={styles.ctaText}>Let’s go 🚀</Text>
-              </LinearGradient>
-            </Pressable>
-          </Animated.View>
+          <Button label="Let’s go 🚀" onPress={handleStart} size="lg" style={styles.cta} />
           {tapped > 0 && (
             <Text style={styles.debug}>tap registered #{tapped}</Text>
           )}
@@ -158,19 +138,6 @@ const styles = StyleSheet.create({
   footer: { padding: Spacing.lg, paddingBottom: Spacing.xl, alignItems: 'center' },
   cta: {
     minWidth: 240,
-    borderRadius: Radius.xl,
-    overflow: 'hidden',
-  },
-  ctaInner: {
-    paddingVertical: 18,
-    paddingHorizontal: 32,
-    alignItems: 'center',
-  },
-  ctaText: {
-    fontFamily: 'BagelFatOne_400Regular',
-    fontSize: 22,
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
   },
   debug: {
     marginTop: 8,
