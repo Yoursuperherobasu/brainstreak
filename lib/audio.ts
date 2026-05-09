@@ -4,25 +4,27 @@ import { useSettingsStore } from '@/store/useSettingsStore';
 // Settings-aware audio. Reads `soundOn` from useSettingsStore on each call.
 // Centralizing here means screens never import expo-audio directly.
 //
-// If a sound file is missing or fails to load, the loader logs a warning
-// and the corresponding play() becomes a no-op. This lets us ship the
-// wiring before the actual mp3s land in Phase 6.
+// Sound files are added in Phase 6. Until then, SOURCES is empty and
+// every play() is a no-op. To wire a sound: add the file to
+// assets/sounds/<key>.mp3 and add `<key>: require('@/assets/sounds/<key>.mp3')`
+// to SOURCES. Metro resolves require() at bundle time, so the entry must
+// be commented out (not just point at a missing file).
 
 type SoundKey = 'tick' | 'correct' | 'wrong' | 'fanfare';
+
+// Phase 6: uncomment each line as the corresponding mp3 file lands in assets/sounds/.
+const SOURCES: Partial<Record<SoundKey, number>> = {
+  // tick: require('@/assets/sounds/tick.mp3'),
+  // correct: require('@/assets/sounds/correct.mp3'),
+  // wrong: require('@/assets/sounds/wrong.mp3'),
+  // fanfare: require('@/assets/sounds/fanfare.mp3'),
+};
 
 const players: Partial<Record<SoundKey, AudioPlayer | null>> = {};
 
 function getPlayer(key: SoundKey): AudioPlayer | null {
   if (key in players) return players[key] ?? null;
-  let source: number | null = null;
-  try {
-    if (key === 'tick') source = require('@/assets/sounds/tick.mp3');
-    else if (key === 'correct') source = require('@/assets/sounds/correct.mp3');
-    else if (key === 'wrong') source = require('@/assets/sounds/wrong.mp3');
-    else if (key === 'fanfare') source = require('@/assets/sounds/fanfare.mp3');
-  } catch {
-    source = null;
-  }
+  const source = SOURCES[key];
   if (source == null) {
     players[key] = null;
     return null;
