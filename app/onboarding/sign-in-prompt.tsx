@@ -11,12 +11,15 @@ import { useSettingsStore } from '@/store/useSettingsStore';
 export default function SignInPromptScreen() {
   const setOnboarded = useSettingsStore((s) => s.setOnboarded);
 
+  // A6 fix: route to (tabs) FIRST, then push the sign-in modal on top.
+  // That way Back from sign-in lands on Home instead of a blank stack
+  // (the previous replace-then-replace wiped all history).
   const finish = (next: 'sign-in' | 'home') => {
     setOnboarded(true);
+    router.replace('/(tabs)');
     if (next === 'sign-in') {
-      router.replace('/auth/sign-in');
-    } else {
-      router.replace('/(tabs)');
+      // Wait a tick so the tabs stack is in place before pushing the modal.
+      setTimeout(() => router.push('/auth/sign-in'), 0);
     }
   };
 

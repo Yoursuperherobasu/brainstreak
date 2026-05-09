@@ -22,7 +22,7 @@ import { XPBar } from '@/components/XPBar';
 import { Button } from '@/components/Button';
 import { SectionHeader } from '@/components/SectionHeader';
 import { Colors, Gradients, Spacing, FontSize, MOTIVATIONAL_QUOTES } from '@/constants/theme';
-import { hasPlayedToday, getStreakData } from '@/lib/storage';
+import { hasPlayedToday, getStreakData, isStreakAtRisk, todayISO, yesterdayISO } from '@/lib/storage';
 import { useUserStore } from '@/store/useUserStore';
 import { getXPForNextLevel } from '@/lib/trivia';
 
@@ -98,7 +98,12 @@ export default function HomeScreen() {
             end={{ x: 1, y: 1 }}
             style={styles.heroCard}
           >
-            <StreakBadge streak={streak.current} size="lg" showLabel />
+            <StreakBadge
+              streak={streak.current}
+              size="lg"
+              showLabel
+              atRisk={isStreakAtRisk(streak, todayISO(), yesterdayISO())}
+            />
             <View style={styles.heroRight}>
               <Text style={styles.heroTitle}>{heroLabel}</Text>
               <Text style={styles.heroSub}>

@@ -24,6 +24,7 @@ import { useUserStore } from '@/store/useUserStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { getXPForNextLevel } from '@/lib/trivia';
 import { signOut } from '@/lib/auth';
+import { isStreakAtRisk, todayISO, yesterdayISO } from '@/lib/storage';
 
 const BADGES = [
   { id: 'first_game', emoji: '🎮', label: 'First Game', desc: 'Play your first game', xpReq: 0 },
@@ -60,6 +61,9 @@ export default function ProfileScreen() {
     setEditing(false);
   };
 
+  // A5: signOut() result must be checked. If it fails, surface the error
+  // and leave the user in the authenticated state so they aren't silently
+  // re-authenticated by getCurrentSession() on the next launch.
   const handleSignOut = () => {
     Alert.alert(
       'Sign out',
@@ -70,13 +74,22 @@ export default function ProfileScreen() {
           text: 'Sign out',
           style: 'destructive',
           onPress: async () => {
-            await signOut();
+            const result = await signOut();
+            if (!result.ok) {
+              Alert.alert(
+                'Sign out failed',
+                result.error ?? 'Could not sign out. Check your connection and try again.'
+              );
+              return;
+            }
             setAnonymous();
           },
         },
       ]
     );
   };
+
+  const atRisk = isStreakAtRisk(streak, todayISO(), yesterdayISO());
 
   const xpForNext = getXPForNextLevel(profile.level);
   const earnedBadges = BADGES.filter(
@@ -127,7 +140,7 @@ export default function ProfileScreen() {
 
         <Animated.View entering={FadeInDown.delay(80).springify()}>
           <Card style={styles.streakCard}>
-            <StreakBadge streak={streak.current} size="md" />
+            <StreakBadge streak={streak.current} size="md" atRisk={atRisk} />
             <View style={styles.streakRight}>
               <Text style={styles.streakBestLabel}>Best streak</Text>
               <Text style={styles.streakBest}>🏆 {streak.longest} {streak.longest === 1 ? 'day' : 'days'}</Text>

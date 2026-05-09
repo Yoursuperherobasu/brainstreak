@@ -16,6 +16,9 @@ interface StreakBadgeProps {
   size?: 'sm' | 'md' | 'lg';
   showLabel?: boolean;
   animate?: boolean;
+  // C12: when true, render the flame as an "ember" (dimmer) to signal the
+  // streak is at risk — i.e. yesterday was the last play and today not yet.
+  atRisk?: boolean;
 }
 
 export function StreakBadge({
@@ -23,6 +26,7 @@ export function StreakBadge({
   size = 'md',
   showLabel = true,
   animate = true,
+  atRisk = false,
 }: StreakBadgeProps) {
   const flicker = useSharedValue(1);
   const scale = useSharedValue(0.8);
@@ -58,18 +62,28 @@ export function StreakBadge({
   const isActive = streak > 0;
   const isMilestone = streak >= 7;
 
+  // Ember state: dim the flame and add a hint label so the user knows
+  // they need to play today to keep the streak alive.
+  const flameEmoji = isActive ? (atRisk ? '🟠' : '🔥') : '💤';
+  const numberColor = atRisk
+    ? Colors.gold
+    : isMilestone
+    ? Colors.goldLight
+    : Colors.textPrimary;
+
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.badge, { padding: s.padding }, flameStyle]}>
-        <Text style={{ fontSize: s.emoji }}>{isActive ? '🔥' : '💤'}</Text>
+      <Animated.View
+        style={[
+          styles.badge,
+          { padding: s.padding },
+          flameStyle,
+          atRisk && { opacity: 0.85 },
+        ]}
+      >
+        <Text style={{ fontSize: s.emoji }}>{flameEmoji}</Text>
         <Text
-          style={[
-            styles.number,
-            {
-              fontSize: s.number,
-              color: isMilestone ? Colors.goldLight : Colors.textPrimary,
-            },
-          ]}
+          style={[styles.number, { fontSize: s.number, color: numberColor }]}
         >
           {streak}
         </Text>
@@ -78,6 +92,8 @@ export function StreakBadge({
         <Text style={[styles.label, { fontSize: s.label }]}>
           {streak === 0
             ? 'Start your streak!'
+            : atRisk
+            ? `Play today to keep ${streak}!`
             : streak === 1
             ? '1 day streak'
             : `${streak} day streak`}
