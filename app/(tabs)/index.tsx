@@ -22,7 +22,7 @@ import { XPBar } from '@/components/XPBar';
 import { Button } from '@/components/Button';
 import { SectionHeader } from '@/components/SectionHeader';
 import { Colors, Gradients, Spacing, FontSize, MOTIVATIONAL_QUOTES } from '@/constants/theme';
-import { hasPlayedToday, getStreakData, isStreakAtRisk, todayISO, yesterdayISO } from '@/lib/storage';
+import { hasPlayedToday, getStreakData, isStreakAtRisk, todayISO, yesterdayISO, getRecentGames, RecentGame } from '@/lib/storage';
 import { useUserStore } from '@/store/useUserStore';
 import { getXPForNextLevel } from '@/lib/trivia';
 
@@ -33,6 +33,7 @@ export default function HomeScreen() {
 
   const [playedToday, setPlayedToday] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [recent, setRecent] = useState<RecentGame[]>([]);
   const [quote] = useState(
     () => MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)]
   );
@@ -49,9 +50,14 @@ export default function HomeScreen() {
   }));
 
   const refreshState = async () => {
-    const [s, played] = await Promise.all([getStreakData(), hasPlayedToday()]);
+    const [s, played, rg] = await Promise.all([
+      getStreakData(),
+      hasPlayedToday(),
+      getRecentGames(),
+    ]);
     setStreak(s);
     setPlayedToday(played);
+    setRecent(rg);
   };
 
   useFocusEffect(
@@ -128,7 +134,34 @@ export default function HomeScreen() {
           </Card>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(300).springify()}>
+        {recent.length > 0 && (
+          <Animated.View entering={FadeInDown.delay(300).springify()}>
+            <SectionHeader title="Recent activity" />
+            <Card style={styles.recentCard}>
+              {recent.slice(0, 5).map((g) => {
+                const accuracy = g.total > 0 ? Math.round((g.correct / g.total) * 100) : 0;
+                return (
+                  <View key={g.at} style={styles.recentRow}>
+                    <Text style={styles.recentEmoji}>
+                      {accuracy >= 80 ? '🌟' : accuracy >= 60 ? '🎉' : accuracy >= 40 ? '👍' : '💪'}
+                    </Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.recentTitle}>
+                        {g.category} · {g.correct}/{g.total} correct
+                      </Text>
+                      <Text style={styles.recentSub}>
+                        {new Date(g.at).toLocaleDateString()} · {g.score.toLocaleString()} pts
+                      </Text>
+                    </View>
+                    <Text style={styles.recentXP}>+{g.xp} XP</Text>
+                  </View>
+                );
+              })}
+            </Card>
+          </Animated.View>
+        )}
+
+        <Animated.View entering={FadeInDown.delay(350).springify()}>
           <Card style={styles.quoteCard}>
             <Text style={styles.quoteEmoji}>💡</Text>
             <Text style={styles.quoteText}>"{quote.text}"</Text>
@@ -136,7 +169,7 @@ export default function HomeScreen() {
           </Card>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(350).springify()} style={styles.ctaWrap}>
+        <Animated.View entering={FadeInDown.delay(400).springify()} style={styles.ctaWrap}>
           <Button
             label={playedToday ? 'Play another round 🎮' : "Start today's game 🚀"}
             onPress={() => router.push('/(tabs)/play')}
@@ -212,4 +245,23 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
   },
   ctaWrap: { marginTop: Spacing.sm },
+  recentCard: { gap: 10, marginBottom: Spacing.md },
+  recentRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  recentEmoji: { fontSize: 22, width: 28 },
+  recentTitle: {
+    fontSize: FontSize.sm,
+    color: Colors.textPrimary,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  recentSub: {
+    fontSize: FontSize.xs,
+    color: Colors.textMuted,
+    fontFamily: 'Inter_400Regular',
+    marginTop: 1,
+  },
+  recentXP: {
+    fontSize: FontSize.sm,
+    color: Colors.gold,
+    fontFamily: 'Outfit_700Bold',
+  },
 });
