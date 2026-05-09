@@ -21,6 +21,11 @@ import { Colors } from '@/constants/theme';
 import { useUserStore } from '@/store/useUserStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { ensureForegroundHandler, getPermissionStatus } from '@/lib/notifications';
+import { installDebug } from '@/lib/debug';
+
+// Dense diagnostic instrumentation — captures every click, error,
+// and unhandled rejection on web. Native is a no-op.
+installDebug();
 
 // Install foreground notification handler at module load — needs to run
 // before any notification arrives, including ones the OS shows on cold start.

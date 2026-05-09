@@ -50,13 +50,22 @@ export function Button({
   }));
 
   const handlePress = () => {
-    if (disabled || loading) return;
+    console.log('[Button] handlePress fired', { label, disabled, loading });
+    if (disabled || loading) {
+      console.log('[Button] blocked — disabled or loading');
+      return;
+    }
     scale.value = withSequence(
       withSpring(0.94, { damping: 10, stiffness: 300 }),
       withSpring(1, { damping: 10, stiffness: 300 })
     );
     haptics.light();
-    onPress();
+    try {
+      onPress();
+      console.log('[Button] onPress completed', label);
+    } catch (e) {
+      console.log('[Button] onPress threw', String(e));
+    }
   };
 
   const sizeStyles = {
