@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Stack, router, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { useFonts, Outfit_400Regular, Outfit_700Bold, Outfit_900Black } from '@expo-google-fonts/outfit';
@@ -24,6 +24,8 @@ export default function RootLayout() {
   const userHydrated = useUserStore((s) => s.hydrated);
   const settingsHydrated = useSettingsStore((s) => s.hydrated);
   const bootstrapAuth = useUserStore((s) => s.bootstrapAuth);
+  const onboarded = useSettingsStore((s) => s.onboarded);
+  const segments = useSegments();
 
   const ready = fontsLoaded && userHydrated && settingsHydrated;
 
@@ -38,6 +40,14 @@ export default function RootLayout() {
       SplashScreen.hideAsync().catch(() => {});
     }
   }, [ready]);
+
+  useEffect(() => {
+    if (!ready) return;
+    const inOnboarding = segments[0] === 'onboarding';
+    if (!onboarded && !inOnboarding) {
+      router.replace('/onboarding/welcome');
+    }
+  }, [ready, onboarded, segments]);
 
   if (!ready) return null;
 
