@@ -21,6 +21,7 @@ import { Card, StatCard } from '@/components/Card';
 import { XPBar } from '@/components/XPBar';
 import { Button } from '@/components/Button';
 import { SectionHeader } from '@/components/SectionHeader';
+import { MotionView } from '@/components/MotionView';
 import { Colors, Gradients, Spacing, FontSize, MOTIVATIONAL_QUOTES } from '@/constants/theme';
 import { hasPlayedToday, getStreakData, isStreakAtRisk, todayISO, yesterdayISO, getRecentGames, RecentGame } from '@/lib/storage';
 import { useUserStore } from '@/store/useUserStore';
@@ -89,15 +90,15 @@ export default function HomeScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
         contentContainerStyle={styles.scroll}
       >
-        <Animated.View style={[styles.header, headerStyle]}>
+        <MotionView style={[styles.header, headerStyle]}>
           <View>
             <Text style={styles.greeting}>Good {getTimeOfDay()} ✨</Text>
             <Text style={styles.username}>{profile.username}</Text>
           </View>
           <StreakPill streak={streak.current} />
-        </Animated.View>
+        </MotionView>
 
-        <Animated.View entering={FadeInDown.delay(100).springify()}>
+        <MotionView entering={FadeInDown.delay(100).springify()}>
           <LinearGradient
             colors={streak.current >= 7 ? Gradients.fire : Gradients.primary}
             start={{ x: 0, y: 0 }}
@@ -117,25 +118,25 @@ export default function HomeScreen() {
               </Text>
             </View>
           </LinearGradient>
-        </Animated.View>
+        </MotionView>
 
-        <Animated.View entering={FadeInDown.delay(200).springify()}>
+        <MotionView entering={FadeInDown.delay(200).springify()}>
           <SectionHeader title="Your stats" />
           <View style={styles.statsRow}>
             <StatCard label="Level" value={profile.level} emoji="⚡" color={Colors.primaryLight} />
             <StatCard label="Total XP" value={profile.totalXP.toLocaleString()} emoji="🧠" color={Colors.accent} />
             <StatCard label="Games" value={profile.gamesPlayed} emoji="🎮" color={Colors.gold} />
           </View>
-        </Animated.View>
+        </MotionView>
 
-        <Animated.View entering={FadeInDown.delay(250).springify()}>
+        <MotionView entering={FadeInDown.delay(250).springify()}>
           <Card style={styles.xpCard}>
             <XPBar level={profile.level} xp={profile.totalXP} xpForNext={xpForNext} />
           </Card>
-        </Animated.View>
+        </MotionView>
 
         {recent.length > 0 && (
-          <Animated.View entering={FadeInDown.delay(300).springify()}>
+          <MotionView entering={FadeInDown.delay(300).springify()}>
             <SectionHeader title="Recent activity" />
             <Card style={styles.recentCard}>
               {recent.slice(0, 5).map((g) => {
@@ -158,24 +159,24 @@ export default function HomeScreen() {
                 );
               })}
             </Card>
-          </Animated.View>
+          </MotionView>
         )}
 
-        <Animated.View entering={FadeInDown.delay(350).springify()}>
+        <MotionView entering={FadeInDown.delay(350).springify()}>
           <Card style={styles.quoteCard}>
             <Text style={styles.quoteEmoji}>💡</Text>
             <Text style={styles.quoteText}>"{quote.text}"</Text>
             <Text style={styles.quoteAuthor}>— {quote.author}</Text>
           </Card>
-        </Animated.View>
+        </MotionView>
 
-        <Animated.View entering={FadeInDown.delay(400).springify()} style={styles.ctaWrap}>
+        <MotionView entering={FadeInDown.delay(400).springify()} style={styles.ctaWrap}>
           <Button
             label={playedToday ? 'Play another round 🎮' : "Start today's game 🚀"}
             onPress={() => router.push('/(tabs)/play')}
             size="lg"
           />
-        </Animated.View>
+        </MotionView>
 
         <View style={{ height: Spacing.xl }} />
       </ScrollView>

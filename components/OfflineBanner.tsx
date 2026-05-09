@@ -4,6 +4,7 @@ import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
 import { Colors, Spacing, FontSize } from '@/constants/theme';
 import { subscribe, fetchOnce, NetworkStatus } from '@/lib/network';
 import { useUserStore } from '@/store/useUserStore';
+import { MotionView } from '@/components/MotionView';
 
 export function OfflineBanner() {
   const authState = useUserStore((s) => s.authState);
@@ -19,10 +20,10 @@ export function OfflineBanner() {
   if (status !== 'offline') return null;
 
   return (
-    <Animated.View entering={FadeInUp.duration(180)} exiting={FadeOutUp.duration(180)} style={styles.bar}>
+    <MotionView entering={FadeInUp.duration(180)} exiting={FadeOutUp.duration(180)} style={styles.bar}>
       <Text style={styles.emoji}>📡</Text>
       <Text style={styles.text}>Offline — changes will sync when you reconnect</Text>
-    </Animated.View>
+    </MotionView>
   );
 }
 

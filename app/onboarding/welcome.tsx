@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Button } from '@/components/Button';
+import { MotionView, MotionText } from '@/components/MotionView';
 import { Colors, Gradients, Spacing, FontSize } from '@/constants/theme';
 
 export default function WelcomeScreen() {
@@ -12,15 +13,15 @@ export default function WelcomeScreen() {
     <LinearGradient colors={Gradients.hero} style={styles.bg}>
       <SafeAreaView style={styles.container}>
         <View style={styles.body}>
-          <Animated.Text entering={FadeIn.duration(400)} style={styles.emoji}>🧠</Animated.Text>
-          <Animated.Text entering={FadeInDown.delay(150).springify()} style={styles.title}>
+          <MotionText entering={FadeIn.duration(400)} style={styles.emoji}>🧠</MotionText>
+          <MotionText entering={FadeInDown.delay(150).springify()} style={styles.title}>
             BrainStreak
-          </Animated.Text>
-          <Animated.Text entering={FadeInDown.delay(250).springify()} style={styles.tagline}>
+          </MotionText>
+          <MotionText entering={FadeInDown.delay(250).springify()} style={styles.tagline}>
             Sharpen your brain in 60 seconds a day.
-          </Animated.Text>
+          </MotionText>
 
-          <Animated.View entering={FadeInDown.delay(400).springify()} style={styles.points}>
+          <MotionView entering={FadeInDown.delay(400).springify()} style={styles.points}>
             {[
               ['⚡', '5 questions, 15 seconds each'],
               ['🔥', 'Build a streak by playing daily'],
@@ -31,16 +32,16 @@ export default function WelcomeScreen() {
                 <Text style={styles.pointText}>{text}</Text>
               </View>
             ))}
-          </Animated.View>
+          </MotionView>
         </View>
 
-        <Animated.View entering={FadeInDown.delay(550).springify()} style={styles.footer}>
+        <MotionView entering={FadeInDown.delay(550).springify()} style={styles.footer}>
           <Button
             label="Let's go 🚀"
             onPress={() => router.push('/onboarding/username')}
             size="lg"
           />
-        </Animated.View>
+        </MotionView>
       </SafeAreaView>
     </LinearGradient>
   );

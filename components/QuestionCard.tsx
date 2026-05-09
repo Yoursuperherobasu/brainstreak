@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { Colors, Spacing, FontSize, Radius } from '@/constants/theme';
+import { MotionView } from '@/components/MotionView';
 
 interface QuestionCardProps {
   question: string;
@@ -18,7 +19,7 @@ const DIFFICULTY_COLOR: Record<QuestionCardProps['difficulty'], string> = {
 
 export function QuestionCard({ question, category, difficulty, questionKey }: QuestionCardProps) {
   return (
-    <Animated.View
+    <MotionView
       key={questionKey}
       entering={FadeInRight.springify().damping(15)}
       exiting={FadeOutLeft.duration(200)}
@@ -35,7 +36,7 @@ export function QuestionCard({ question, category, difficulty, questionKey }: Qu
         </View>
       </View>
       <Text style={styles.question}>{question}</Text>
-    </Animated.View>
+    </MotionView>
   );
 }
 

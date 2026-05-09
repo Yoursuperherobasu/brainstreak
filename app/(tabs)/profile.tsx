@@ -17,6 +17,7 @@ import { StreakBadge } from '@/components/StreakBadge';
 import { XPBar } from '@/components/XPBar';
 import { SectionHeader } from '@/components/SectionHeader';
 import { SettingsRow } from '@/components/SettingsRow';
+import { MotionView } from '@/components/MotionView';
 import { Button } from '@/components/Button';
 import { Colors, Spacing, FontSize, Radius, Gradients } from '@/constants/theme';
 import { Config } from '@/constants/config';
@@ -99,7 +100,7 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        <Animated.View entering={FadeInDown.springify()}>
+        <MotionView entering={FadeInDown.springify()}>
           <LinearGradient colors={Gradients.primary} style={styles.heroCard}>
             <View style={styles.avatar}>
               <Text style={styles.avatarEmoji}>🧠</Text>
@@ -136,9 +137,9 @@ export default function ProfileScreen() {
               </Text>
             </View>
           </LinearGradient>
-        </Animated.View>
+        </MotionView>
 
-        <Animated.View entering={FadeInDown.delay(80).springify()}>
+        <MotionView entering={FadeInDown.delay(80).springify()}>
           <Card style={styles.streakCard}>
             <StreakBadge streak={streak.current} size="md" atRisk={atRisk} />
             <View style={styles.streakRight}>
@@ -149,10 +150,10 @@ export default function ProfileScreen() {
               </Text>
             </View>
           </Card>
-        </Animated.View>
+        </MotionView>
 
         {authState !== 'authenticated' && (
-          <Animated.View entering={FadeInDown.delay(120).springify()}>
+          <MotionView entering={FadeInDown.delay(120).springify()}>
             <Card style={styles.signInCard}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.signInTitle}>Sync across devices</Text>
@@ -166,19 +167,19 @@ export default function ProfileScreen() {
                 onPress={() => router.push('/auth/sign-in')}
               />
             </Card>
-          </Animated.View>
+          </MotionView>
         )}
 
-        <Animated.View entering={FadeInDown.delay(160).springify()}>
+        <MotionView entering={FadeInDown.delay(160).springify()}>
           <SectionHeader title="Stats" />
           <View style={styles.statsRow}>
             <StatCard label="Level" value={profile.level} emoji="⚡" color={Colors.primaryLight} />
             <StatCard label="Total XP" value={profile.totalXP.toLocaleString()} emoji="🧠" color={Colors.accent} />
             <StatCard label="Games" value={profile.gamesPlayed} emoji="🎮" color={Colors.gold} />
           </View>
-        </Animated.View>
+        </MotionView>
 
-        <Animated.View entering={FadeInDown.delay(200).springify()}>
+        <MotionView entering={FadeInDown.delay(200).springify()}>
           <SectionHeader title="Badges" />
           <View style={styles.badgeGrid}>
             {BADGES.map((badge) => {
@@ -200,9 +201,9 @@ export default function ProfileScreen() {
               );
             })}
           </View>
-        </Animated.View>
+        </MotionView>
 
-        <Animated.View entering={FadeInDown.delay(240).springify()}>
+        <MotionView entering={FadeInDown.delay(240).springify()}>
           <SectionHeader title="Settings" />
           <SettingsRow
             kind="toggle"
@@ -237,9 +238,9 @@ export default function ProfileScreen() {
               onPress={handleSignOut}
             />
           )}
-        </Animated.View>
+        </MotionView>
 
-        <Animated.View entering={FadeInDown.delay(280).springify()}>
+        <MotionView entering={FadeInDown.delay(280).springify()}>
           <SectionHeader title="App info" />
           <Card style={styles.infoCard}>
             {[
@@ -255,7 +256,7 @@ export default function ProfileScreen() {
               </View>
             ))}
           </Card>
-        </Animated.View>
+        </MotionView>
 
         <View style={{ height: Spacing.xl }} />
       </ScrollView>

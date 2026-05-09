@@ -21,6 +21,7 @@ import { AnswerButton, AnswerState } from '@/components/AnswerButton';
 import { XPBar } from '@/components/XPBar';
 import { ConfettiBurst } from '@/components/ConfettiBurst';
 import { Button } from '@/components/Button';
+import { MotionView } from '@/components/MotionView';
 import { Colors, Spacing, FontSize, Radius } from '@/constants/theme';
 import { Config } from '@/constants/config';
 import { useGameStore } from '@/store/useGameStore';
@@ -186,10 +187,10 @@ export default function GameSessionScreen() {
   if (phase === 'countdown') {
     return (
       <LinearGradient colors={[Colors.bg, '#1A0A3A']} style={styles.fullscreen}>
-        <Animated.View key={countdownNum} entering={ZoomIn.duration(400)} style={styles.countdownContainer}>
+        <MotionView key={countdownNum} entering={ZoomIn.duration(400)} style={styles.countdownContainer}>
           <Text style={styles.countdownNumber}>{countdownNum}</Text>
           <Text style={styles.countdownLabel}>Get Ready!</Text>
-        </Animated.View>
+        </MotionView>
       </LinearGradient>
     );
   }
@@ -217,7 +218,7 @@ export default function GameSessionScreen() {
       <SafeAreaView style={styles.container}>
         {showConfetti && <ConfettiBurst trigger={true} />}
         <ScrollView contentContainerStyle={styles.gameoverScroll} showsVerticalScrollIndicator={false}>
-          <Animated.View entering={ZoomIn.springify()}>
+          <MotionView entering={ZoomIn.springify()}>
             <LinearGradient colors={[Colors.primary, Colors.primaryDark]} style={styles.gameoverCard}>
               <Text style={styles.gameoverTitle}>{grade.label}</Text>
               {leveledUp && (
@@ -242,7 +243,7 @@ export default function GameSessionScreen() {
                 </View>
               </View>
             </LinearGradient>
-          </Animated.View>
+          </MotionView>
 
           <View style={styles.xpWrap}>
             <XPBar level={profile.level} xp={profile.totalXP} xpForNext={xpForNext} />
@@ -250,7 +251,7 @@ export default function GameSessionScreen() {
 
           <Text style={styles.breakdownTitle}>Round Breakdown</Text>
           {roundResults.map((r, i) => (
-            <Animated.View key={i} entering={FadeIn.delay(i * 80).springify()}>
+            <MotionView key={i} entering={FadeIn.delay(i * 80).springify()}>
               <View style={[styles.roundRow, { borderColor: r.isCorrect ? Colors.success : Colors.danger }]}>
                 <Text style={styles.roundEmoji}>{r.isCorrect ? '✅' : '❌'}</Text>
                 <View style={{ flex: 1 }}>
@@ -263,7 +264,7 @@ export default function GameSessionScreen() {
                   {r.isCorrect ? `+${r.pointsEarned}` : '0'}
                 </Text>
               </View>
-            </Animated.View>
+            </MotionView>
           ))}
 
           <View style={styles.gameoverBtns}>
@@ -319,7 +320,7 @@ export default function GameSessionScreen() {
       </View>
 
       <View style={styles.progressBg}>
-        <Animated.View style={[styles.progressFill, { width: `${progress}%` }]} />
+        <MotionView style={[styles.progressFill, { width: `${progress}%` }]} />
       </View>
 
       {phase === 'playing' && (
@@ -337,7 +338,7 @@ export default function GameSessionScreen() {
 
       <View style={styles.answersWrap}>
         {currentQuestion.answers.map((answer, i) => (
-          <Animated.View key={`${currentIndex}_${i}`} entering={FadeIn.delay(i * 60).springify()}>
+          <MotionView key={`${currentIndex}_${i}`} entering={FadeIn.delay(i * 60).springify()}>
             <AnswerButton
               letter={(['A', 'B', 'C', 'D'] as const)[i]}
               text={answer}
@@ -345,18 +346,18 @@ export default function GameSessionScreen() {
               onPress={() => handleAnswer(answer)}
               disabled={showResult}
             />
-          </Animated.View>
+          </MotionView>
         ))}
       </View>
 
       {showResult && (
-        <Animated.View entering={FadeIn.springify()} style={styles.nextWrap}>
+        <MotionView entering={FadeIn.springify()} style={styles.nextWrap}>
           <Button
             label={currentIndex + 1 >= questions.length ? 'See Results 🏆' : 'Next Question →'}
             onPress={nextQuestion}
             size="lg"
           />
-        </Animated.View>
+        </MotionView>
       )}
     </SafeAreaView>
   );

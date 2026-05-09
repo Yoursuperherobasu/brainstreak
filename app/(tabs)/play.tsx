@@ -15,6 +15,7 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { CategoryTile } from '@/components/CategoryTile';
 import { SectionHeader } from '@/components/SectionHeader';
+import { MotionView } from '@/components/MotionView';
 import { Colors, Spacing, FontSize, CATEGORIES, Radius } from '@/constants/theme';
 import { fetchTriviaQuestions } from '@/lib/trivia';
 import { useGameStore } from '@/store/useGameStore';
@@ -65,12 +66,12 @@ export default function PlayScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
       >
-        <Animated.View entering={FadeInDown.springify()} style={styles.header}>
+        <MotionView entering={FadeInDown.springify()} style={styles.header}>
           <Text style={styles.title}>Pick a category</Text>
           <Text style={styles.subtitle}>{Config.QUESTIONS_PER_GAME} questions · {Config.ROUND_TIME_SECONDS} seconds each</Text>
-        </Animated.View>
+        </MotionView>
 
-        <Animated.View entering={FadeInDown.delay(100).springify()}>
+        <MotionView entering={FadeInDown.delay(100).springify()}>
           <View style={styles.categoryGrid}>
             {CATEGORIES.map((cat) => (
               <CategoryTile
@@ -83,9 +84,9 @@ export default function PlayScreen() {
               />
             ))}
           </View>
-        </Animated.View>
+        </MotionView>
 
-        <Animated.View entering={FadeInDown.delay(200).springify()}>
+        <MotionView entering={FadeInDown.delay(200).springify()}>
           <SectionHeader title="Difficulty" />
           <View style={styles.diffRow}>
             {DIFFICULTIES.map((d) => {
@@ -113,9 +114,9 @@ export default function PlayScreen() {
               );
             })}
           </View>
-        </Animated.View>
+        </MotionView>
 
-        <Animated.View entering={FadeInDown.delay(300).springify()}>
+        <MotionView entering={FadeInDown.delay(300).springify()}>
           <Card style={styles.howCard}>
             <Text style={styles.howTitle}>How to play</Text>
             {[
@@ -130,9 +131,9 @@ export default function PlayScreen() {
               </View>
             ))}
           </Card>
-        </Animated.View>
+        </MotionView>
 
-        <Animated.View entering={FadeInDown.delay(350).springify()}>
+        <MotionView entering={FadeInDown.delay(350).springify()}>
           <LinearGradient
             colors={[Colors.primary, Colors.primaryDark]}
             style={styles.summaryCard}
@@ -142,9 +143,9 @@ export default function PlayScreen() {
             </Text>
             <Text style={styles.summaryXP}>+up to 750 XP</Text>
           </LinearGradient>
-        </Animated.View>
+        </MotionView>
 
-        <Animated.View entering={FadeInDown.delay(400).springify()}>
+        <MotionView entering={FadeInDown.delay(400).springify()}>
           <Button
             label={loading ? 'Loading...' : 'Start game 🚀'}
             onPress={handlePlay}
@@ -152,7 +153,7 @@ export default function PlayScreen() {
             size="lg"
             style={styles.playBtn}
           />
-        </Animated.View>
+        </MotionView>
 
         <View style={{ height: Spacing.xl }} />
       </ScrollView>

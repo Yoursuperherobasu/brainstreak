@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '@/components/Button';
+import { MotionView } from '@/components/MotionView';
 import { Colors, Gradients, Spacing, FontSize, Radius } from '@/constants/theme';
 import { useSettingsStore } from '@/store/useSettingsStore';
 
@@ -26,7 +27,7 @@ export default function SignInPromptScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.body}>
-        <Animated.View entering={FadeInDown.springify()}>
+        <MotionView entering={FadeInDown.springify()}>
           <Text style={styles.step}>Step 3 of 3</Text>
           <Text style={styles.title}>Sync across devices?</Text>
           <Text style={styles.subtitle}>
@@ -45,7 +46,7 @@ export default function SignInPromptScreen() {
               </View>
             ))}
           </LinearGradient>
-        </Animated.View>
+        </MotionView>
       </View>
 
       <View style={styles.footer}>

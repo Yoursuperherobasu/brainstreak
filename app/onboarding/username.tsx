@@ -11,6 +11,7 @@ import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Button } from '@/components/Button';
+import { MotionView } from '@/components/MotionView';
 import { Colors, Spacing, FontSize, Radius } from '@/constants/theme';
 import { useUserStore } from '@/store/useUserStore';
 import { DEFAULT_USERNAME } from '@/lib/storage';
@@ -37,7 +38,7 @@ export default function UsernameScreen() {
         style={{ flex: 1 }}
       >
         <View style={styles.body}>
-          <Animated.View entering={FadeInDown.springify()}>
+          <MotionView entering={FadeInDown.springify()}>
             <Text style={styles.step}>Step 2 of 3</Text>
             <Text style={styles.title}>Pick a username</Text>
             <Text style={styles.subtitle}>
@@ -58,7 +59,7 @@ export default function UsernameScreen() {
             <Text style={styles.hint}>
               {draft.length}/20 — leave blank to keep "{DEFAULT_USERNAME}"
             </Text>
-          </Animated.View>
+          </MotionView>
         </View>
 
         <View style={styles.footer}>
