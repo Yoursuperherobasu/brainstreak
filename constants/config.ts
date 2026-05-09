@@ -1,0 +1,13 @@
+export const Config = {
+  ROUND_TIME_SECONDS: 15,
+  QUESTIONS_PER_GAME: 5,
+  COUNTDOWN_SECONDS: 3,
+  RESULT_PAUSE_MS: 1500,
+
+  MAX_RECENT_GAMES: 20,
+
+  DEFAULT_REMINDER_HHMM: '19:00',
+
+  APP_VERSION: '1.0.0',
+  ANDROID_PACKAGE: 'com.brainstreak.app',
+} as const;
