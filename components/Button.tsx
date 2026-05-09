@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   ViewStyle,
   TextStyle,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
@@ -81,6 +82,48 @@ export function Button({
   const isGhost = variant === 'ghost';
   const isSecondary = variant === 'secondary';
   const labelColor = isGhost || isSecondary ? Colors.textPrimary : '#FFFFFF';
+
+  // On WEB: native <button> element guarantees clicks work even if
+  // react-native-web's Pressable is being intercepted by transforms /
+  // shadows / Reanimated layout config. We render the gradient as a
+  // background div and the label as a span — pure HTML.
+  if (Platform.OS === 'web') {
+    const css: any = {
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'row',
+      paddingTop: sizeStyles[size].paddingVertical,
+      paddingBottom: sizeStyles[size].paddingVertical,
+      paddingLeft: sizeStyles[size].paddingHorizontal,
+      paddingRight: sizeStyles[size].paddingHorizontal,
+      borderRadius: sizeStyles[size].borderRadius,
+      cursor: disabled || loading ? 'not-allowed' : 'pointer',
+      opacity: disabled || loading ? 0.5 : 1,
+      border: isGhost ? `1.5px solid ${Colors.borderBright}` : 'none',
+      background: isGhost
+        ? 'transparent'
+        : `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`,
+      color: labelColor,
+      boxShadow: isGhost ? 'none' : '0 2px 6px rgba(0,0,0,0.1)',
+      fontFamily: 'BricolageGrotesque_700Bold',
+      fontWeight: 700,
+      fontSize: textSizes[size],
+      letterSpacing: '0.3px',
+      transition: 'transform 0.12s ease',
+      display: 'flex',
+    };
+    return (
+      // eslint-disable-next-line react/forbid-dom-props
+      <button
+        type="button"
+        onClick={handlePress}
+        disabled={disabled || loading}
+        style={{ ...css, ...(style as any) }}
+      >
+        {loading ? '...' : `${icon ? icon + '  ' : ''}${label}`}
+      </button>
+    );
+  }
 
   return (
     <Animated.View style={[animatedStyle, !isGhost && Shadow.md, style]}>

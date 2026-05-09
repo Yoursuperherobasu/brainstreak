@@ -16,7 +16,6 @@ import {
 } from '@expo-google-fonts/plus-jakarta-sans';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StyleSheet, Platform } from 'react-native';
-import { LayoutAnimationConfig } from 'react-native-reanimated';
 import * as SplashScreen from 'expo-splash-screen';
 import { Colors } from '@/constants/theme';
 import { useUserStore } from '@/store/useUserStore';
@@ -94,15 +93,14 @@ export default function RootLayout() {
   // Don't gate render on fonts — let the Stack mount with system-font fallback
   // until @expo-google-fonts loads. Stores are local and rehydrate fast.
 
-  // On web, Reanimated entering/exiting animations leave elements stuck at
-  // opacity 0 because the worklets runtime layout-animation path doesn't run.
-  // Skip them on web; native still gets the full animations.
-  const skipEntering = Platform.OS === 'web';
+  // (LayoutAnimationConfig wrapper removed: it was wrapping everything and
+  // suspected of intercepting/swallowing pointer events on web. MotionView
+  // already handles the entering-animation problem at the component level,
+  // so the global wrapper was redundant.)
 
   return (
     <GestureHandlerRootView style={styles.root}>
       <StatusBar style="dark" backgroundColor={Colors.bg} />
-      <LayoutAnimationConfig skipEntering={skipEntering} skipExiting={skipEntering}>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.bg } }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen
@@ -135,7 +133,6 @@ export default function RootLayout() {
           }}
         />
       </Stack>
-      </LayoutAnimationConfig>
     </GestureHandlerRootView>
   );
 }
