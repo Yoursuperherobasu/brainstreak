@@ -37,8 +37,11 @@ export default function HomeScreen() {
     () => MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)]
   );
 
-  const headerScale = useSharedValue(0.9);
-  const headerOpacity = useSharedValue(0);
+  // Start at the visible state so the header is rendered even if the
+  // entrance animation never fires (e.g. on web). useFocusEffect below
+  // animates from these values on native.
+  const headerScale = useSharedValue(1);
+  const headerOpacity = useSharedValue(1);
 
   const headerStyle = useAnimatedStyle(() => ({
     transform: [{ scale: headerScale.value }],

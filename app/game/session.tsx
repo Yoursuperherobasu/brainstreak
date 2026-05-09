@@ -225,7 +225,7 @@ export default function GameSessionScreen() {
               variant="ghost"
               onPress={() => {
                 resetGame();
-                router.replace('/(tabs)/');
+                router.replace('/(tabs)');
               }}
               style={{ flex: 1 }}
             />

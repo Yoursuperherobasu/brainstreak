@@ -4,7 +4,8 @@ import { useEffect } from 'react';
 import { useFonts, Outfit_400Regular, Outfit_700Bold, Outfit_900Black } from '@expo-google-fonts/outfit';
 import { Inter_400Regular, Inter_600SemiBold } from '@expo-google-fonts/inter';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
+import { LayoutAnimationConfig } from 'react-native-reanimated';
 import * as SplashScreen from 'expo-splash-screen';
 import { Colors } from '@/constants/theme';
 import { useUserStore } from '@/store/useUserStore';
@@ -27,7 +28,11 @@ export default function RootLayout() {
   const onboarded = useSettingsStore((s) => s.onboarded);
   const segments = useSegments();
 
+  // On native, we wait for fonts + stores to hydrate before showing UI to
+  // avoid flicker. On web, useFonts() never resolves reliably for some
+  // setups, so we render unconditionally and let fonts swap in when ready.
   const ready = fontsLoaded && userHydrated && settingsHydrated;
+  const stable = userHydrated && settingsHydrated; // good enough for routing
 
   useEffect(() => {
     if (userHydrated) {
@@ -42,18 +47,25 @@ export default function RootLayout() {
   }, [ready]);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!stable) return;
     const inOnboarding = segments[0] === 'onboarding';
     if (!onboarded && !inOnboarding) {
       router.replace('/onboarding/welcome');
     }
-  }, [ready, onboarded, segments]);
+  }, [stable, onboarded, segments]);
 
-  if (!ready) return null;
+  // Don't gate render on fonts — let the Stack mount with system-font fallback
+  // until @expo-google-fonts loads. Stores are local and rehydrate fast.
+
+  // On web, Reanimated entering/exiting animations leave elements stuck at
+  // opacity 0 because the worklets runtime layout-animation path doesn't run.
+  // Skip them on web; native still gets the full animations.
+  const skipEntering = Platform.OS === 'web';
 
   return (
     <GestureHandlerRootView style={styles.root}>
       <StatusBar style="light" backgroundColor={Colors.bg} />
+      <LayoutAnimationConfig skipEntering={skipEntering} skipExiting={skipEntering}>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.bg } }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen
@@ -85,6 +97,7 @@ export default function RootLayout() {
           }}
         />
       </Stack>
+      </LayoutAnimationConfig>
     </GestureHandlerRootView>
   );
 }

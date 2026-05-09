@@ -16,7 +16,7 @@ export default function SignInPromptScreen() {
     if (next === 'sign-in') {
       router.replace('/auth/sign-in');
     } else {
-      router.replace('/(tabs)/');
+      router.replace('/(tabs)');
     }
   };
 
