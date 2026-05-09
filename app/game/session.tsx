@@ -17,7 +17,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { TimerRing } from '@/components/TimerRing';
 import { QuestionCard } from '@/components/QuestionCard';
-import { AnswerButton, AnswerState } from '@/components/AnswerButton';
+import { BubbleField } from '@/components/BubbleField';
 import { XPBar } from '@/components/XPBar';
 import { ConfettiBurst } from '@/components/ConfettiBurst';
 import { Button } from '@/components/Button';
@@ -298,13 +298,16 @@ export default function GameSessionScreen() {
   const progress = ((currentIndex + 1) / questions.length) * 100;
   const showResult = phase === 'result';
 
-  function answerStateFor(answer: string): AnswerState {
-    if (!showResult) {
-      return selectedAnswer === answer ? 'selected' : 'idle';
-    }
+  // Per-bubble visual state for the BubbleField. The arcade game shows
+  // 4 bobbing color bubbles; the correct one stays put on a hit, the
+  // wrong ones fade away when the round resolves.
+  const BUBBLE_COLORS = [Colors.primary, Colors.accent, Colors.gold, '#7E5DB0'];
+
+  function bubbleStateFor(answer: string): 'idle' | 'correct' | 'wrong' | 'fading' {
+    if (!showResult) return 'idle';
     if (answer === currentQuestion!.correct_answer) return 'correct';
     if (selectedAnswer === answer) return 'wrong';
-    return 'idle';
+    return 'fading';
   }
 
   return (
@@ -337,18 +340,16 @@ export default function GameSessionScreen() {
       />
 
       <View style={styles.answersWrap}>
-        {currentQuestion.answers.map((answer, i) => (
-          <MotionView key={`${currentIndex}_${i}`} entering={FadeIn.delay(i * 60).springify()}>
-            <AnswerButton
-              letter={(['A', 'B', 'C', 'D'] as const)[i]}
-              text={answer}
-              state={answerStateFor(answer)}
-              onPress={() => handleAnswer(answer)}
-              disabled={showResult}
-              bobIndex={i}
-            />
-          </MotionView>
-        ))}
+        <BubbleField
+          answers={currentQuestion.answers}
+          correctAnswer={currentQuestion.correct_answer}
+          colors={BUBBLE_COLORS}
+          states={currentQuestion.answers.map(bubbleStateFor)}
+          onPick={(i) => {
+            if (showResult) return;
+            handleAnswer(currentQuestion.answers[i]);
+          }}
+        />
       </View>
 
       {showResult && (
