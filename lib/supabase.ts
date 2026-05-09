@@ -3,21 +3,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
 // ─── Supabase Configuration ─────────────────────────────────────────────────
-// Replace these with your actual Supabase project URL and anon key.
+// Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY in .env
 // Get them from: https://app.supabase.com → Project Settings → API
-//
-// FREE tier includes:
-//  • 500 MB database
-//  • 50,000 monthly active users
-//  • 2 GB bandwidth
-//  • Realtime updates
 //
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? 'https://placeholder.supabase.co';
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? 'placeholder-key';
 
 const storage =
   Platform.OS === 'web'
-    ? undefined // web uses localStorage automatically
+    ? undefined
     : {
         getItem: (key: string) => AsyncStorage.getItem(key),
         setItem: (key: string, value: string) => AsyncStorage.setItem(key, value),
@@ -33,43 +27,24 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   },
 });
 
-// ─── Database Types ──────────────────────────────────────────────────────────
+export function isSupabaseConfigured(): boolean {
+  return (
+    !!process.env.EXPO_PUBLIC_SUPABASE_URL &&
+    !!process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY &&
+    !process.env.EXPO_PUBLIC_SUPABASE_URL.includes('placeholder')
+  );
+}
+
+// ─── Database Types (v1) ─────────────────────────────────────────────────────
+// v1 ships only `profiles`. `scores` and `habits` are deferred to v2.
+
 export interface Profile {
   id: string;
   username: string;
-  avatar_url?: string;
   total_xp: number;
   level: number;
   current_streak: number;
   longest_streak: number;
   games_played: number;
-  created_at: string;
+  updated_at: string;
 }
-
-export interface Score {
-  id: string;
-  user_id: string;
-  username: string;
-  score: number;
-  xp_earned: number;
-  category: string;
-  questions_correct: number;
-  questions_total: number;
-  created_at: string;
-}
-
-export interface Habit {
-  id: string;
-  user_id: string;
-  title: string;
-  emoji: string;
-  color: string;
-  frequency: 'daily' | 'weekly';
-  streak: number;
-  completed_today: boolean;
-  last_completed: string | null;
-  created_at: string;
-}
-
-// ─── Supabase SQL Setup (run once in Supabase SQL editor) ───────────────────
-// See supabase_setup.sql in project root
