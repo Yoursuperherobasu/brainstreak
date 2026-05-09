@@ -7,7 +7,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -18,18 +18,19 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StreakBadge, StreakPill } from '@/components/StreakBadge';
 import { Card, StatCard } from '@/components/Card';
+import { XPBar } from '@/components/XPBar';
+import { Button } from '@/components/Button';
+import { SectionHeader } from '@/components/SectionHeader';
 import { Colors, Gradients, Spacing, FontSize, MOTIVATIONAL_QUOTES } from '@/constants/theme';
-import {
-  getStreakData,
-  getLocalProfile,
-  hasPlayedToday,
-  StreakData,
-  LocalProfile,
-} from '@/lib/storage';
+import { hasPlayedToday, getStreakData } from '@/lib/storage';
+import { useUserStore } from '@/store/useUserStore';
+import { getXPForNextLevel } from '@/lib/trivia';
 
 export default function HomeScreen() {
-  const [streak, setStreak] = useState<StreakData>({ current: 0, longest: 0, lastPlayDate: null });
-  const [profile, setProfile] = useState<LocalProfile | null>(null);
+  const profile = useUserStore((s) => s.profile);
+  const streak = useUserStore((s) => s.streak);
+  const setStreak = useUserStore((s) => s.setStreak);
+
   const [playedToday, setPlayedToday] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [quote] = useState(
@@ -44,20 +45,15 @@ export default function HomeScreen() {
     opacity: headerOpacity.value,
   }));
 
-  const loadData = async () => {
-    const [s, p, played] = await Promise.all([
-      getStreakData(),
-      getLocalProfile(),
-      hasPlayedToday(),
-    ]);
+  const refreshState = async () => {
+    const [s, played] = await Promise.all([getStreakData(), hasPlayedToday()]);
     setStreak(s);
-    setProfile(p);
     setPlayedToday(played);
   };
 
   useFocusEffect(
     useCallback(() => {
-      loadData();
+      refreshState();
       headerScale.value = withSpring(1, { damping: 12, stiffness: 150 });
       headerOpacity.value = withTiming(1, { duration: 600 });
     }, [])
@@ -65,14 +61,17 @@ export default function HomeScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadData();
+    await refreshState();
     setRefreshing(false);
   };
 
-  const level = profile?.level ?? 1;
-  const xp = profile?.totalXP ?? 0;
-  const xpForNext = Math.pow(level, 2) * 50;
-  const xpProgress = Math.min(xp / xpForNext, 1);
+  const xpForNext = getXPForNextLevel(profile.level);
+
+  const heroLabel = streak.current === 0
+    ? 'Start today! 🚀'
+    : playedToday
+    ? "Today's done! 🎉"
+    : "Don't break it! 💪";
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -84,9 +83,7 @@ export default function HomeScreen() {
         <Animated.View style={[styles.header, headerStyle]}>
           <View>
             <Text style={styles.greeting}>Good {getTimeOfDay()} ✨</Text>
-            <Text style={styles.username}>
-              {profile?.username ?? 'BrainPlayer'}
-            </Text>
+            <Text style={styles.username}>{profile.username}</Text>
           </View>
           <StreakPill streak={streak.current} />
         </Animated.View>
@@ -100,13 +97,7 @@ export default function HomeScreen() {
           >
             <StreakBadge streak={streak.current} size="lg" showLabel />
             <View style={styles.heroRight}>
-              <Text style={styles.heroTitle}>
-                {streak.current === 0
-                  ? 'Start today! 🚀'
-                  : playedToday
-                  ? "Today's done! 🎉"
-                  : "Don't break it! 💪"}
-              </Text>
+              <Text style={styles.heroTitle}>{heroLabel}</Text>
               <Text style={styles.heroSub}>
                 Best: {streak.longest} {streak.longest === 1 ? 'day' : 'days'}
               </Text>
@@ -115,6 +106,21 @@ export default function HomeScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).springify()}>
+          <SectionHeader title="Your stats" />
+          <View style={styles.statsRow}>
+            <StatCard label="Level" value={profile.level} emoji="⚡" color={Colors.primaryLight} />
+            <StatCard label="Total XP" value={profile.totalXP.toLocaleString()} emoji="🧠" color={Colors.accent} />
+            <StatCard label="Games" value={profile.gamesPlayed} emoji="🎮" color={Colors.gold} />
+          </View>
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(250).springify()}>
+          <Card style={styles.xpCard}>
+            <XPBar level={profile.level} xp={profile.totalXP} xpForNext={xpForNext} />
+          </Card>
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(300).springify()}>
           <Card style={styles.quoteCard}>
             <Text style={styles.quoteEmoji}>💡</Text>
             <Text style={styles.quoteText}>"{quote.text}"</Text>
@@ -122,30 +128,12 @@ export default function HomeScreen() {
           </Card>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(300).springify()}>
-          <Text style={styles.sectionTitle}>Your Stats</Text>
-          <View style={styles.statsRow}>
-            <StatCard label="Level" value={level} emoji="⚡" color={Colors.primaryLight} />
-            <StatCard label="Total XP" value={xp.toLocaleString()} emoji="🧠" color={Colors.accent} />
-            <StatCard label="Games" value={profile?.gamesPlayed ?? 0} emoji="🎮" color={Colors.gold} />
-          </View>
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.delay(350).springify()}>
-          <Card style={styles.xpCard}>
-            <View style={styles.xpHeader}>
-              <Text style={styles.xpLabel}>Level {level} → {level + 1}</Text>
-              <Text style={styles.xpValue}>{xp} / {xpForNext} XP</Text>
-            </View>
-            <View style={styles.xpBarBg}>
-              <Animated.View
-                style={[
-                  styles.xpBarFill,
-                  { width: `${Math.round(xpProgress * 100)}%` },
-                ]}
-              />
-            </View>
-          </Card>
+        <Animated.View entering={FadeInDown.delay(350).springify()} style={styles.ctaWrap}>
+          <Button
+            label={playedToday ? 'Play another round 🎮' : "Start today's game 🚀"}
+            onPress={() => router.push('/(tabs)/play')}
+            size="lg"
+          />
         </Animated.View>
 
         <View style={{ height: Spacing.xl }} />
@@ -199,6 +187,8 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.7)',
     marginTop: 4,
   },
+  statsRow: { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.md },
+  xpCard: { marginBottom: Spacing.md },
   quoteCard: { marginBottom: Spacing.md, gap: 6 },
   quoteEmoji: { fontSize: 20 },
   quoteText: {
@@ -213,39 +203,5 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     fontFamily: 'Inter_600SemiBold',
   },
-  sectionTitle: {
-    fontSize: FontSize.lg,
-    color: Colors.textPrimary,
-    fontFamily: 'Outfit_700Bold',
-    marginBottom: Spacing.sm,
-    marginTop: Spacing.sm,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
-  },
-  xpCard: { marginBottom: Spacing.md, gap: 10 },
-  xpHeader: { flexDirection: 'row', justifyContent: 'space-between' },
-  xpLabel: {
-    fontSize: FontSize.sm,
-    color: Colors.textSecondary,
-    fontFamily: 'Inter_600SemiBold',
-  },
-  xpValue: {
-    fontSize: FontSize.sm,
-    color: Colors.primaryLight,
-    fontFamily: 'Outfit_700Bold',
-  },
-  xpBarBg: {
-    height: 8,
-    backgroundColor: Colors.bgOverlay,
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  xpBarFill: {
-    height: '100%',
-    backgroundColor: Colors.primary,
-    borderRadius: 4,
-  },
+  ctaWrap: { marginTop: Spacing.sm },
 });
