@@ -137,11 +137,20 @@ export const useGameStore = create<GameState>((set, get) => ({
     try {
       const streak = await updateStreakAfterGame();
       const xp = calculateXP(totalScore, streak.current);
-      await updateXP(xp);
+      const updatedProfile = await updateXP(xp);
       set({ xpEarned: xp });
+
+      // Sync useUserStore in-memory copy with what we persisted to AsyncStorage,
+      // then push to Supabase if signed in. require() avoids a circular import.
+      const { useUserStore } = require('@/store/useUserStore');
+      useUserStore.getState().setProfile(updatedProfile);
+      useUserStore.getState().setStreak(streak);
+      await useUserStore.getState().pushIfAuthed();
     } catch (err) {
       console.warn('[GameStore] Failed to save results:', err);
     }
+
+    void correctCount;
   },
 
   resetGame: () => {
