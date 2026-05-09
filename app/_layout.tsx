@@ -46,6 +46,13 @@ export default function RootLayout() {
             presentation: 'fullScreenModal',
           }}
         />
+        <Stack.Screen
+          name="auth/sign-in"
+          options={{
+            animation: 'slide_from_bottom',
+            presentation: 'modal',
+          }}
+        />
       </Stack>
     </GestureHandlerRootView>
   );
