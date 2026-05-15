@@ -96,10 +96,10 @@ export default function ReactionTapScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <AnimatedBackground intensity="subtle" tint={Colors.success} />
+      <AnimatedBackground intensity="subtle" tint="#21D07A" />
       <GameFrame
         title="Reaction Tap"
-        accent={Colors.primary}
+        accent="#21D07A"
         seconds={seconds}
         totalSeconds={ROUND_SECONDS}
         score={score}
@@ -162,30 +162,41 @@ const styles = StyleSheet.create({
   // Field is a 1:1 square that takes the full available width. We use
   // aspectRatio (not useWindowDimensions) so it renders correctly under
   // SSR where window dimensions are 0.
+  // Reaction Tap visual identity: neon green dot on a dark "lab" field.
+  // Reads completely differently from every other game and signals
+  // "twitch reflex" the moment you land on it.
   field: {
     width: '100%',
     aspectRatio: 1,
     maxWidth: 480,
-    backgroundColor: Colors.bgCard,
+    backgroundColor: '#0E1722',
     borderRadius: Radius.lg,
     borderWidth: 2,
-    borderColor: Colors.borderBright,
+    borderColor: '#1A2A40',
     position: 'relative',
     overflow: 'hidden',
-    ...Shadow.sm,
+    ...Shadow.lg,
   },
   dotWrap: {
     position: 'absolute',
     width: DOT_SIZE,
     height: DOT_SIZE,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dot: {
     width: DOT_SIZE,
     height: DOT_SIZE,
     borderRadius: DOT_SIZE / 2,
-    backgroundColor: Colors.primary,
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
+    backgroundColor: '#21D07A',
+    borderWidth: 4,
+    borderColor: '#9BF2C7',
+    // Neon glow on web via boxShadow; on native the shadow approximates it.
+    shadowColor: '#21D07A',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.9,
+    shadowRadius: 18,
+    elevation: 8,
   },
   statsRow: {
     flexDirection: 'row',

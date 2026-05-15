@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
-import { Colors, Spacing, FontSize, Radius } from '@/constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Colors, Spacing, FontSize, Radius, Shadow } from '@/constants/theme';
 import { extendSequence, isCorrectSoFar } from '@/lib/games/memoryMatch';
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
@@ -12,7 +13,12 @@ import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 import { audio } from '@/lib/audio';
 
-const TILES = [Colors.primary, Colors.accent, Colors.gold, Colors.success];
+// Memory Match visual identity: violet/jewel palette. The default tile
+// palette was generic blue+teal+gold+green which looks identical to every
+// other game's HUD. Here we lean into a "Simon-says jukebox" look —
+// 4 jewel tones on a violet velvet board.
+const TILES = ['#6B5DD3' /* violet */, '#C75C9E' /* hot pink */, '#169B8F' /* teal */, '#D99921' /* gold */];
+const FRAME_GRADIENT = ['#3B2A5C', '#6B5DD3'] as const;
 const FLASH_MS = 480;
 const GAP_MS = 220;
 
@@ -98,16 +104,36 @@ export default function MemoryMatchScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <AnimatedBackground intensity="subtle" tint={Colors.gold} />
-      <GameFrame title="Memory Match" accent={Colors.gold} seconds={Math.max(0, 60 - round * 5)} totalSeconds={60} score={score} onExit={() => router.replace('/play')} />
+      <AnimatedBackground intensity="subtle" tint="#6B5DD3" />
+      <GameFrame title="Memory Match" accent="#6B5DD3" seconds={Math.max(0, 60 - round * 5)} totalSeconds={60} score={score} onExit={() => router.replace('/play')} />
       {phase !== 'over' ? (
         <View style={styles.body}>
           <Text style={styles.round}>Round {round}</Text>
-          <View style={styles.grid}>
-            {TILES.map((c, i) => (
-              <Pressable key={i} onPress={() => press(i)} disabled={phase !== 'input'} style={[styles.tile, { backgroundColor: c, opacity: activeTile === i ? 1 : 0.5 }]} />
-            ))}
-          </View>
+          {/* Violet velvet board — jewel-toned tiles glow when active. */}
+          <LinearGradient
+            colors={FRAME_GRADIENT}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.boardFrame}
+          >
+            <View style={styles.grid}>
+              {TILES.map((c, i) => (
+                <Pressable
+                  key={i}
+                  onPress={() => press(i)}
+                  disabled={phase !== 'input'}
+                  style={[
+                    styles.tile,
+                    {
+                      backgroundColor: c,
+                      opacity: activeTile === i ? 1 : 0.45,
+                      transform: [{ scale: activeTile === i ? 1.04 : 1 }],
+                    },
+                  ]}
+                />
+              ))}
+            </View>
+          </LinearGradient>
           <Text style={styles.hint}>{phase === 'show' ? 'Watch the sequence…' : 'Now repeat it!'}</Text>
         </View>
       ) : (
@@ -136,7 +162,18 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
   body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.lg, padding: Spacing.md },
   round: { fontSize: FontSize.xl, color: Colors.textPrimary, fontFamily: 'BricolageGrotesque_700Bold' },
+  boardFrame: {
+    padding: Spacing.md,
+    borderRadius: Radius.xl,
+    ...Shadow.lg,
+  },
   grid: { width: 280, height: 280, flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
-  tile: { width: 132, height: 132, borderRadius: Radius.lg },
+  tile: {
+    width: 132,
+    height: 132,
+    borderRadius: Radius.lg,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.25)',
+  },
   hint: { color: Colors.textSecondary, fontFamily: 'PlusJakartaSans_600SemiBold' },
 });

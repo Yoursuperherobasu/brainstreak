@@ -152,16 +152,58 @@ export default function WordSprintScreen() {
   );
 }
 
+// Word Sprint visual identity: paper-y warm tan accent. Letter tiles look
+// like Scrabble pieces (warm cream, gold border, subtle shadow). The body
+// gets a faint warm wash so the screen feels like a notebook page, not
+// "another blue card".
+const PAPER_BG    = '#FBF6EA';
+const PAPER_TILE  = '#FFF8E6';
+const PAPER_INK   = '#5A4A2A';
+const PAPER_GOLD  = '#D99921';
+const PAPER_FOUND = '#F2E6C9';
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
-  body: { flex: 1, padding: Spacing.md, gap: Spacing.md },
-  hint: { color: Colors.textSecondary, fontSize: FontSize.sm, fontFamily: 'PlusJakartaSans_400Regular' },
-  letters: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, justifyContent: 'center' },
-  letterTile: { width: 52, height: 60, borderRadius: Radius.md, backgroundColor: Colors.bgCard, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Colors.border },
-  letterText: { fontSize: FontSize.xl, color: Colors.textPrimary, fontFamily: 'BricolageGrotesque_700Bold' },
-  input: { backgroundColor: Colors.bgCard, color: Colors.textPrimary, borderRadius: Radius.md, paddingHorizontal: Spacing.md, paddingVertical: 12, fontSize: FontSize.lg, borderWidth: 1, borderColor: Colors.border, fontFamily: 'PlusJakartaSans_600SemiBold' },
+  body: { flex: 1, padding: Spacing.md, gap: Spacing.md, backgroundColor: PAPER_BG },
+  hint: { color: PAPER_INK, fontSize: FontSize.sm, fontFamily: 'PlusJakartaSans_600SemiBold' },
+  letters: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, justifyContent: 'center', paddingVertical: Spacing.sm },
+  letterTile: {
+    width: 56,
+    height: 64,
+    borderRadius: Radius.md,
+    backgroundColor: PAPER_TILE,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: PAPER_GOLD,
+    // Soft Scrabble-like shadow.
+    shadowColor: '#5A4A2A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  letterText: { fontSize: FontSize.xxl, color: PAPER_INK, fontFamily: 'BagelFatOne_400Regular' },
+  input: {
+    backgroundColor: PAPER_TILE,
+    color: PAPER_INK,
+    borderRadius: Radius.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 12,
+    fontSize: FontSize.lg,
+    borderWidth: 1.5,
+    borderColor: PAPER_GOLD,
+    fontFamily: 'PlusJakartaSans_700Bold',
+  },
   row: { flexDirection: 'row', gap: Spacing.sm },
-  usedWrap: { backgroundColor: Colors.bgElevated, padding: Spacing.md, borderRadius: Radius.md, gap: 4 },
-  usedLabel: { fontSize: FontSize.xs, color: Colors.textSecondary, fontFamily: 'PlusJakartaSans_600SemiBold' },
-  usedList: { fontSize: FontSize.sm, color: Colors.textPrimary, fontFamily: 'PlusJakartaSans_400Regular' },
+  usedWrap: {
+    backgroundColor: PAPER_FOUND,
+    padding: Spacing.md,
+    borderRadius: Radius.md,
+    gap: 4,
+    borderWidth: 1,
+    borderColor: PAPER_GOLD,
+  },
+  usedLabel: { fontSize: FontSize.xs, color: PAPER_INK, fontFamily: 'PlusJakartaSans_700Bold', letterSpacing: 0.5 },
+  usedList: { fontSize: FontSize.sm, color: PAPER_INK, fontFamily: 'PlusJakartaSans_500Medium' },
 });

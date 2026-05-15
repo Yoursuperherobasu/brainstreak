@@ -9,6 +9,7 @@ import { generateProblem, scoreAttempt, type Problem } from '@/lib/games/numberS
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { GraphPaperBackground } from '@/components/games/GraphPaperBackground';
 import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 import { usePausableInterval } from '@/lib/usePausableInterval';
@@ -78,6 +79,9 @@ export default function NumberSenseScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Number Sense visual identity: graph-paper notebook underlay so it
+          reads like a math worksheet, not a generic blue card. */}
+      <GraphPaperBackground />
       <AnimatedBackground intensity="subtle" tint={Colors.primary} />
       <GameFrame title="Number Sense" accent={Colors.primary} seconds={seconds} totalSeconds={ROUND_SECONDS} score={score} onExit={() => router.replace('/play')} />
       {phase === 'playing' ? (
@@ -121,9 +125,32 @@ export default function NumberSenseScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
   body: { flex: 1, padding: Spacing.lg, gap: Spacing.lg, justifyContent: 'center' },
-  q: { textAlign: 'center', fontSize: 56, color: Colors.textPrimary, fontFamily: 'BagelFatOne_400Regular' },
+  q: {
+    textAlign: 'center',
+    fontSize: 64,
+    color: Colors.primaryDark,
+    fontFamily: 'BagelFatOne_400Regular',
+    // Soft ink-on-paper feel.
+    textShadowColor: '#FFFFFFAA',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
   choices: { flexDirection: 'row', gap: Spacing.md, justifyContent: 'center' },
-  choice: { backgroundColor: Colors.bgCard, borderWidth: 1, borderColor: Colors.border, paddingVertical: 18, paddingHorizontal: 28, borderRadius: Radius.lg, minWidth: 84, alignItems: 'center' },
+  choice: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    paddingVertical: 18,
+    paddingHorizontal: 28,
+    borderRadius: Radius.lg,
+    minWidth: 84,
+    alignItems: 'center',
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    elevation: 2,
+  },
   choiceText: { fontSize: FontSize.xxl, color: Colors.primary, fontFamily: 'BricolageGrotesque_800ExtraBold' },
   loading: { textAlign: 'center', fontSize: FontSize.md, color: Colors.textMuted, fontFamily: 'PlusJakartaSans_600SemiBold' },
 });
