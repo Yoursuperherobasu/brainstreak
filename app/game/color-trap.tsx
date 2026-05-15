@@ -25,7 +25,12 @@ import { usePausableInterval } from '@/lib/usePausableInterval';
 import { useGameBackHandler } from '@/lib/useGameBackHandler';
 
 const ROUND_SECONDS = 30;
-const ACCENT = Colors.catTech; // violet — distinct from blue/teal default
+// ACCENT drives the GameFrame chrome (timer ring, score chip). We deliberately
+// do NOT pass this as the AnimatedBackground tint — a strong field tint
+// competes with the colored word being displayed, which is the entire point
+// of the game. Background stays on the default warm Sunwashed palette so the
+// ink colors (red, blue, green, etc.) read cleanly against cream paper.
+const ACCENT = Colors.primary; // violet ink — on-theme, not blue
 
 export default function ColorTrapScreen() {
   const [round, setRound] = useState<ColorTrapRound>(() => generateRound());
@@ -129,7 +134,9 @@ export default function ColorTrapScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <AnimatedBackground intensity="subtle" tint={ACCENT} />
+      {/* No tint: the colored word IS the focal point. A tinted orb field
+          would compete with the ink color the player is trying to read. */}
+      <AnimatedBackground intensity="subtle" />
       <GameFrame
         title="Color Trap"
         accent={ACCENT}

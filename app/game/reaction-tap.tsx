@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Pressable, type GestureResponderEvent } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Spacing, FontSize, Radius, Shadow } from '@/constants/theme';
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
@@ -127,7 +128,9 @@ export default function ReactionTapScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <AnimatedBackground intensity="subtle" tint="#21D07A" />
+      {/* Warm-paper orbs around the magenta arena — keeps the screen on the
+          Sunwashed palette while the field itself stays high-contrast. */}
+      <AnimatedBackground intensity="subtle" />
       <GameFrame
         title="Reaction Tap"
         accent="#21D07A"
@@ -146,6 +149,16 @@ export default function ReactionTapScreen() {
               setFieldSize(Math.min(width, height));
             }}
           >
+            {/* Warm magenta-violet "arena" — keeps the dark contrast that
+                makes the neon dot pop, but on-theme with the rest of the
+                Sunwashed Arcade palette instead of cold navy. */}
+            <LinearGradient
+              colors={[Colors.primary, Colors.primaryDark]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFill}
+              pointerEvents="none"
+            />
             {fieldSize > 0 && (
               <>
                 <Animated.View
@@ -204,17 +217,19 @@ const styles = StyleSheet.create({
   // Field is a 1:1 square that takes the full available width. We use
   // aspectRatio (not useWindowDimensions) so it renders correctly under
   // SSR where window dimensions are 0.
-  // Reaction Tap visual identity: neon green dot on a dark "lab" field.
-  // Reads completely differently from every other game and signals
-  // "twitch reflex" the moment you land on it.
+  // Reaction Tap visual identity: neon green dot on a warm magenta-violet
+  // "arena". Still high contrast (so the dot pops), but on-theme with the
+  // rest of the Sunwashed Arcade palette instead of cold navy. The actual
+  // fill is a <LinearGradient> child; the backgroundColor here is just a
+  // pre-paint fallback before the gradient mounts.
   field: {
     width: '100%',
     aspectRatio: 1,
     maxWidth: 480,
-    backgroundColor: '#0E1722',
+    backgroundColor: Colors.primaryDark,
     borderRadius: Radius.lg,
     borderWidth: 2,
-    borderColor: '#1A2A40',
+    borderColor: Colors.primaryDark,
     position: 'relative',
     overflow: 'hidden',
     ...Shadow.lg,

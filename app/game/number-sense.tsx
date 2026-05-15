@@ -9,7 +9,6 @@ import { generateProblem, scoreAttempt, type Problem } from '@/lib/games/numberS
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import { GraphPaperBackground } from '@/components/games/GraphPaperBackground';
 import { CountingOperand } from '@/components/games/number/CountingOperand';
 import { ChoiceButton, type ChoiceFlash } from '@/components/games/number/ChoiceButton';
 import { FloatingXP } from '@/components/games/number/FloatingXP';
@@ -117,9 +116,10 @@ export default function NumberSenseScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Number Sense visual identity: graph-paper notebook underlay so it
-          reads like a math worksheet, not a generic blue card. */}
-      <GraphPaperBackground />
+      {/* Sunwashed-palette background: warm cream paper with the same subtle
+          orb field every other on-theme game uses. The earlier graph-paper
+          underlay tinted the screen lavender, which clashed with the rest of
+          the app. */}
       <AnimatedBackground intensity="subtle" tint={Colors.primary} />
       <GameFrame title="Number Sense" accent={Colors.primary} seconds={seconds} totalSeconds={ROUND_SECONDS} score={score} onExit={() => router.replace('/play')} />
       {phase === 'playing' ? (
