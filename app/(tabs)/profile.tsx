@@ -26,15 +26,8 @@ import { useSettingsStore } from '@/store/useSettingsStore';
 import { getXPForNextLevel } from '@/lib/trivia';
 import { signOut } from '@/lib/auth';
 import { isStreakAtRisk, todayISO, yesterdayISO } from '@/lib/storage';
-
-const BADGES = [
-  { id: 'first_game', label: 'First Game', desc: 'Play your first game', xpReq: 0 },
-  { id: 'streak_3', label: 'On Fire', desc: '3 day streak', xpReq: 30 },
-  { id: 'streak_7', label: 'Diamond', desc: '7 day streak', xpReq: 70 },
-  { id: 'xp_100', label: 'Charged', desc: '100 XP earned', xpReq: 100 },
-  { id: 'xp_500', label: 'Big Brain', desc: '500 XP earned', xpReq: 500 },
-  { id: 'xp_1000', label: 'Champion', desc: '1000 XP earned', xpReq: 1000 },
-];
+import { ACHIEVEMENTS } from '@/lib/achievements';
+import { useAchievementsStore } from '@/store/useAchievementsStore';
 
 export default function ProfileScreen() {
   const profile = useUserStore((s) => s.profile);
@@ -90,12 +83,11 @@ export default function ProfileScreen() {
     );
   };
 
+  const unlocked = useAchievementsStore((s) => s.unlocked);
+
   const atRisk = isStreakAtRisk(streak, todayISO(), yesterdayISO());
 
   const xpForNext = getXPForNextLevel(profile.level);
-  const earnedBadges = BADGES.filter(
-    (b) => profile.totalXP >= b.xpReq || (b.id === 'first_game' && profile.gamesPlayed > 0)
-  );
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -177,20 +169,22 @@ export default function ProfileScreen() {
 
         <MotionView entering={FadeInDown.delay(200).springify()}>
           <SectionHeader title="Badges" />
-          <View style={styles.badgeGrid}>
-            {BADGES.map((badge) => {
-              const earned = earnedBadges.some((b) => b.id === badge.id);
+          <View style={styles.badgesGrid}>
+            {ACHIEVEMENTS.map((a) => {
+              const isUnlocked = unlocked.includes(a.id);
               return (
                 <View
-                  key={badge.id}
-                  style={[styles.badge, !earned && styles.badgeLocked]}
+                  key={a.id}
+                  style={[styles.badge, isUnlocked ? styles.badgeUnlocked : styles.badgeLocked]}
                 >
-                  <View style={[styles.badgeMarker, { backgroundColor: earned ? Colors.primary : Colors.bgOverlay }]} />
-                  <Text style={[styles.badgeLabel, !earned && { opacity: 0.3 }]}>
-                    {badge.label}
+                  <View style={[styles.badgeMark, { backgroundColor: isUnlocked ? Colors.primary : Colors.borderBright }]} />
+                  <Text style={[styles.badgeTitle, !isUnlocked && styles.badgeTitleLocked]} numberOfLines={1}>
+                    {a.title}
                   </Text>
-                  <Text style={styles.badgeDesc}>{badge.desc}</Text>
-                  {!earned && <Text style={styles.badgeLockText}>Locked</Text>}
+                  <Text style={styles.badgeDesc} numberOfLines={2}>
+                    {a.description}
+                  </Text>
+                  <Text style={styles.badgeState}>{isUnlocked ? 'Unlocked' : 'Locked'}</Text>
                 </View>
               );
             })}
@@ -384,45 +378,55 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   statsRow: { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.md },
-  badgeGrid: {
+  badgesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.sm,
-    marginBottom: Spacing.md,
   },
   badge: {
-    width: '30%',
-    backgroundColor: Colors.bgCard,
+    flexBasis: '31%',
+    flexGrow: 1,
+    padding: Spacing.md,
     borderRadius: Radius.md,
-    padding: Spacing.sm,
-    alignItems: 'center',
-    gap: 2,
+    backgroundColor: Colors.bgCard,
     borderWidth: 1,
-    borderColor: Colors.border,
+    gap: 4,
+    minHeight: 110,
   },
-  badgeLocked: { borderStyle: 'dashed' },
-  badgeMarker: {
-    width: 20,
-    height: 4,
+  badgeUnlocked: {
+    borderColor: Colors.primary,
+  },
+  badgeLocked: {
+    borderColor: Colors.border,
+    borderStyle: 'dashed',
+    opacity: 0.6,
+  },
+  badgeMark: {
+    width: 24,
+    height: 3,
     borderRadius: 2,
     marginBottom: 4,
   },
-  badgeLabel: {
-    fontSize: FontSize.xs,
+  badgeTitle: {
+    fontSize: FontSize.sm,
     color: Colors.textPrimary,
     fontFamily: 'BricolageGrotesque_700Bold',
-    textAlign: 'center',
+  },
+  badgeTitleLocked: {
+    color: Colors.textSecondary,
   },
   badgeDesc: {
-    fontSize: 9,
-    color: Colors.textMuted,
-    textAlign: 'center',
+    fontSize: FontSize.xs,
+    color: Colors.textSecondary,
     fontFamily: 'PlusJakartaSans_400Regular',
+    lineHeight: 14,
   },
-  badgeLockText: {
-    fontSize: 9,
+  badgeState: {
+    fontSize: FontSize.xs,
     color: Colors.textMuted,
     fontFamily: 'PlusJakartaSans_600SemiBold',
+    marginTop: 'auto',
+    letterSpacing: 0.5,
   },
   infoCard: { gap: 10, marginBottom: Spacing.md },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
