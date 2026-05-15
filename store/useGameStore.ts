@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { TriviaQuestion, RoundResult, calculatePoints, calculateXP } from '@/lib/trivia';
 import { updateStreakAfterGame, updateXP, recordGame } from '@/lib/storage';
 import { Config } from '@/constants/config';
+import { evaluate } from '@/lib/achievements';
+import { useAchievementsStore } from '@/store/useAchievementsStore';
 
 export type GamePhase = 'idle' | 'countdown' | 'playing' | 'result' | 'gameover';
 
@@ -26,6 +28,8 @@ interface GameState {
   prefetchedQuestions: TriviaQuestion[] | null;
   prefetchedCategory: string | null;
 
+  pendingAchievementIds: string[];
+
   startGame: (questions: TriviaQuestion[], category: string) => void;
   selectAnswer: (answer: string, timeTaken: number) => void;
   nextQuestion: () => void;
@@ -35,6 +39,7 @@ interface GameState {
   timeExpired: () => void;
   setPrefetched: (questions: TriviaQuestion[], category: string) => void;
   consumePrefetched: () => { questions: TriviaQuestion[]; category: string } | null;
+  clearPendingAchievements: () => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -53,6 +58,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   leveledUp: false,
   prefetchedQuestions: null,
   prefetchedCategory: null,
+  pendingAchievementIds: [],
 
   startGame: (questions, category) => {
     set({
@@ -148,7 +154,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       const updatedProfile = await updateXP(xp);
 
       // A11: persist this game to the recent-games ring buffer.
-      await recordGame({
+      const recent = await recordGame({
         category,
         score: totalScore,
         xp,
@@ -157,12 +163,18 @@ export const useGameStore = create<GameState>((set, get) => ({
         at: new Date().toISOString(),
       });
 
+      // Phase 6: evaluate achievements against the post-game snapshot and
+      // record any newly-unlocked ones so the root toast can surface them.
+      const unlockedIds = evaluate({ profile: updatedProfile, streak, recent });
+      const fresh = useAchievementsStore.getState().recordUnlocked(unlockedIds);
+
       // A8: set phase + xpEarned + leveledUp atomically so the recap renders
       // the final values on first paint (no +0 XP flicker).
       set({
         phase: 'gameover',
         xpEarned: xp,
         leveledUp: updatedProfile.level > previousLevel,
+        ...(fresh.length > 0 ? { pendingAchievementIds: fresh } : {}),
       });
 
       // Sync useUserStore in-memory copy with persisted state.
@@ -204,4 +216,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ prefetchedQuestions: null, prefetchedCategory: null });
     return { questions: prefetchedQuestions, category: prefetchedCategory };
   },
+
+  clearPendingAchievements: () => set({ pendingAchievementIds: [] }),
 }));
