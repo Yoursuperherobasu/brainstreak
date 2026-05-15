@@ -33,6 +33,7 @@ export default function SignInScreen() {
 
   const signInAndSync = useUserStore((s) => s.signInAndSync);
   const username = useUserStore((s) => s.profile.username);
+  const supabaseReady = isSupabaseConfigured();
 
   const handleSubmit = async () => {
     setError(null);
@@ -105,7 +106,7 @@ export default function SignInScreen() {
       >
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
-            <Text style={styles.emoji}>☁️</Text>
+            <View style={styles.headerMark} />
             <Text style={styles.title}>
               {mode === 'sign-in' ? 'Welcome back' : 'Create account'}
             </Text>
@@ -114,10 +115,26 @@ export default function SignInScreen() {
             </Text>
           </View>
 
+          {!supabaseReady && (
+            <View style={styles.noticeCard}>
+              <Text style={styles.noticeTitle}>Cloud sync isn't set up yet</Text>
+              <Text style={styles.noticeBody}>
+                This build has no Supabase credentials, so accounts can't be
+                created or signed in here. Your XP, streak, and level are
+                still saved safely on this device — keep playing and sync
+                will turn on automatically once cloud is configured.
+              </Text>
+              <Text style={styles.noticeFootnote}>
+                Developers: see docs/SUPABASE_SETUP.md.
+              </Text>
+            </View>
+          )}
+
           <View style={styles.tabs}>
             <TouchableOpacity
               onPress={() => { setMode('sign-in'); setError(null); setInfo(null); }}
               style={[styles.tab, mode === 'sign-in' && styles.tabActive]}
+              disabled={!supabaseReady}
             >
               <Text style={[styles.tabText, mode === 'sign-in' && styles.tabTextActive]}>
                 Sign in
@@ -126,6 +143,7 @@ export default function SignInScreen() {
             <TouchableOpacity
               onPress={() => { setMode('sign-up'); setError(null); setInfo(null); }}
               style={[styles.tab, mode === 'sign-up' && styles.tabActive]}
+              disabled={!supabaseReady}
             >
               <Text style={[styles.tabText, mode === 'sign-up' && styles.tabTextActive]}>
                 Sign up
@@ -143,8 +161,8 @@ export default function SignInScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="email-address"
-              style={styles.input}
-              editable={!loading}
+              style={[styles.input, !supabaseReady && styles.inputDisabled]}
+              editable={!loading && supabaseReady}
             />
           </View>
 
@@ -158,8 +176,8 @@ export default function SignInScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               secureTextEntry
-              style={styles.input}
-              editable={!loading}
+              style={[styles.input, !supabaseReady && styles.inputDisabled]}
+              editable={!loading && supabaseReady}
             />
           </View>
 
@@ -170,18 +188,21 @@ export default function SignInScreen() {
             label={loading ? '...' : mode === 'sign-in' ? 'Sign in' : 'Create account'}
             onPress={handleSubmit}
             loading={loading}
+            disabled={!supabaseReady}
             size="lg"
             style={{ marginTop: Spacing.md }}
           />
 
-          {mode === 'sign-in' && (
+          {mode === 'sign-in' && supabaseReady && (
             <TouchableOpacity onPress={handleForgotPassword} disabled={loading} style={styles.forgotWrap}>
               <Text style={styles.forgotText}>Forgot password?</Text>
             </TouchableOpacity>
           )}
 
           <TouchableOpacity onPress={() => router.back()} style={styles.skipWrap} disabled={loading}>
-            <Text style={styles.skipText}>Skip for now — keep playing on this device</Text>
+            <Text style={styles.skipText}>
+              {supabaseReady ? 'Skip for now — keep playing on this device' : 'Back to the app'}
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -200,7 +221,12 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     marginBottom: Spacing.lg,
   },
-  emoji: { fontSize: 48 },
+  headerMark: {
+    width: 44,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: Colors.primary,
+  },
   title: {
     fontSize: FontSize.xxl,
     color: Colors.textPrimary,
@@ -234,7 +260,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     fontFamily: 'BricolageGrotesque_700Bold',
   },
-  tabTextActive: { color: Colors.textPrimary },
+  tabTextActive: { color: '#FFFFFF' },
   field: { marginBottom: Spacing.md, gap: 6 },
   label: {
     fontSize: FontSize.sm,
@@ -252,14 +278,45 @@ const styles = StyleSheet.create({
     fontFamily: 'PlusJakartaSans_400Regular',
     fontSize: FontSize.md,
   },
+  inputDisabled: {
+    backgroundColor: Colors.bgElevated,
+    color: Colors.textMuted,
+    opacity: 0.7,
+  },
+  noticeCard: {
+    backgroundColor: Colors.bgCard,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: Spacing.md,
+    marginBottom: Spacing.lg,
+    gap: 6,
+  },
+  noticeTitle: {
+    fontSize: FontSize.md,
+    color: Colors.textPrimary,
+    fontFamily: 'BricolageGrotesque_700Bold',
+  },
+  noticeBody: {
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+    fontFamily: 'PlusJakartaSans_400Regular',
+    lineHeight: 20,
+  },
+  noticeFootnote: {
+    fontSize: FontSize.xs,
+    color: Colors.textMuted,
+    fontFamily: 'PlusJakartaSans_400Regular',
+    marginTop: 2,
+  },
   errorText: {
-    color: Colors.dangerLight,
+    color: Colors.danger,
     fontSize: FontSize.sm,
     fontFamily: 'PlusJakartaSans_600SemiBold',
     marginTop: 4,
   },
   infoText: {
-    color: Colors.successLight,
+    color: Colors.success,
     fontSize: FontSize.sm,
     fontFamily: 'PlusJakartaSans_600SemiBold',
     marginTop: 4,

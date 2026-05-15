@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   difficultyText: {
     fontFamily: 'BricolageGrotesque_700Bold',
     fontSize: FontSize.xs,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
   },
   question: {
     fontFamily: 'BricolageGrotesque_700Bold',

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { LocalProfile, StreakData, DEFAULT_USERNAME } from '@/lib/storage';
 import { getLevelFromXP } from '@/lib/trivia';
 
@@ -74,18 +74,26 @@ export async function pullAndMerge(
   local: LocalProfile,
   localStreak: StreakData
 ): Promise<MergedProfile> {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .maybeSingle();
-
-  if (error) {
-    console.warn('[sync] pull failed:', error.message);
+  if (!isSupabaseConfigured()) {
     return { profile: local, streak: localStreak };
   }
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle();
 
-  return mergeProfiles({ local, localStreak, cloud: (data ?? null) as CloudProfile | null });
+    if (error) {
+      if (__DEV__) console.warn('[sync] pull failed:', error.message);
+      return { profile: local, streak: localStreak };
+    }
+
+    return mergeProfiles({ local, localStreak, cloud: (data ?? null) as CloudProfile | null });
+  } catch (e) {
+    if (__DEV__) console.warn('[sync] pull threw:', e);
+    return { profile: local, streak: localStreak };
+  }
 }
 
 export async function pushProfile(
@@ -93,6 +101,10 @@ export async function pushProfile(
   profile: LocalProfile,
   streak: StreakData
 ): Promise<{ ok: boolean; error?: string }> {
+  if (!isSupabaseConfigured()) {
+    return { ok: false, error: 'supabase-not-configured' };
+  }
+
   const row = {
     id: userId,
     username: profile.username,
@@ -105,10 +117,15 @@ export async function pushProfile(
     updated_at: new Date().toISOString(),
   };
 
-  const { error } = await supabase.from('profiles').upsert(row, { onConflict: 'id' });
-  if (error) {
-    console.warn('[sync] push failed:', error.message);
-    return { ok: false, error: error.message };
+  try {
+    const { error } = await supabase.from('profiles').upsert(row, { onConflict: 'id' });
+    if (error) {
+      if (__DEV__) console.warn('[sync] push failed:', error.message);
+      return { ok: false, error: error.message };
+    }
+    return { ok: true };
+  } catch (e) {
+    if (__DEV__) console.warn('[sync] push threw:', e);
+    return { ok: false, error: 'network-error' };
   }
-  return { ok: true };
 }

@@ -24,7 +24,6 @@ export default function UsernameScreen() {
   );
 
   const handleNext = () => {
-    console.log('[Onboarding] Username → SignInPrompt, draft=', draft);
     const trimmed = draft.trim();
     if (trimmed) {
       setUsername(trimmed.slice(0, 20));
@@ -64,7 +63,7 @@ export default function UsernameScreen() {
         </View>
 
         <View style={styles.footer}>
-          <Button label="Continue →" onPress={handleNext} size="lg" />
+          <Button label="Continue" onPress={handleNext} size="lg" />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -84,7 +83,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xxxl,
     color: Colors.textPrimary,
     fontFamily: 'BagelFatOne_400Regular',
-    letterSpacing: -0.5,
+    letterSpacing: 0,
     marginBottom: Spacing.sm,
   },
   subtitle: {

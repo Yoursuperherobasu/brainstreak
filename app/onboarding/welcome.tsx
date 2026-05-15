@@ -15,15 +15,9 @@ import Animated, {
 import { Button } from '@/components/Button';
 import { Colors, Gradients, Spacing, FontSize } from '@/constants/theme';
 
-// Build timestamp baked into the bundle so the user can confirm they
-// reloaded the new build. If they see today's date in the corner, the
-// browser is on the fresh bundle.
-const BUILD_STAMP = new Date().toISOString().slice(0, 16).replace('T', ' ');
-
 export default function WelcomeScreen() {
-  const [tapped, setTapped] = useState(0);
+  const [tapped, setTapped] = useState(false);
 
-  // Continuously animate the brain emoji so the screen feels alive.
   const float = useSharedValue(0);
   React.useEffect(() => {
     float.value = withRepeat(
@@ -39,23 +33,20 @@ export default function WelcomeScreen() {
     transform: [{ translateY: float.value }],
   }));
 
-  // Use the Button component (which renders a native HTML <button> on web).
-  // We still increment a visible counter so the user can SEE the click
-  // event firing even before navigation completes.
   const handleStart = () => {
-    setTapped((n) => n + 1);
-    console.log('[Welcome] Let’s go tapped, navigating to /onboarding/username');
+    if (tapped) return;
+    setTapped(true);
     router.push('/onboarding/username');
   };
 
   return (
     <LinearGradient colors={Gradients.hero} style={styles.bg}>
       <SafeAreaView style={styles.container}>
-        <Text style={styles.buildStamp}>BUILD {BUILD_STAMP}</Text>
-
         <View style={styles.body}>
           <Animated.View entering={FadeIn.duration(400)} style={floatStyle}>
-            <Text style={styles.emoji}>🧠</Text>
+            <View style={styles.brandMark}>
+              <Text style={styles.brandLetter}>B</Text>
+            </View>
           </Animated.View>
           <Text style={styles.title}>BrainStreak</Text>
           <Text style={styles.tagline}>
@@ -64,12 +55,12 @@ export default function WelcomeScreen() {
 
           <View style={styles.points}>
             {[
-              ['⚡', '5 questions, 15 seconds each'],
-              ['🔥', 'Daily streak — don’t break it'],
-              ['🏆', 'Math · English · GK rotates'],
-            ].map(([emoji, text]) => (
+              ['01', '5 questions, 15 seconds each'],
+              ['02', 'Daily streaks without the clutter'],
+              ['03', 'Math, English, and general knowledge'],
+            ].map(([step, text]) => (
               <View key={text} style={styles.point}>
-                <Text style={styles.pointEmoji}>{emoji}</Text>
+                <Text style={styles.pointStep}>{step}</Text>
                 <Text style={styles.pointText}>{text}</Text>
               </View>
             ))}
@@ -77,10 +68,7 @@ export default function WelcomeScreen() {
         </View>
 
         <View style={styles.footer}>
-          <Button label="Let’s go 🚀" onPress={handleStart} size="lg" style={styles.cta} />
-          {tapped > 0 && (
-            <Text style={styles.debug}>tap registered #{tapped}</Text>
-          )}
+          <Button label="Get started" onPress={handleStart} size="lg" style={styles.cta} />
         </View>
       </SafeAreaView>
     </LinearGradient>
@@ -90,14 +78,6 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   bg: { flex: 1 },
   container: { flex: 1 },
-  buildStamp: {
-    position: 'absolute',
-    top: 8,
-    right: 12,
-    fontSize: 9,
-    color: Colors.textMuted,
-    fontFamily: 'PlusJakartaSans_400Regular',
-  },
   body: {
     flex: 1,
     alignItems: 'center',
@@ -105,12 +85,24 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     gap: Spacing.md,
   },
-  emoji: { fontSize: 110 },
+  brandMark: {
+    width: 108,
+    height: 108,
+    borderRadius: 28,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  brandLetter: {
+    fontSize: 62,
+    fontFamily: 'BricolageGrotesque_800ExtraBold',
+    color: '#FFFFFF',
+  },
   title: {
     fontSize: 56,
     fontFamily: 'BagelFatOne_400Regular',
     color: Colors.textPrimary,
-    letterSpacing: -1.5,
+    letterSpacing: 0,
     marginTop: 4,
   },
   tagline: {
@@ -128,7 +120,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
   },
   point: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  pointEmoji: { fontSize: 24, width: 32 },
+  pointStep: {
+    width: 32,
+    fontSize: FontSize.xs,
+    color: Colors.textMuted,
+    fontFamily: 'BricolageGrotesque_700Bold',
+  },
   pointText: {
     flex: 1,
     fontSize: FontSize.md,
@@ -138,11 +135,5 @@ const styles = StyleSheet.create({
   footer: { padding: Spacing.lg, paddingBottom: Spacing.xl, alignItems: 'center' },
   cta: {
     minWidth: 240,
-  },
-  debug: {
-    marginTop: 8,
-    fontSize: 11,
-    color: Colors.success,
-    fontFamily: 'PlusJakartaSans_600SemiBold',
   },
 });

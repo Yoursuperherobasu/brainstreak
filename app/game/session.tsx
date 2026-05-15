@@ -199,10 +199,10 @@ export default function GameSessionScreen() {
   if (phase === 'gameover') {
     const accuracy = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
     const grade =
-      accuracy >= 80 ? { label: 'Brilliant! 🌟', color: Colors.gold } :
-      accuracy >= 60 ? { label: 'Great! 🎉', color: Colors.success } :
-      accuracy >= 40 ? { label: 'Not bad 👍', color: Colors.accent } :
-      { label: 'Keep trying 💪', color: Colors.primaryLight };
+      accuracy >= 80 ? { label: 'Excellent', color: Colors.gold } :
+      accuracy >= 60 ? { label: 'Strong round', color: Colors.success } :
+      accuracy >= 40 ? { label: 'Good effort', color: Colors.accent } :
+      { label: 'Keep going', color: Colors.primaryLight };
 
     const xpForNext = getXPForNextLevel(profile.level);
     // A9 fix: confetti fires on level-up (the actual "you progressed" moment),
@@ -253,7 +253,9 @@ export default function GameSessionScreen() {
           {roundResults.map((r, i) => (
             <MotionView key={i} entering={FadeIn.delay(i * 80).springify()}>
               <View style={[styles.roundRow, { borderColor: r.isCorrect ? Colors.success : Colors.danger }]}>
-                <Text style={styles.roundEmoji}>{r.isCorrect ? '✅' : '❌'}</Text>
+                <Text style={[styles.roundMark, { color: r.isCorrect ? Colors.success : Colors.danger }]}>
+                  {r.isCorrect ? 'OK' : 'NO'}
+                </Text>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.roundQ} numberOfLines={2}>{r.question.question}</Text>
                   {!r.isCorrect && (
@@ -269,7 +271,7 @@ export default function GameSessionScreen() {
 
           <View style={styles.gameoverBtns}>
             <Button
-              label="Play Again 🎮"
+              label="Play again"
               onPress={() => {
                 resetGame();
                 router.back();
@@ -277,7 +279,7 @@ export default function GameSessionScreen() {
               style={{ flex: 1 }}
             />
             <Button
-              label="Home 🏠"
+              label="Home"
               variant="ghost"
               onPress={() => {
                 resetGame();
@@ -355,7 +357,7 @@ export default function GameSessionScreen() {
       {showResult && (
         <MotionView entering={FadeIn.springify()} style={styles.nextWrap}>
           <Button
-            label={currentIndex + 1 >= questions.length ? 'See Results 🏆' : 'Next Question →'}
+            label={currentIndex + 1 >= questions.length ? 'See results' : 'Next question'}
             onPress={nextQuestion}
             size="lg"
           />
@@ -382,14 +384,14 @@ const styles = StyleSheet.create({
   },
   gameoverScroll: { paddingHorizontal: Spacing.md, paddingTop: Spacing.lg },
   gameoverCard: {
-    borderRadius: 24,
+    borderRadius: 16,
     padding: Spacing.xl,
     alignItems: 'center',
     marginBottom: Spacing.lg,
   },
   gameoverTitle: {
     fontSize: FontSize.xxl,
-    color: Colors.textPrimary,
+    color: '#FFFFFF',
     fontFamily: 'BricolageGrotesque_700Bold',
     marginBottom: Spacing.sm,
   },
@@ -397,12 +399,12 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     color: Colors.goldLight,
     fontFamily: 'BagelFatOne_400Regular',
-    letterSpacing: 1.2,
+    letterSpacing: 0,
     marginBottom: Spacing.sm,
   },
   gameoverScore: {
     fontSize: 72,
-    color: Colors.textPrimary,
+    color: '#FFFFFF',
     fontFamily: 'BagelFatOne_400Regular',
     lineHeight: 80,
   },
@@ -420,7 +422,7 @@ const styles = StyleSheet.create({
   gameoverStat: { alignItems: 'center' },
   gameoverStatVal: {
     fontSize: FontSize.xl,
-    color: Colors.textPrimary,
+    color: '#FFFFFF',
     fontFamily: 'BricolageGrotesque_700Bold',
   },
   gameoverStatLabel: {
@@ -446,7 +448,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     borderLeftWidth: 3,
   },
-  roundEmoji: { fontSize: 18, width: 24 },
+  roundMark: {
+    width: 28,
+    fontSize: FontSize.xs,
+    fontFamily: 'BricolageGrotesque_700Bold',
+    textAlign: 'center',
+  },
   roundQ: {
     fontSize: FontSize.sm,
     color: Colors.textPrimary,

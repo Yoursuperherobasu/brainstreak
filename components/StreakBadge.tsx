@@ -53,18 +53,15 @@ export function StreakBadge({
   }));
 
   const sizes = {
-    sm: { emoji: 20, number: FontSize.sm, label: FontSize.xs, padding: 6 },
-    md: { emoji: 32, number: FontSize.xl, label: FontSize.sm, padding: 10 },
-    lg: { emoji: 48, number: FontSize.xxxl, label: FontSize.md, padding: 14 },
+    sm: { mark: 20, number: FontSize.sm, label: FontSize.xs, padding: 6 },
+    md: { mark: 32, number: FontSize.xl, label: FontSize.sm, padding: 10 },
+    lg: { mark: 48, number: FontSize.xxxl, label: FontSize.md, padding: 14 },
   };
 
   const s = sizes[size];
   const isActive = streak > 0;
   const isMilestone = streak >= 7;
 
-  // Ember state: dim the flame and add a hint label so the user knows
-  // they need to play today to keep the streak alive.
-  const flameEmoji = isActive ? (atRisk ? '🟠' : '🔥') : '💤';
   const numberColor = atRisk
     ? Colors.gold
     : isMilestone
@@ -81,7 +78,16 @@ export function StreakBadge({
           atRisk && { opacity: 0.85 },
         ]}
       >
-        <Text style={{ fontSize: s.emoji }}>{flameEmoji}</Text>
+        <View
+          style={[
+            styles.flameDot,
+            {
+              width: s.mark,
+              height: Math.max(6, s.mark / 5),
+              backgroundColor: isActive ? (atRisk ? Colors.gold : Colors.primary) : Colors.bgOverlay,
+            },
+          ]}
+        />
         <Text
           style={[styles.number, { fontSize: s.number, color: numberColor }]}
         >
@@ -91,9 +97,9 @@ export function StreakBadge({
       {showLabel && (
         <Text style={[styles.label, { fontSize: s.label }]}>
           {streak === 0
-            ? 'Start your streak!'
+            ? 'Start your streak'
             : atRisk
-            ? `Play today to keep ${streak}!`
+            ? `Play today to keep ${streak}`
             : streak === 1
             ? '1 day streak'
             : `${streak} day streak`}
@@ -113,7 +119,6 @@ export function StreakPill({ streak }: { streak: number }) {
 
   return (
     <Animated.View style={[styles.pill, pillStyle]}>
-      <Text style={styles.pillEmoji}>🔥</Text>
       <Text style={styles.pillText}>{streak}</Text>
     </Animated.View>
   );
@@ -130,7 +135,7 @@ const styles = StyleSheet.create({
   },
   number: {
     fontWeight: '900',
-    letterSpacing: -0.5,
+    letterSpacing: 0,
   },
   label: {
     color: Colors.textSecondary,
@@ -147,8 +152,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  pillEmoji: {
-    fontSize: 14,
+  flameDot: {
+    borderRadius: 4,
   },
   pillText: {
     color: Colors.textPrimary,

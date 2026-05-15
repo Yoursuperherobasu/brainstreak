@@ -1,6 +1,6 @@
 # BrainStreak Privacy Policy
 
-**Effective date:** 2026-05-09
+**Effective date:** 2026-05-15
 **Contact:** pratap1297@gmail.com
 
 BrainStreak ("we", "our", "the app") respects your privacy. This document

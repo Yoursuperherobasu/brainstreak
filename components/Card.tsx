@@ -73,14 +73,13 @@ export function Card({ children, style, onPress, gradient, noPadding }: CardProp
 interface StatCardProps {
   label: string;
   value: string | number;
-  emoji: string;
   color?: string;
 }
 
-export function StatCard({ label, value, emoji, color }: StatCardProps) {
+export function StatCard({ label, value, color }: StatCardProps) {
   return (
     <View style={[styles.statCard, { borderColor: color ?? Colors.border }]}>
-      <Text style={styles.statEmoji}>{emoji}</Text>
+      <View style={[styles.statMarker, { backgroundColor: color ?? Colors.primary }]} />
       <Text style={[styles.statValue, { color: color ?? Colors.textPrimary }]}>
         {value}
       </Text>
@@ -91,7 +90,7 @@ export function StatCard({ label, value, emoji, color }: StatCardProps) {
 
 const styles = StyleSheet.create({
   inner: {
-    borderRadius: Radius.lg,
+    borderRadius: Radius.md,
     padding: Spacing.md,
     overflow: 'hidden',
   },
@@ -114,12 +113,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     ...Shadow.sm,
   },
-  statEmoji: {
-    fontSize: 22,
+  statMarker: {
+    width: 18,
+    height: 4,
+    borderRadius: 2,
+    marginBottom: 2,
   },
   statValue: {
     fontSize: FontSize.xl,
     fontWeight: '800',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
   statLabel: {
     fontSize: FontSize.xs,

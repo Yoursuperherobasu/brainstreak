@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     fontFamily: 'BagelFatOne_400Regular',
     fontSize: 22,
     color: 'rgba(255,255,255,0.85)',
-    letterSpacing: 0.5,
+    letterSpacing: 0,
   },
   text: {
     fontFamily: 'BricolageGrotesque_700Bold',

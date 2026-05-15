@@ -25,11 +25,11 @@ import { Config } from '@/constants/config';
 
 type Difficulty = 'any' | 'easy' | 'medium' | 'hard';
 
-const DIFFICULTIES: { id: Difficulty; label: string; emoji: string; color: string }[] = [
-  { id: 'any', label: 'Mixed', emoji: '🎲', color: Colors.primaryLight },
-  { id: 'easy', label: 'Easy', emoji: '😊', color: Colors.success },
-  { id: 'medium', label: 'Medium', emoji: '🤔', color: Colors.gold },
-  { id: 'hard', label: 'Hard', emoji: '🔥', color: Colors.danger },
+const DIFFICULTIES: { id: Difficulty; label: string; color: string }[] = [
+  { id: 'any', label: 'Mixed', color: Colors.primaryLight },
+  { id: 'easy', label: 'Easy', color: Colors.success },
+  { id: 'medium', label: 'Medium', color: Colors.gold },
+  { id: 'hard', label: 'Hard', color: Colors.danger },
 ];
 
 export default function PlayScreen() {
@@ -40,7 +40,6 @@ export default function PlayScreen() {
   const userLevel = useUserStore((s) => s.profile.level);
 
   const handlePlay = async () => {
-    console.log('[Play] Start game tapped, category=', selectedCategory, 'difficulty=', selectedDifficulty);
     if (loading) return;
     setLoading(true);
     try {
@@ -62,13 +61,11 @@ export default function PlayScreen() {
         Alert.alert('Oops!', 'Could not load questions. Try again.');
         return;
       }
-      console.log('[Play] starting with', questions.length, 'questions');
       startGame(questions, selectedCategory);
       // Navigate after the store update so the session screen reads
       // the right phase on first paint.
       router.push('/game/session');
     } catch (err) {
-      console.warn('[Play] failed to start game:', err);
       Alert.alert('Error', 'Something went wrong. Check your connection.');
     } finally {
       setLoading(false);
@@ -94,7 +91,6 @@ export default function PlayScreen() {
             {CATEGORIES.map((cat) => (
               <CategoryTile
                 key={cat.id}
-                emoji={cat.emoji}
                 label={cat.label}
                 color={cat.color}
                 selected={selectedCategory === cat.id}
@@ -119,7 +115,7 @@ export default function PlayScreen() {
                     isSelected && { backgroundColor: `${d.color}20` },
                   ]}
                 >
-                  <Text style={styles.diffEmoji}>{d.emoji}</Text>
+                  <View style={[styles.diffMarker, { backgroundColor: d.color }]} />
                   <Text
                     style={[
                       styles.diffLabel,
@@ -138,13 +134,13 @@ export default function PlayScreen() {
           <Card style={styles.howCard}>
             <Text style={styles.howTitle}>How to play</Text>
             {[
-              ['⚡', 'Answer 5 questions as fast as you can'],
-              ['⏱️', '15 seconds per question — speed = bonus points'],
-              ['🔥', 'Play daily to build your streak'],
-              ['🧠', 'Earn XP and level up your brain'],
-            ].map(([emoji, text]) => (
+              ['01', 'Answer 5 questions as fast as you can'],
+              ['02', '15 seconds per question. Speed adds bonus points'],
+              ['03', 'Play daily to build your streak'],
+              ['04', 'Earn XP and level up'],
+            ].map(([step, text]) => (
               <View key={text} style={styles.howRow}>
-                <Text style={styles.howEmoji}>{emoji}</Text>
+                <Text style={styles.howStep}>{step}</Text>
                 <Text style={styles.howText}>{text}</Text>
               </View>
             ))}
@@ -157,7 +153,7 @@ export default function PlayScreen() {
             style={styles.summaryCard}
           >
             <Text style={styles.summaryText}>
-              {selectedCat?.emoji} {selectedCat?.label} · {selectedDiff?.label}
+              {selectedCat?.label} · {selectedDiff?.label}
             </Text>
             <Text style={styles.summaryXP}>+up to 750 XP</Text>
           </LinearGradient>
@@ -165,7 +161,7 @@ export default function PlayScreen() {
 
         <MotionView entering={FadeInDown.delay(400).springify()}>
           <Button
-            label={loading ? 'Loading...' : 'Start game 🚀'}
+            label={loading ? 'Loading...' : 'Start game'}
             onPress={handlePlay}
             loading={loading}
             size="lg"
@@ -187,7 +183,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xxxl,
     color: Colors.textPrimary,
     fontFamily: 'BagelFatOne_400Regular',
-    letterSpacing: -0.5,
+    letterSpacing: 0,
   },
   subtitle: {
     fontSize: FontSize.md,
@@ -216,7 +212,11 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     gap: 4,
   },
-  diffEmoji: { fontSize: 20 },
+  diffMarker: {
+    width: 18,
+    height: 4,
+    borderRadius: 2,
+  },
   diffLabel: {
     fontSize: FontSize.xs,
     fontFamily: 'BricolageGrotesque_700Bold',
@@ -229,7 +229,12 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   howRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  howEmoji: { fontSize: 18, width: 26 },
+  howStep: {
+    width: 28,
+    fontSize: FontSize.xs,
+    color: Colors.textMuted,
+    fontFamily: 'BricolageGrotesque_700Bold',
+  },
   howText: {
     flex: 1,
     fontSize: FontSize.sm,
@@ -238,7 +243,7 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     marginTop: Spacing.md,
-    borderRadius: Radius.lg,
+    borderRadius: Radius.md,
     padding: Spacing.md,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -246,12 +251,12 @@ const styles = StyleSheet.create({
   },
   summaryText: {
     fontSize: FontSize.md,
-    color: Colors.textPrimary,
+    color: '#FFFFFF',
     fontFamily: 'BricolageGrotesque_700Bold',
   },
   summaryXP: {
     fontSize: FontSize.sm,
-    color: Colors.goldLight,
+    color: 'rgba(255,255,255,0.78)',
     fontFamily: 'BricolageGrotesque_700Bold',
   },
   playBtn: { marginTop: Spacing.lg },

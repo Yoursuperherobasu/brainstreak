@@ -34,13 +34,13 @@ export const Typography: Record<string, TextStyle> = {
     fontFamily: Fonts.display,
     fontSize: FontSize.hero,
     color: Colors.textPrimary,
-    letterSpacing: -0.5,
+    letterSpacing: 0,
   },
   h1: {
     fontFamily: Fonts.headingExtraBold,
     fontSize: FontSize.xxxl,
     color: Colors.textPrimary,
-    letterSpacing: -0.5,
+    letterSpacing: 0,
   },
   h2: {
     fontFamily: Fonts.headingBold,

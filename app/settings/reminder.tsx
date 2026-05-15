@@ -87,7 +87,7 @@ export default function ReminderScreen() {
 
         <TouchableOpacity onPress={() => setPending(null)} style={styles.disableRow}>
           <Text style={[styles.disableText, pending === null && styles.disableTextActive]}>
-            {pending === null ? '✓ Reminders off' : 'Turn reminders off'}
+            {pending === null ? 'Reminders off' : 'Turn reminders off'}
           </Text>
         </TouchableOpacity>
 
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xxxl,
     color: Colors.textPrimary,
     fontFamily: 'BagelFatOne_400Regular',
-    letterSpacing: -0.5,
+    letterSpacing: 0,
     marginBottom: 6,
   },
   subtitle: {

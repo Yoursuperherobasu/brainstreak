@@ -36,12 +36,12 @@ export default function SignInPromptScreen() {
 
           <LinearGradient colors={Gradients.primary} style={styles.benefitCard}>
             {[
-              ['☁️', 'Your progress in the cloud'],
-              ['📱', 'Pick up where you left off on any phone'],
-              ['🔒', 'Email + password only — no tracking'],
-            ].map(([emoji, text]) => (
+              ['01', 'Your progress in the cloud'],
+              ['02', 'Pick up where you left off on any phone'],
+              ['03', 'Email and password only'],
+            ].map(([step, text]) => (
               <View key={text} style={styles.benefit}>
-                <Text style={styles.benefitEmoji}>{emoji}</Text>
+                <Text style={styles.benefitStep}>{step}</Text>
                 <Text style={styles.benefitText}>{text}</Text>
               </View>
             ))}
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xxxl,
     color: Colors.textPrimary,
     fontFamily: 'BagelFatOne_400Regular',
-    letterSpacing: -0.5,
+    letterSpacing: 0,
     marginBottom: Spacing.sm,
   },
   subtitle: {
@@ -83,16 +83,21 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   benefitCard: {
-    borderRadius: Radius.lg,
+    borderRadius: Radius.md,
     padding: Spacing.lg,
     gap: Spacing.md,
   },
   benefit: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  benefitEmoji: { fontSize: 22, width: 32 },
+  benefitStep: {
+    fontSize: FontSize.xs,
+    width: 32,
+    color: 'rgba(255,255,255,0.78)',
+    fontFamily: 'BricolageGrotesque_700Bold',
+  },
   benefitText: {
     flex: 1,
     fontSize: FontSize.md,
-    color: Colors.textPrimary,
+    color: '#FFFFFF',
     fontFamily: 'PlusJakartaSans_400Regular',
   },
   footer: { padding: Spacing.lg, paddingBottom: Spacing.xl, gap: Spacing.md },

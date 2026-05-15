@@ -1,87 +1,76 @@
-// BrainStreak — Color System, Theme & Design Tokens (light, playful)
-//
-// Design direction: Wordle / NYT Mini / Heads Up.
-// White-cream background, single bold violet accent, generous whitespace,
-// soft shadows instead of borders. Big editorial type. No dark gradients.
+// BrainStreak — Color System, Theme & Design Tokens
 
 export const Colors = {
-  // Brand Palette — warm coral primary, sand accents
-  primary: '#E85D40',       // Warm coral (was electric violet)
-  primaryLight: '#F4836B',  // Soft coral
-  primaryDark: '#C44A30',   // Deep coral
+  primary: '#2F6FED',
+  primaryLight: '#6EA1FF',
+  primaryDark: '#1E4FA8',
 
-  accent: '#3B7A8D',        // Muted teal — pairs with coral
-  accentLight: '#85C1CE',   // Pale teal
+  accent: '#169B8F',
+  accentLight: '#7EDBD1',
 
-  gold: '#D4A017',          // Honey gold (warmer than amber)
-  goldLight: '#F4D673',     // Soft honey
+  gold: '#D99921',
+  goldLight: '#F2C86B',
 
-  danger: '#C84441',        // Brick red
-  dangerLight: '#F5C9C7',   // Soft brick
+  danger: '#D64B4B',
+  dangerLight: '#F6D3D3',
 
-  success: '#5C9E5E',       // Sage green
-  successLight: '#B5D9B5',  // Soft sage
+  success: '#2B9B62',
+  successLight: '#C8EAD8',
 
-  // Neutrals — warm off-white / brownish paper
-  bg: '#F4ECE0',            // Warm sand background
-  bgCard: '#FBF5EA',        // Cream paper card
-  bgElevated: '#EBE0CE',    // Recessed surface (tab bar)
-  bgOverlay: '#DBCDB6',     // Tracks/bars background
+  bg: '#F6F7F9',
+  bgCard: '#FFFFFF',
+  bgElevated: '#ECEFF3',
+  bgOverlay: '#DDE3EA',
 
-  // Text — warm brown ink, not black
-  textPrimary: '#3D2914',   // Rich espresso brown
-  textSecondary: '#6B523A', // Coffee brown
-  textMuted: '#9C8770',     // Muted tan
+  textPrimary: '#172033',
+  textSecondary: '#536174',
+  textMuted: '#8A95A5',
 
-  // Borders
-  border: '#E0D2BC',        // Hairline divider
-  borderBright: '#C9B89A',  // Visible divider
+  border: '#E1E6EE',
+  borderBright: '#C8D1DE',
 
-  // Category Colors — distinct hues that all sit on warm cream
-  catMath:    '#E85D40',  // coral
-  catEnglish: '#3B7A8D',  // teal
-  catGK:      '#D4A017',  // honey
-  catScience: '#3B7A8D',
-  catHistory: '#D4A017',
-  catTech:    '#7E5DB0',  // muted plum
-  catSports:  '#5C9E5E',
-  catPop:     '#D86CB7',  // dusty rose
-  catMixed:   '#7E5DB0',
+  catMath:    '#2F6FED',
+  catEnglish: '#169B8F',
+  catGK:      '#D99921',
+  catScience: '#169B8F',
+  catHistory: '#D99921',
+  catTech:    '#6B5DD3',
+  catSports:  '#2B9B62',
+  catPop:     '#C75C9E',
+  catMixed:   '#6B5DD3',
 };
 
-// Gradients tuned for the warm sand palette.
 export const Gradients = {
-  primary: ['#E85D40', '#F4836B'] as const,
-  accent: ['#3B7A8D', '#85C1CE'] as const,
-  gold: ['#D4A017', '#F4D673'] as const,
-  hero: ['#FBF5EA', '#F4ECE0'] as const,
+  primary: ['#2F6FED', '#1E4FA8'] as const,
+  accent: ['#169B8F', '#7EDBD1'] as const,
+  gold: ['#D99921', '#F2C86B'] as const,
+  hero: ['#FFFFFF', '#F6F7F9'] as const,
   card: ['#FFFFFF', '#FBF5EA'] as const,
-  danger: ['#C84441', '#E08482'] as const,
-  success: ['#5C9E5E', '#9DC89D'] as const,
-  fire: ['#E85D40', '#F4A74A'] as const,
+  danger: ['#D64B4B', '#F07878'] as const,
+  success: ['#2B9B62', '#64C58E'] as const,
+  fire: ['#EF6A3A', '#D99921'] as const,
 };
 
-// Soft drop-shadow recipe for cards. RN style fragments — spread into style.
 export const Shadow = {
   sm: {
-    shadowColor: '#000',
+    shadowColor: '#172033',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
     elevation: 1,
   },
   md: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: '#172033',
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.08,
-    shadowRadius: 6,
+    shadowRadius: 12,
     elevation: 3,
   },
   lg: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
+    shadowColor: '#172033',
+    shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.10,
-    shadowRadius: 14,
+    shadowRadius: 24,
     elevation: 6,
   },
 };
@@ -96,10 +85,10 @@ export const Spacing = {
 };
 
 export const Radius = {
-  sm: 8,
-  md: 12,
-  lg: 18,
-  xl: 26,
+  sm: 6,
+  md: 8,
+  lg: 12,
+  xl: 16,
   full: 9999,
 };
 
@@ -116,21 +105,17 @@ export const FontSize = {
 
 export const CATEGORIES = [
   // BrainRush — the new default. Math + English + GK, no network needed.
-  { id: 'brain',   label: 'BrainRush', emoji: '🧠', color: Colors.primary,   apiId: -1 },
-  { id: 'mixed',   label: 'Mixed',     emoji: '🌀', color: Colors.catMixed,   apiId: 0 },
-  { id: 'science', label: 'Science',   emoji: '🔬', color: Colors.catScience, apiId: 17 },
-  { id: 'history', label: 'History',   emoji: '🏛️', color: Colors.catHistory, apiId: 23 },
-  { id: 'tech',    label: 'Tech',      emoji: '💻', color: Colors.catTech,    apiId: 18 },
-  { id: 'pop',     label: 'Pop',       emoji: '🎬', color: Colors.catPop,     apiId: 11 },
+  { id: 'brain',   label: 'BrainRush', color: Colors.primary,   apiId: -1 },
+  { id: 'mixed',   label: 'Mixed',     color: Colors.catMixed,   apiId: 0 },
+  { id: 'science', label: 'Science',   color: Colors.catScience, apiId: 17 },
+  { id: 'history', label: 'History',   color: Colors.catHistory, apiId: 23 },
+  { id: 'tech',    label: 'Tech',      color: Colors.catTech,    apiId: 18 },
+  { id: 'pop',     label: 'Pop',       color: Colors.catPop,     apiId: 11 },
 ] as const;
 
 export const MOTIVATIONAL_QUOTES = [
-  { text: "The brain is a muscle. Flex it daily.", author: "BrainStreak" },
-  { text: "Every question answered makes you sharper.", author: "BrainStreak" },
-  { text: "Streaks aren't built in a day. But they break in one.", author: "BrainStreak" },
-  { text: "Knowledge is the only treasure that grows when shared.", author: "Proverb" },
-  { text: "Small daily improvements lead to stunning results.", author: "BrainStreak" },
-  { text: "The more you know, the more you grow.", author: "BrainStreak" },
-  { text: "Curiosity is the engine of achievement.", author: "BrainStreak" },
-  { text: "Winners are people with definite purpose.", author: "BrainStreak" },
+  { text: "Five quick questions. Keep the habit moving.", author: "BrainStreak" },
+  { text: "Small rounds add up when you come back daily.", author: "BrainStreak" },
+  { text: "A clean streak starts with one round.", author: "BrainStreak" },
+  { text: "Quick recall gets better with repetition.", author: "BrainStreak" },
 ];

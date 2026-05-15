@@ -4,7 +4,6 @@ import { Colors, Spacing, FontSize, Radius } from '@/constants/theme';
 import { haptics } from '@/lib/haptics';
 
 interface BaseProps {
-  emoji: string;
   label: string;
   description?: string;
 }
@@ -31,7 +30,7 @@ type SettingsRowProps = ToggleRowProps | NavRowProps | ValueRowProps;
 export function SettingsRow(props: SettingsRowProps) {
   const inner = (
     <View style={styles.row}>
-      <Text style={styles.emoji}>{props.emoji}</Text>
+      <View style={styles.marker} />
       <View style={styles.textCol}>
         <Text style={styles.label}>{props.label}</Text>
         {props.description && <Text style={styles.description}>{props.description}</Text>}
@@ -79,7 +78,12 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     marginBottom: 8,
   },
-  emoji: { fontSize: 22, width: 28 },
+  marker: {
+    width: 8,
+    height: 32,
+    borderRadius: 4,
+    backgroundColor: Colors.bgOverlay,
+  },
   textCol: { flex: 1, gap: 2 },
   label: {
     fontSize: FontSize.md,

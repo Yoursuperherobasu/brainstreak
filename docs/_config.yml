@@ -1,0 +1,10 @@
+title: BrainStreak
+description: BrainStreak — privacy policy, terms, and support.
+theme: jekyll-theme-cayman
+markdown: kramdown
+include:
+  - privacy-policy.md
+  - terms.md
+  - privacy-policy.html
+  - terms.html
+  - index.html

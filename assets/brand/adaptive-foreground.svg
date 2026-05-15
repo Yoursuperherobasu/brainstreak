@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080">
+  <!-- Android adaptive icon: foreground only, transparent bg.
+       Safe zone is centered 66% (~712px) — keep glyph inside. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3A7CF0"/>
+      <stop offset="1" stop-color="#2F6FED"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#169B8F"/>
+      <stop offset="1" stop-color="#1FB8A8"/>
+    </linearGradient>
+  </defs>
+  <rect x="184" y="184" width="712" height="712" rx="160" ry="160" fill="url(#bg)"/>
+  <circle cx="800" cy="288" r="84" fill="url(#accent)" opacity="0.55"/>
+  <g transform="translate(310 280)" fill="#FFFFFF">
+    <path d="M0 0 h220 q120 0 120 116 q0 65 -60 95 q85 25 85 118 q0 122 -145 122 H0 Z M96 80 v112 h120 q56 0 56 -56 q0 -56 -56 -56 Z M96 272 v128 h136 q64 0 64 -64 q0 -64 -64 -64 Z" />
+  </g>
+  <rect x="310" y="610" width="420" height="16" rx="8" fill="url(#accent)"/>
+</svg>

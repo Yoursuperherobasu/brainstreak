@@ -13,6 +13,9 @@ export function installDebug(): void {
   if (installed) return;
   installed = true;
 
+  const enabled = (globalThis as any).__BRAIN_DEBUG__ === true;
+  if (!enabled) return;
+
   console.log(TAG, 'install start, platform=', Platform.OS, 'time=', new Date().toISOString());
 
   if (Platform.OS !== 'web') {

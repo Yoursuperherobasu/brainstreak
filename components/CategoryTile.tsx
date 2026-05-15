@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
@@ -10,14 +10,13 @@ import { Colors, FontSize, Radius, Shadow } from '@/constants/theme';
 import { haptics } from '@/lib/haptics';
 
 interface CategoryTileProps {
-  emoji: string;
   label: string;
   color: string;
   selected: boolean;
   onPress: () => void;
 }
 
-export function CategoryTile({ emoji, label, color, selected, onPress }: CategoryTileProps) {
+export function CategoryTile({ label, color, selected, onPress }: CategoryTileProps) {
   const scale = useSharedValue(1);
 
   const animStyle = useAnimatedStyle(() => ({
@@ -56,7 +55,7 @@ export function CategoryTile({ emoji, label, color, selected, onPress }: Categor
           end={{ x: 1, y: 1 }}
           style={styles.inner}
         >
-          <Text style={styles.emoji}>{emoji}</Text>
+          <View style={[styles.marker, { backgroundColor: selected ? '#FFFFFF' : color }]} />
           <Text
             style={[
               styles.label,
@@ -76,7 +75,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: '30%',
     aspectRatio: 1,
-    borderRadius: Radius.lg,
+    borderRadius: Radius.md,
     borderWidth: 1.5,
     overflow: 'hidden',
   },
@@ -85,9 +84,14 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 6,
   },
-  emoji: { fontSize: 38 },
+  marker: {
+    width: 22,
+    height: 4,
+    borderRadius: 2,
+    marginBottom: 4,
+  },
   label: {
     fontSize: FontSize.md,
     fontFamily: 'BricolageGrotesque_700Bold',

@@ -28,12 +28,12 @@ import { signOut } from '@/lib/auth';
 import { isStreakAtRisk, todayISO, yesterdayISO } from '@/lib/storage';
 
 const BADGES = [
-  { id: 'first_game', emoji: '🎮', label: 'First Game', desc: 'Play your first game', xpReq: 0 },
-  { id: 'streak_3', emoji: '🔥', label: 'On Fire', desc: '3 day streak', xpReq: 30 },
-  { id: 'streak_7', emoji: '💎', label: 'Diamond', desc: '7 day streak', xpReq: 70 },
-  { id: 'xp_100', emoji: '⚡', label: 'Charged', desc: '100 XP earned', xpReq: 100 },
-  { id: 'xp_500', emoji: '🧠', label: 'Big Brain', desc: '500 XP earned', xpReq: 500 },
-  { id: 'xp_1000', emoji: '🏆', label: 'Champion', desc: '1000 XP earned', xpReq: 1000 },
+  { id: 'first_game', label: 'First Game', desc: 'Play your first game', xpReq: 0 },
+  { id: 'streak_3', label: 'On Fire', desc: '3 day streak', xpReq: 30 },
+  { id: 'streak_7', label: 'Diamond', desc: '7 day streak', xpReq: 70 },
+  { id: 'xp_100', label: 'Charged', desc: '100 XP earned', xpReq: 100 },
+  { id: 'xp_500', label: 'Big Brain', desc: '500 XP earned', xpReq: 500 },
+  { id: 'xp_1000', label: 'Champion', desc: '1000 XP earned', xpReq: 1000 },
 ];
 
 export default function ProfileScreen() {
@@ -103,7 +103,7 @@ export default function ProfileScreen() {
         <MotionView entering={FadeInDown.springify()}>
           <LinearGradient colors={Gradients.primary} style={styles.heroCard}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarEmoji}>🧠</Text>
+              <Text style={styles.avatarText}>{profile.username.slice(0, 1).toUpperCase()}</Text>
             </View>
 
             {editing ? (
@@ -119,12 +119,12 @@ export default function ProfileScreen() {
                   onSubmitEditing={handleSaveName}
                 />
                 <TouchableOpacity onPress={handleSaveName} style={styles.saveBtn}>
-                  <Text style={styles.saveTxt}>✓</Text>
+                  <Text style={styles.saveTxt}>Save</Text>
                 </TouchableOpacity>
               </View>
             ) : (
               <TouchableOpacity onPress={() => { setDraftName(profile.username); setEditing(true); }}>
-                <Text style={styles.heroName}>{profile.username} ✏️</Text>
+                <Text style={styles.heroName}>{profile.username}</Text>
               </TouchableOpacity>
             )}
 
@@ -144,7 +144,7 @@ export default function ProfileScreen() {
             <StreakBadge streak={streak.current} size="md" atRisk={atRisk} />
             <View style={styles.streakRight}>
               <Text style={styles.streakBestLabel}>Best streak</Text>
-              <Text style={styles.streakBest}>🏆 {streak.longest} {streak.longest === 1 ? 'day' : 'days'}</Text>
+              <Text style={styles.streakBest}>{streak.longest} {streak.longest === 1 ? 'day' : 'days'}</Text>
               <Text style={styles.streakLast}>
                 Last played: {streak.lastPlayDate ?? 'Never'}
               </Text>
@@ -173,9 +173,9 @@ export default function ProfileScreen() {
         <MotionView entering={FadeInDown.delay(160).springify()}>
           <SectionHeader title="Stats" />
           <View style={styles.statsRow}>
-            <StatCard label="Level" value={profile.level} emoji="⚡" color={Colors.primaryLight} />
-            <StatCard label="Total XP" value={profile.totalXP.toLocaleString()} emoji="🧠" color={Colors.accent} />
-            <StatCard label="Games" value={profile.gamesPlayed} emoji="🎮" color={Colors.gold} />
+            <StatCard label="Level" value={profile.level} color={Colors.primaryLight} />
+            <StatCard label="Total XP" value={profile.totalXP.toLocaleString()} color={Colors.accent} />
+            <StatCard label="Games" value={profile.gamesPlayed} color={Colors.gold} />
           </View>
         </MotionView>
 
@@ -189,14 +189,12 @@ export default function ProfileScreen() {
                   key={badge.id}
                   style={[styles.badge, !earned && styles.badgeLocked]}
                 >
-                  <Text style={[styles.badgeEmoji, !earned && { opacity: 0.3 }]}>
-                    {badge.emoji}
-                  </Text>
+                  <View style={[styles.badgeMarker, { backgroundColor: earned ? Colors.primary : Colors.bgOverlay }]} />
                   <Text style={[styles.badgeLabel, !earned && { opacity: 0.3 }]}>
                     {badge.label}
                   </Text>
                   <Text style={styles.badgeDesc}>{badge.desc}</Text>
-                  {!earned && <Text style={styles.badgeLockText}>🔒</Text>}
+                  {!earned && <Text style={styles.badgeLockText}>Locked</Text>}
                 </View>
               );
             })}
@@ -207,7 +205,6 @@ export default function ProfileScreen() {
           <SectionHeader title="Settings" />
           <SettingsRow
             kind="toggle"
-            emoji="🔊"
             label="Sound effects"
             description="Tick, ding, buzz, fanfare"
             value={soundOn}
@@ -215,7 +212,6 @@ export default function ProfileScreen() {
           />
           <SettingsRow
             kind="toggle"
-            emoji="📳"
             label="Haptics"
             description="Vibration feedback on tap and answer"
             value={hapticsOn}
@@ -223,7 +219,6 @@ export default function ProfileScreen() {
           />
           <SettingsRow
             kind="nav"
-            emoji="⏰"
             label="Daily reminder"
             description="Pick a time that works for you"
             rightLabel={dailyReminderTime ?? 'Off'}
@@ -232,7 +227,6 @@ export default function ProfileScreen() {
           {authState === 'authenticated' && (
             <SettingsRow
               kind="nav"
-              emoji="🚪"
               label="Sign out"
               description="Stop syncing on this device"
               onPress={handleSignOut}
@@ -244,13 +238,12 @@ export default function ProfileScreen() {
           <SectionHeader title="App info" />
           <Card style={styles.infoCard}>
             {[
-              ['🧠', 'Version', `v${Config.APP_VERSION}`],
-              ['🎮', 'Questions', 'Open Trivia DB'],
-              ['☁️', 'Sync', authState === 'authenticated' ? 'On' : 'Off (anonymous)'],
-              ['📱', 'Platform', 'Android'],
-            ].map(([emoji, label, value]) => (
+              ['Version', `v${Config.APP_VERSION}`],
+              ['Questions', 'Math, English, GK + Open Trivia DB'],
+              ['Sync', authState === 'authenticated' ? 'On' : 'Off (anonymous)'],
+              ['Platform', 'Android'],
+            ].map(([label, value]) => (
               <View key={label} style={styles.infoRow}>
-                <Text style={styles.infoEmoji}>{emoji}</Text>
                 <Text style={styles.infoLabel}>{label}</Text>
                 <Text style={styles.infoValue}>{value}</Text>
               </View>
@@ -268,7 +261,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
   scroll: { paddingHorizontal: Spacing.md, paddingTop: Spacing.sm },
   heroCard: {
-    borderRadius: 24,
+    borderRadius: 16,
     padding: Spacing.lg,
     alignItems: 'center',
     gap: 8,
@@ -278,33 +271,37 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(255,255,255,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
   },
-  avatarEmoji: { fontSize: 44 },
+  avatarText: {
+    fontSize: FontSize.xxxl,
+    color: '#FFFFFF',
+    fontFamily: 'BricolageGrotesque_800ExtraBold',
+  },
   heroName: {
     fontSize: FontSize.xxl,
-    color: Colors.textPrimary,
+    color: '#FFFFFF',
     fontFamily: 'BricolageGrotesque_700Bold',
   },
   heroLevel: {
     fontSize: FontSize.md,
-    color: 'rgba(255,255,255,0.7)',
+    color: 'rgba(255,255,255,0.78)',
     fontFamily: 'PlusJakartaSans_400Regular',
   },
   heroXp: { width: '100%', gap: 6, marginTop: 6 },
   heroXpText: {
     fontSize: FontSize.xs,
-    color: 'rgba(255,255,255,0.7)',
+    color: 'rgba(255,255,255,0.78)',
     fontFamily: 'PlusJakartaSans_400Regular',
     textAlign: 'center',
   },
   editRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   nameInput: {
     fontSize: FontSize.xl,
-    color: Colors.textPrimary,
+    color: '#FFFFFF',
     fontFamily: 'BricolageGrotesque_700Bold',
     borderBottomWidth: 2,
     borderBottomColor: Colors.primaryLight,
@@ -313,14 +310,19 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   saveBtn: {
-    width: 36,
+    minWidth: 54,
     height: 36,
-    borderRadius: 18,
+    borderRadius: Radius.md,
     backgroundColor: Colors.success,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  saveTxt: { color: Colors.textPrimary, fontSize: 20, fontWeight: '700' },
+  saveTxt: {
+    color: '#FFFFFF',
+    fontSize: FontSize.xs,
+    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans_700Bold',
+  },
   streakCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -335,7 +337,7 @@ const styles = StyleSheet.create({
   },
   streakBest: {
     fontSize: FontSize.xl,
-    color: Colors.goldLight,
+    color: Colors.textPrimary,
     fontFamily: 'BricolageGrotesque_700Bold',
   },
   streakLast: {
@@ -379,7 +381,12 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   badgeLocked: { borderStyle: 'dashed' },
-  badgeEmoji: { fontSize: 28 },
+  badgeMarker: {
+    width: 20,
+    height: 4,
+    borderRadius: 2,
+    marginBottom: 4,
+  },
   badgeLabel: {
     fontSize: FontSize.xs,
     color: Colors.textPrimary,
@@ -392,10 +399,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'PlusJakartaSans_400Regular',
   },
-  badgeLockText: { fontSize: 12 },
+  badgeLockText: {
+    fontSize: 9,
+    color: Colors.textMuted,
+    fontFamily: 'PlusJakartaSans_600SemiBold',
+  },
   infoCard: { gap: 10, marginBottom: Spacing.md },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  infoEmoji: { fontSize: 18, width: 24 },
   infoLabel: {
     flex: 1,
     fontSize: FontSize.sm,
