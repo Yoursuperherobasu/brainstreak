@@ -48,8 +48,7 @@
           "icon": "./assets/icon.png",
           "color": "#2F6FED"
         }
-      ],
-      "expo-audio"
+      ]
     ],
     "experiments": {
       "typedRoutes": true

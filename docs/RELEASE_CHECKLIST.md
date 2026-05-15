@@ -147,7 +147,7 @@ Play Store requires you walk through tracks:
 
 | Command | What it does |
 |---|---|
-| `npm test` | Run Jest suite (73 tests) |
+| `npm test` | Run Jest suite (106 tests) |
 | `npx tsc --noEmit` | Typecheck |
 | `npx expo export --platform web` | Build static web bundle |
 | `npm run icons` | Regenerate brand PNGs from SVG |

@@ -40,7 +40,7 @@ export default function SignInScreen() {
     setInfo(null);
 
     if (!isSupabaseConfigured()) {
-      setError('Supabase isn’t configured yet. See docs/SUPABASE_SETUP.md.');
+      setError('Cloud sync isn’t available in this build yet. Your progress stays on this device.');
       return;
     }
 
@@ -125,7 +125,7 @@ export default function SignInScreen() {
                 will turn on automatically once cloud is configured.
               </Text>
               <Text style={styles.noticeFootnote}>
-                Developers: see docs/SUPABASE_SETUP.md.
+                Cloud sync rolls out in a future update.
               </Text>
             </View>
           )}

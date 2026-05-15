@@ -51,6 +51,9 @@ graphify-out/
 /e2e-out/
 /smoke-out/
 /probe-out/
+/offline-out/
+/viewport-out/
+/qa-out/
 /test_bug.js
 .claude/worktrees/
 .claude/agents/

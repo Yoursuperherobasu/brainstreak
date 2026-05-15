@@ -45,7 +45,7 @@ No ads. No tracking. No analytics. Anonymous by default. If you sign in, we stor
 - Daily reminder you can set to any time (or turn off).
 - Toggleable sound and haptics.
 - Works fully offline — questions cache automatically.
-- Dark theme that's easy on the eyes.
+- Clean light UI with soft ambient animations.
 
 Sharpen your brain. Build the streak. Take 60 seconds.
 ```
