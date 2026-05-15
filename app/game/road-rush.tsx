@@ -23,7 +23,6 @@ import { haptics } from '@/lib/haptics';
 import { audio } from '@/lib/audio';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 import { usePausableInterval } from '@/lib/usePausableInterval';
-import { ConfettiBurst } from '@/components/ConfettiBurst';
 
 const ROUND_SECONDS = 60; // shown in the timer bar; the round usually ends earlier by crash
 const FRAME_MS = 30; // ~33 FPS — smooth enough, cheap enough
@@ -35,6 +34,8 @@ export default function RoadRushScreen() {
   // Chrome's autoplay policy — bgStart() only runs after the first user tap.
   const [phase, setPhase] = useState<'idle' | 'playing' | 'over'>('idle');
   const [leveledUp, setLeveledUp] = useState(false);
+  const [newBest, setNewBest] = useState(false);
+  const [prevBest, setPrevBest] = useState(0);
   const [seconds, setSeconds] = useState(ROUND_SECONDS);
   const [fieldSize, setFieldSize] = useState({ w: 0, h: 0 });
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -108,6 +109,10 @@ export default function RoadRushScreen() {
         setLeveledUp(true);
         audio.levelup();
       }
+      if (res.wasNewBest) {
+        setNewBest(true);
+        setPrevBest(res.previousBest);
+      }
     }).catch(() => {});
   }, [phase, state.distance, state.obstacles.length]);
 
@@ -131,6 +136,8 @@ export default function RoadRushScreen() {
     setPhase('idle');
     setSeconds(ROUND_SECONDS);
     setLeveledUp(false);
+    setNewBest(false);
+    setPrevBest(0);
     recordedRef.current = false;
   };
 
@@ -224,7 +231,6 @@ export default function RoadRushScreen() {
         </Pressable>
       ) : (
         <View style={styles.body}>
-          {leveledUp && <ConfettiBurst trigger={true} />}
           <GameOverCard
             title={state.alive ? 'Time!' : 'Crash'}
             score={score}
@@ -235,6 +241,9 @@ export default function RoadRushScreen() {
             ]}
             onPlayAgain={restart}
             onExit={() => { audio.bgStop(); router.replace('/play'); }}
+            newBest={newBest}
+            delta={score - prevBest}
+            leveledUp={leveledUp}
           />
         </View>
       )}

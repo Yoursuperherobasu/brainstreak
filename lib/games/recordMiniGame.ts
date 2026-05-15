@@ -1,6 +1,7 @@
 import { useUserStore } from '@/store/useUserStore';
 import { useGameStore } from '@/store/useGameStore';
 import { useAchievementsStore } from '@/store/useAchievementsStore';
+import { usePersonalBestStore } from '@/store/usePersonalBestStore';
 import {
   computeStreakAfterGame,
   recordGame,
@@ -29,6 +30,8 @@ export interface MiniGameResult {
 export interface RecordedResult {
   leveledUp: boolean;
   freshUnlocks: string[];
+  wasNewBest: boolean;
+  previousBest: number;
 }
 
 const PRETTY: Record<MiniGameId, string> = {
@@ -71,6 +74,8 @@ export async function recordMiniGameResult(r: MiniGameResult): Promise<RecordedR
     useGameStore.setState({ pendingAchievementIds: fresh });
   }
 
+  const pb = usePersonalBestStore.getState().recordScore(r.gameId, r.score);
+
   // Best-effort cloud sync — matches useGameStore.finishGame (Brain Rush).
   // No-op when the user is anonymous, when Supabase isn't configured, or
   // when offline. Must not block the UI.
@@ -79,5 +84,7 @@ export async function recordMiniGameResult(r: MiniGameResult): Promise<RecordedR
   return {
     leveledUp: updatedProfile.level > previousLevel,
     freshUnlocks: fresh,
+    wasNewBest: pb.wasNewBest,
+    previousBest: pb.previousBest,
   };
 }

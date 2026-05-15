@@ -44,6 +44,8 @@ export default function GameSessionScreen() {
     correctCount,
     xpEarned,
     leveledUp,
+    newBest,
+    previousBest,
     roundResults,
     selectAnswer,
     nextQuestion,
@@ -287,6 +289,25 @@ export default function GameSessionScreen() {
               )}
               <Text style={styles.gameoverScore}>{totalScore.toLocaleString()}</Text>
               <Text style={styles.gameoverScoreLabel}>points</Text>
+              {newBest && (
+                <View style={{
+                  backgroundColor: Colors.gold,
+                  paddingHorizontal: Spacing.md,
+                  paddingVertical: 6,
+                  borderRadius: Radius.sm,
+                  alignSelf: 'center',
+                  marginTop: 4,
+                }}>
+                  <Text style={{
+                    color: '#FFFFFF',
+                    fontSize: FontSize.sm,
+                    fontFamily: 'BricolageGrotesque_700Bold',
+                    letterSpacing: 0.5,
+                  }}>
+                    NEW BEST!{previousBest > 0 ? ` +${totalScore - previousBest}` : ''}
+                  </Text>
+                </View>
+              )}
               <View style={styles.gameoverStats}>
                 <View style={styles.gameoverStat}>
                   <Text style={styles.gameoverStatVal}>{correctCount}/{questions.length}</Text>

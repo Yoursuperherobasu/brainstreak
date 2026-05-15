@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors, Spacing, FontSize, Radius } from '@/constants/theme';
 import { Button } from '@/components/Button';
+import { ConfettiBurst } from '@/components/ConfettiBurst';
 
 interface Stat { label: string; value: string }
 
@@ -11,9 +12,12 @@ interface Props {
   stats: Stat[];
   onPlayAgain: () => void;
   onExit: () => void;
+  newBest?: boolean;
+  delta?: number;
+  leveledUp?: boolean;
 }
 
-export function GameOverCard({ title, score, stats, onPlayAgain, onExit }: Props) {
+export function GameOverCard({ title, score, stats, onPlayAgain, onExit, newBest, delta, leveledUp }: Props) {
   return (
     <View style={styles.card}>
       <Text style={styles.title}>{title}</Text>
@@ -26,6 +30,12 @@ export function GameOverCard({ title, score, stats, onPlayAgain, onExit }: Props
           </View>
         ))}
       </View>
+      {newBest && (
+        <View style={styles.newBest}>
+          <Text style={styles.newBestText}>NEW BEST!{delta != null && delta > 0 ? ` +${delta}` : ''}</Text>
+        </View>
+      )}
+      {leveledUp && <ConfettiBurst trigger={true} />}
       <View style={styles.row}>
         <Button label="Play again" onPress={onPlayAgain} />
         <Button label="Done" onPress={onExit} variant="secondary" />
@@ -42,5 +52,19 @@ const styles = StyleSheet.create({
   stat: { alignItems: 'center', gap: 2 },
   statValue: { fontSize: FontSize.xl, color: Colors.textPrimary, fontFamily: 'BricolageGrotesque_700Bold' },
   statLabel: { fontSize: FontSize.xs, color: Colors.textSecondary, fontFamily: 'PlusJakartaSans_600SemiBold' },
+  newBest: {
+    backgroundColor: Colors.gold,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 6,
+    borderRadius: Radius.sm,
+    marginTop: 4,
+    alignSelf: 'center',
+  },
+  newBestText: {
+    color: '#FFFFFF',
+    fontSize: FontSize.sm,
+    fontFamily: 'BricolageGrotesque_700Bold',
+    letterSpacing: 0.5,
+  },
   row: { flexDirection: 'row', gap: Spacing.sm, alignSelf: 'stretch' },
 });

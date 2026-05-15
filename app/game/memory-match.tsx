@@ -10,7 +10,6 @@ import { GameOverCard } from '@/components/games/GameOverCard';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
-import { ConfettiBurst } from '@/components/ConfettiBurst';
 import { audio } from '@/lib/audio';
 
 const TILES = [Colors.primary, Colors.accent, Colors.gold, Colors.success];
@@ -25,6 +24,8 @@ export default function MemoryMatchScreen() {
   const [score, setScore] = useState(0);
   const [activeTile, setActiveTile] = useState<number | null>(null);
   const [leveledUp, setLeveledUp] = useState(false);
+  const [newBest, setNewBest] = useState(false);
+  const [prevBest, setPrevBest] = useState(0);
   const playingRef = useRef(false);
   const recordedRef = useRef(false);
 
@@ -49,6 +50,10 @@ export default function MemoryMatchScreen() {
       if (res.leveledUp) {
         setLeveledUp(true);
         audio.levelup();
+      }
+      if (res.wasNewBest) {
+        setNewBest(true);
+        setPrevBest(res.previousBest);
       }
     }).catch(() => {});
   }, [phase, score, seq.length]);
@@ -107,7 +112,6 @@ export default function MemoryMatchScreen() {
         </View>
       ) : (
         <View style={styles.body}>
-          {leveledUp && <ConfettiBurst trigger={true} />}
           <GameOverCard
             title="Game Over"
             score={score}
@@ -116,8 +120,11 @@ export default function MemoryMatchScreen() {
               { label: 'Length', value: seq.length.toString() },
               { label: 'XP', value: Math.floor(score / 4).toString() },
             ]}
-            onPlayAgain={() => { setSeq([]); setAttempt([]); setScore(0); setRound(1); setLeveledUp(false); recordedRef.current = false; }}
+            onPlayAgain={() => { setSeq([]); setAttempt([]); setScore(0); setRound(1); setLeveledUp(false); setNewBest(false); setPrevBest(0); recordedRef.current = false; }}
             onExit={() => router.replace('/play')}
+            newBest={newBest}
+            delta={score - prevBest}
+            leveledUp={leveledUp}
           />
         </View>
       )}

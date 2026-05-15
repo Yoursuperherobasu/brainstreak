@@ -29,6 +29,8 @@ import { signOut } from '@/lib/auth';
 import { isStreakAtRisk, todayISO, yesterdayISO } from '@/lib/storage';
 import { ACHIEVEMENTS } from '@/lib/achievements';
 import { useAchievementsStore } from '@/store/useAchievementsStore';
+import { usePersonalBestStore } from '@/store/usePersonalBestStore';
+import { GAMES } from '@/constants/games';
 
 export default function ProfileScreen() {
   const profile = useUserStore((s) => s.profile);
@@ -85,6 +87,7 @@ export default function ProfileScreen() {
   };
 
   const unlocked = useAchievementsStore((s) => s.unlocked);
+  const bests = usePersonalBestStore((s) => s.bests);
 
   const atRisk = isStreakAtRisk(streak, todayISO(), yesterdayISO());
 
@@ -177,6 +180,22 @@ export default function ProfileScreen() {
               value={<CountingNumber value={profile.gamesPlayed} style={styles.statValueText} />}
               color={Colors.gold}
             />
+          </View>
+        </MotionView>
+
+        <MotionView entering={FadeInDown.delay(180).springify()}>
+          <SectionHeader title="Personal bests" />
+          <View style={styles.bestsGrid}>
+            {GAMES.map((g) => {
+              const b = bests[g.id];
+              return (
+                <View key={g.id} style={styles.bestCard}>
+                  <View style={[styles.bestMarker, { backgroundColor: g.color }]} />
+                  <Text style={styles.bestTitle} numberOfLines={1}>{g.title}</Text>
+                  <Text style={styles.bestValue}>{b ? b.bestScore.toLocaleString() : '—'}</Text>
+                </View>
+              );
+            })}
           </View>
         </MotionView>
 
@@ -448,6 +467,20 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
     letterSpacing: 0.5,
   },
+  bestsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginBottom: Spacing.md },
+  bestCard: {
+    flexBasis: '31%',
+    flexGrow: 1,
+    padding: Spacing.md,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.bgCard,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    gap: 4,
+  },
+  bestMarker: { width: 18, height: 3, borderRadius: 2 },
+  bestTitle: { fontSize: FontSize.xs, color: Colors.textSecondary, fontFamily: 'PlusJakartaSans_600SemiBold' },
+  bestValue: { fontSize: FontSize.lg, color: Colors.textPrimary, fontFamily: 'BricolageGrotesque_800ExtraBold' },
   infoCard: { gap: 10, marginBottom: Spacing.md },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   infoLabel: {

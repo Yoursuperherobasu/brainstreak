@@ -29,6 +29,8 @@ interface GameState {
   prefetchedCategory: string | null;
 
   pendingAchievementIds: string[];
+  newBest: boolean;
+  previousBest: number;
 
   startGame: (questions: TriviaQuestion[], category: string) => void;
   selectAnswer: (answer: string, timeTaken: number) => void;
@@ -59,6 +61,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   prefetchedQuestions: null,
   prefetchedCategory: null,
   pendingAchievementIds: [],
+  newBest: false,
+  previousBest: 0,
 
   startGame: (questions, category) => {
     set({
@@ -184,19 +188,26 @@ export const useGameStore = create<GameState>((set, get) => ({
       const unlockedIds = evaluate({ profile: updatedProfile, streak: newStreak, recent });
       const fresh = useAchievementsStore.getState().recordUnlocked(unlockedIds);
 
-      // 6. Atomic recap update (phase + xp + level-up + pending unlocks).
+      // 6. Brain Rush personal best.
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { usePersonalBestStore } = require('@/store/usePersonalBestStore');
+      const pb = usePersonalBestStore.getState().recordScore('brain-rush', totalScore);
+
+      // 7. Atomic recap update (phase + xp + level-up + pending unlocks + pb).
       set({
         phase: 'gameover',
         xpEarned: xp,
         leveledUp: updatedProfile.level > previousLevel,
+        newBest: pb.wasNewBest,
+        previousBest: pb.previousBest,
         ...(fresh.length > 0 ? { pendingAchievementIds: fresh } : {}),
       });
 
-      // 7. Commit to Zustand-persisted state.
+      // 8. Commit to Zustand-persisted state.
       user.setProfile(updatedProfile);
       user.setStreak(newStreak);
 
-      // 8. Cloud push is best-effort and must not block the UI.
+      // 9. Cloud push is best-effort and must not block the UI.
       user.pushIfAuthed().catch(() => {});
     } catch (err) {
       if (__DEV__) console.warn('[GameStore] Failed to save results:', err);
@@ -217,6 +228,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       xpEarned: 0,
       correctCount: 0,
       leveledUp: false,
+      newBest: false,
+      previousBest: 0,
     });
   },
 
