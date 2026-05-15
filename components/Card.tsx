@@ -74,7 +74,11 @@ export function Card({ children, style, onPress, gradient, noPadding }: CardProp
           {inner}
           <Animated.View
             pointerEvents="none"
-            style={[StyleSheet.absoluteFillObject, { backgroundColor: Colors.primary, borderRadius: Radius.md }, flashStyle]}
+            style={[
+              StyleSheet.absoluteFillObject,
+              { backgroundColor: gradient?.[0] ?? Colors.primary, borderRadius: Radius.md },
+              flashStyle,
+            ]}
           />
         </TouchableOpacity>
       </Animated.View>
