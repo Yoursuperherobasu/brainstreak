@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { FadeIn } from 'react-native-reanimated';
 import { Colors, Spacing, FontSize, Radius, Shadow } from '@/constants/theme';
 import { MotionView } from '@/components/MotionView';
 import { GameFrame } from '@/components/games/GameFrame';
@@ -17,7 +17,9 @@ import {
   SHAPE_POOL,
   type ShapeId,
 } from '@/lib/games/patternRecall';
-import { ShapeIcon, SHAPE_COLORS } from '@/components/games/pattern/ShapeIcon';
+import { SHAPE_COLORS } from '@/components/games/pattern/ShapeIcon';
+import { AnimatedShape } from '@/components/games/pattern/AnimatedShape';
+import { ConfettiDots } from '@/components/games/pattern/ConfettiDots';
 import { haptics } from '@/lib/haptics';
 import { audio } from '@/lib/audio';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
@@ -33,10 +35,13 @@ export default function PatternRecallScreen() {
   const [attempt, setAttempt] = useState<ShapeId[]>([]);
   const [phase, setPhase] = useState<'show' | 'input' | 'over'>('show');
   const [activeShape, setActiveShape] = useState<ShapeId | null>(null);
+  const [activeShapeTick, setActiveShapeTick] = useState(0);  // bump to re-fire entrance
   const [score, setScore] = useState(0);
   const [leveledUp, setLeveledUp] = useState(false);
   const [newBest, setNewBest] = useState(false);
   const [prevBest, setPrevBest] = useState(0);
+  const [confettiBurst, setConfettiBurst] = useState(0);   // bumps on each correct pick
+  const [wrongPaletteShape, setWrongPaletteShape] = useState<ShapeId | null>(null);
   const recordedRef = useRef(false);
   const playingRef = useRef(false);
 
@@ -58,6 +63,7 @@ export default function PatternRecallScreen() {
     await new Promise((r) => setTimeout(r, 300));
     for (const shape of s) {
       setActiveShape(shape);
+      setActiveShapeTick((t) => t + 1);     // re-fire entrance spring
       haptics.light();
       await new Promise((r) => setTimeout(r, FLASH_MS));
       setActiveShape(null);
@@ -103,10 +109,14 @@ export default function PatternRecallScreen() {
     setAttempt(next);
     if (!isCorrectSoFar(seq, next)) {
       haptics.error();
+      // Flash red on the wrongly-tapped palette button briefly before game-over.
+      setWrongPaletteShape(shape);
+      setTimeout(() => setWrongPaletteShape(null), 280);
       setPhase('over');
       return;
     }
     haptics.success();
+    setConfettiBurst((b) => b + 1);  // tiny burst on correct pick
     if (next.length === seq.length) {
       const gained = scoreForRound(round);
       setScore((s) => s + gained);
@@ -123,6 +133,8 @@ export default function PatternRecallScreen() {
     setLeveledUp(false);
     setNewBest(false);
     setPrevBest(0);
+    setConfettiBurst(0);
+    setWrongPaletteShape(null);
     recordedRef.current = false;
     // Re-trigger sequence generation by rerunning the effect.
     setTimeout(() => {
@@ -153,7 +165,12 @@ export default function PatternRecallScreen() {
               or progress dots (during 'input'). */}
           <View style={styles.stage}>
             {phase === 'show' && activeShape && (
-              <ShapeIcon shape={activeShape} size={140} color={SHAPE_COLORS[activeShape]} />
+              <AnimatedShape
+                shape={activeShape}
+                size={140}
+                color={SHAPE_COLORS[activeShape]}
+                keyValue={activeShapeTick}
+              />
             )}
             {phase === 'show' && !activeShape && (
               <Text style={styles.stageHint}>·</Text>
@@ -187,7 +204,24 @@ export default function PatternRecallScreen() {
                   phase !== 'input' && { opacity: 0.55 },
                 ]}
               >
-                <ShapeIcon shape={shape} size={48} color={SHAPE_COLORS[shape]} />
+                <View>
+                  <AnimatedShape
+                    shape={shape}
+                    size={48}
+                    color={SHAPE_COLORS[shape]}
+                    keyValue={shape}
+                    wrongFlash={wrongPaletteShape === shape}
+                  />
+                  {/* Inline confetti burst pinned over the picked tile.
+                      We mount one set per palette button; only the one that
+                      changes burstKey actually animates. */}
+                  <View pointerEvents="none" style={styles.burstHost}>
+                    <ConfettiDots
+                      burstKey={wrongPaletteShape === shape ? 0 : (confettiBurst > 0 && attempt[attempt.length - 1] === shape ? confettiBurst : 0)}
+                      size={48}
+                    />
+                  </View>
+                </View>
               </Pressable>
             ))}
           </View>
@@ -252,4 +286,5 @@ const styles = StyleSheet.create({
     ...Shadow.sm,
   },
   paletteBtnPressed: { transform: [{ scale: 0.94 }], opacity: 0.9 },
+  burstHost: { position: 'absolute', left: 0, top: 0, width: 48, height: 48 },
 });
