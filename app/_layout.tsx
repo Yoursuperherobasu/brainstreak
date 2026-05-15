@@ -173,7 +173,7 @@ export default function RootLayout() {
         <Stack.Screen
           name="onboarding"
           options={{
-            animation: 'fade',
+            animation: 'slide_from_right',
             presentation: 'fullScreenModal',
           }}
         />
