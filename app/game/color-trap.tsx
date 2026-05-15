@@ -2,12 +2,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import Animated, { useSharedValue, useAnimatedStyle, withSequence, withTiming, FadeIn } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSequence, withTiming, withSpring, FadeIn } from 'react-native-reanimated';
 import { Colors, Spacing, FontSize, Radius, Shadow } from '@/constants/theme';
 import { MotionView } from '@/components/MotionView';
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { DotBurst } from '@/components/games/color/DotBurst';
+import { HueUnderline } from '@/components/games/color/HueUnderline';
+import { WrongPulseBorder } from '@/components/games/color/WrongPulseBorder';
 import {
   generateRound,
   scoreAttempt,
@@ -37,10 +40,24 @@ export default function ColorTrapScreen() {
   const recordedRef = useRef(false);
   const wordScale = useSharedValue(1);
   const wordStyle = useAnimatedStyle(() => ({ transform: [{ scale: wordScale.value }] }));
+  // Cartoon flourishes: roundKey resets the entrance + hue cycle when a new
+  // word appears; burstKey fires the 6-dot success burst; wrongIdx tracks
+  // which option (0 = DIFFERENT, 1 = MATCH) pulses red; wrongKey re-fires
+  // the same option's pulse without re-mount.
+  const [roundKey, setRoundKey] = useState(0);
+  const [burstKey, setBurstKey] = useState(0);
+  const [wrongIdx, setWrongIdx] = useState<number | null>(null);
+  const [wrongKey, setWrongKey] = useState(0);
 
   const advance = () => {
-    wordScale.value = withSequence(withTiming(0.92, { duration: 60 }), withTiming(1, { duration: 180 }));
+    // Word entrance: scale 0.6 → 1.05 → 1 spring so it pops into view.
+    wordScale.value = 0.6;
+    wordScale.value = withSequence(
+      withSpring(1.05, { damping: 10, stiffness: 200 }),
+      withSpring(1, { damping: 12, stiffness: 220 }),
+    );
     setRound(generateRound());
+    setRoundKey((k) => k + 1);
   };
 
   usePausableInterval({
@@ -86,9 +103,13 @@ export default function ColorTrapScreen() {
       setCorrect((c) => c + 1);
       setScore((s) => s + r.points);
       haptics.success();
+      setBurstKey((k) => k + 1);
     } else {
       setScore((s) => Math.max(0, s + r.points));
       haptics.error();
+      // DIFFERENT is left (index 0), MATCH is right (index 1).
+      setWrongIdx(matchPick ? 1 : 0);
+      setWrongKey((k) => k + 1);
     }
     advance();
   };
@@ -121,30 +142,38 @@ export default function ColorTrapScreen() {
         <MotionView entering={FadeIn} style={styles.body}>
           <Text style={styles.hint}>Does the WORD match the INK color?</Text>
           <View style={styles.stage}>
+            <DotBurst burstKey={burstKey} />
             <Animated.Text
               style={[styles.word, { color: COLOR_PALETTE[round.ink] }, wordStyle]}
               accessibilityLabel={`Word ${round.word} in ${round.ink} ink`}
             >
               {round.word.toUpperCase()}
             </Animated.Text>
+            <HueUnderline finalColor={COLOR_PALETTE[round.ink]} resetKey={roundKey} />
           </View>
           <View style={styles.actions}>
-            <Pressable
-              onPress={() => pick(false)}
-              style={({ pressed }) => [styles.btn, styles.btnNo, pressed && styles.btnPressed]}
-              accessibilityRole="button"
-              accessibilityLabel="Different"
-            >
-              <Text style={styles.btnLabel}>DIFFERENT</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => pick(true)}
-              style={({ pressed }) => [styles.btn, styles.btnYes, pressed && styles.btnPressed]}
-              accessibilityRole="button"
-              accessibilityLabel="Match"
-            >
-              <Text style={styles.btnLabel}>MATCH</Text>
-            </Pressable>
+            <View style={styles.btnWrap}>
+              <Pressable
+                onPress={() => pick(false)}
+                style={({ pressed }) => [styles.btn, styles.btnNo, pressed && styles.btnPressed]}
+                accessibilityRole="button"
+                accessibilityLabel="Different"
+              >
+                <Text style={styles.btnLabel}>DIFFERENT</Text>
+              </Pressable>
+              {wrongIdx === 0 && <WrongPulseBorder pulseKey={wrongKey} />}
+            </View>
+            <View style={styles.btnWrap}>
+              <Pressable
+                onPress={() => pick(true)}
+                style={({ pressed }) => [styles.btn, styles.btnYes, pressed && styles.btnPressed]}
+                accessibilityRole="button"
+                accessibilityLabel="Match"
+              >
+                <Text style={styles.btnLabel}>MATCH</Text>
+              </Pressable>
+              {wrongIdx === 1 && <WrongPulseBorder pulseKey={wrongKey} />}
+            </View>
           </View>
           <View style={styles.statsRow}>
             <Text style={styles.statLabel}>Correct</Text>
@@ -204,8 +233,11 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     paddingHorizontal: Spacing.md,
   },
+  // Relative wrapper so WrongPulseBorder can absolute-fill on top of the
+  // pressable without bumping its layout box.
+  btnWrap: { flex: 1, position: 'relative' },
   btn: {
-    flex: 1,
+    width: '100%',
     paddingVertical: 20,
     borderRadius: Radius.lg,
     alignItems: 'center',
