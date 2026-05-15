@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { FadeIn } from 'react-native-reanimated';
+import { MotionView } from '@/components/MotionView';
 import { Colors, Spacing, FontSize, Radius } from '@/constants/theme';
 import { generateAnagramRound, scoreAnagramAttempt, type AnagramRound } from '@/lib/games/wordSprint';
 import { Button } from '@/components/Button';
@@ -69,10 +70,10 @@ export default function WordSprintScreen() {
         seconds={secondsLeft}
         totalSeconds={ROUND_SECONDS}
         score={score}
-        onExit={() => router.back()}
+        onExit={() => router.replace('/play')}
       />
       {phase === 'playing' ? (
-        <Animated.View entering={FadeIn} style={styles.body}>
+        <MotionView entering={FadeIn} style={styles.body}>
           <Text style={styles.hint}>Make as many words as you can from these letters.</Text>
           <View style={styles.letters}>
             {round.letters.map((c, i) => (
@@ -99,9 +100,9 @@ export default function WordSprintScreen() {
               <Text style={styles.usedList} numberOfLines={3}>{Array.from(used).join(', ')}</Text>
             </View>
           )}
-        </Animated.View>
+        </MotionView>
       ) : (
-        <Animated.View entering={FadeIn} style={styles.body}>
+        <MotionView entering={FadeIn} style={styles.body}>
           <GameOverCard
             title="Time!"
             score={score}
@@ -111,9 +112,9 @@ export default function WordSprintScreen() {
               { label: 'XP earned', value: Math.floor(score / 4).toString() },
             ]}
             onPlayAgain={() => router.replace('/game/word-sprint')}
-            onExit={() => router.back()}
+            onExit={() => router.replace('/play')}
           />
-        </Animated.View>
+        </MotionView>
       )}
     </SafeAreaView>
   );

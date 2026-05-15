@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { FadeInUp, FadeOutDown } from 'react-native-reanimated';
+import { FadeInUp, FadeOutDown } from 'react-native-reanimated';
+import { MotionView } from '@/components/MotionView';
 import { Colors, Spacing, FontSize, Radius, Shadow } from '@/constants/theme';
 import { ACHIEVEMENTS } from '@/lib/achievements';
 
@@ -15,14 +16,14 @@ export function AchievementToast({ ids, onHide }: { ids: string[]; onHide: () =>
   const first = ACHIEVEMENTS.find((a) => a.id === ids[0]);
   if (!first) return null;
   return (
-    <Animated.View entering={FadeInUp} exiting={FadeOutDown} style={styles.toast}>
+    <MotionView entering={FadeInUp} exiting={FadeOutDown} style={styles.toast}>
       <View style={styles.dot} />
       <View style={{ flex: 1 }}>
         <Text style={styles.tag}>UNLOCKED</Text>
         <Text style={styles.title}>{first.title}</Text>
         <Text style={styles.sub}>{first.description}</Text>
       </View>
-    </Animated.View>
+    </MotionView>
   );
 }
 

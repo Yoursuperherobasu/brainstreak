@@ -81,6 +81,21 @@ function escapeHtml(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+// React Native Web emits `body { overflow: hidden }` to keep RN's
+// scroll-views in charge. On phone-sized viewports this works, but when
+// our frame wrapper or the embedded ScrollView fails to receive height
+// propagation (or content simply exceeds the visible area), the page
+// becomes unscrollable. We layer in a tiny CSS shim that lets the body
+// scroll as a fallback while leaving RN's inner scroll-views intact.
+const SCROLL_FIX_CSS = `
+<style id="bs-scroll-fix">
+  html, body { height: 100% !important; }
+  body { overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; overscroll-behavior-y: contain; }
+  #root { min-height: 100vh; }
+  /* Stop RN-Web's transient hidden overlays from blocking pointer/wheel events. */
+  div[style*="position:absolute"][style*="visibility:hidden"][style*="pointer-events:none"] { pointer-events: none !important; }
+</style>`;
+
 function rewriteHtml(filePath, rel) {
   let html = fs.readFileSync(filePath, 'utf8');
 
@@ -90,12 +105,14 @@ function rewriteHtml(filePath, rel) {
     'g'
   );
   html = html.replace(between, '');
+  // Also strip any previous scroll-fix block so re-runs don't duplicate.
+  html = html.replace(/<style id="bs-scroll-fix">[\s\S]*?<\/style>/g, '');
 
   // 2. Drop Expo's empty <title> tags so the injected one wins.
   html = html.replace(/<title[^>]*><\/title>/g, '');
 
   // 3. Inject our block just before </head>.
-  const block = metaBlockFor(rel);
+  const block = metaBlockFor(rel) + SCROLL_FIX_CSS;
   if (html.includes('</head>')) {
     html = html.replace('</head>', `${block}</head>`);
   } else {
@@ -151,6 +168,54 @@ function writeManifest() {
   console.log('   wrote manifest → manifest.webmanifest');
 }
 
+// Patch Vite-style `import.meta.env.MODE` references that some libraries
+// (e.g. Zustand's devtools middleware) embed in their distributed code.
+// Metro bundles them through to the web output verbatim, but the classic-
+// <script> tag we emit can't execute `import.meta`, so the bundle errors at
+// load and React never hydrates → buttons appear but don't fire. We surgically
+// rewrite the access to a harmless equivalent.
+function patchImportMeta() {
+  const jsDir = path.join(DIST, '_expo', 'static', 'js', 'web');
+  if (!fs.existsSync(jsDir)) return;
+  for (const name of fs.readdirSync(jsDir)) {
+    if (!name.endsWith('.js')) continue;
+    const p = path.join(jsDir, name);
+    let src = fs.readFileSync(p, 'utf8');
+    if (!src.includes('import.meta')) continue;
+    // Replace every `import.meta.env` access with an object literal so the
+    // surrounding optional-chain / ternary degrades to the production branch.
+    const before = src;
+    src = src.replace(/import\.meta\.env/g, '({MODE:"production",PROD:!0,DEV:!1})');
+    // Belt-and-suspenders: bare `import.meta` (no .env) → empty object.
+    src = src.replace(/import\.meta(?!\.)/g, '({})');
+    if (src !== before) {
+      fs.writeFileSync(p, src);
+      console.log('   patched import.meta →', name);
+    }
+  }
+}
+
+// Make `serve` (and most static hosts) fall back to the friendly +not-found
+// page for any unknown URL. Without this, hitting /total-garbage shows the
+// server's plain "404 The requested path could not be found" instead of the
+// in-app 404 with branding and a Home button.
+//
+// We do this two ways so the dev static-serve AND production hosts both work:
+//   1. Copy `+not-found.html` to `200.html` and `404.html`. The `serve` CLI
+//      and Netlify both pick these up automatically as SPA fallbacks.
+//   2. Drop a `serve.json` config that explicitly routes unknown paths to it.
+function writeSpaFallback() {
+  const src = path.join(DIST, '+not-found.html');
+  if (!fs.existsSync(src)) {
+    console.warn('[postprocess-web] +not-found.html missing — skipping SPA fallback');
+    return;
+  }
+  const html = fs.readFileSync(src, 'utf8');
+  fs.writeFileSync(path.join(DIST, '404.html'), html);
+  fs.writeFileSync(path.join(DIST, '200.html'), html);
+  console.log('   wrote SPA fallback → 200.html / 404.html');
+}
+
 function main() {
   if (!fs.existsSync(DIST)) {
     console.error(`[postprocess-web] dist/ missing — run \`expo export\` first.`);
@@ -158,7 +223,9 @@ function main() {
   }
   console.log('[postprocess-web] injecting meta into', DIST);
   walk(DIST);
+  patchImportMeta();
   writeManifest();
+  writeSpaFallback();
   console.log('[postprocess-web] done.');
 }
 

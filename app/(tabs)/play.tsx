@@ -16,6 +16,7 @@ import { Card } from '@/components/Card';
 import { CategoryTile } from '@/components/CategoryTile';
 import { SectionHeader } from '@/components/SectionHeader';
 import { MotionView } from '@/components/MotionView';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Colors, Spacing, FontSize, CATEGORIES, Radius } from '@/constants/theme';
 import { fetchTriviaQuestions } from '@/lib/trivia';
 import { generateBrainRush } from '@/lib/quiz-bank';
@@ -77,24 +78,26 @@ export default function PlayScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <AnimatedBackground intensity="subtle" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
       >
         <MotionView entering={FadeInDown.springify()} style={styles.header}>
-          <Text style={styles.title}>Pick a category</Text>
-          <Text style={styles.subtitle}>{Config.QUESTIONS_PER_GAME} questions · {Config.ROUND_TIME_SECONDS} seconds each</Text>
+          <Text style={styles.title}>Play</Text>
+          <Text style={styles.subtitle}>6 ways to flex your brain — no doomscroll required.</Text>
         </MotionView>
 
-        <MotionView entering={FadeInDown.delay(50).springify()}>
-          <SectionHeader title="Mini-games" />
+        <MotionView entering={FadeInDown.delay(40).springify()}>
+          <SectionHeader title="Arcade — 5 mini-games" />
           <View style={styles.miniGrid}>
             {(
               [
-                { id: 'word-sprint', title: 'Word Sprint', sub: '60s anagrams', color: Colors.accent },
-                { id: 'number-sense', title: 'Number Sense', sub: '30s math drill', color: Colors.primary },
-                { id: 'memory-match', title: 'Memory Match', sub: 'Simon-style', color: Colors.gold },
-                { id: 'reaction-tap', title: 'Reaction Tap', sub: 'Tap the target', color: Colors.success },
+                { id: 'word-sprint',  title: 'Word Sprint',  sub: '60s anagram chase',       color: Colors.accent  },
+                { id: 'number-sense', title: 'Number Sense', sub: '30s math drill',          color: Colors.primaryLight },
+                { id: 'memory-match', title: 'Memory Match', sub: 'Simon-style sequence',    color: Colors.gold    },
+                { id: 'reaction-tap', title: 'Reaction Tap', sub: 'Tap before it vanishes',  color: Colors.success },
+                { id: 'road-rush',    title: 'Road Rush',    sub: 'Dodge traffic, no chill', color: Colors.danger  },
               ] as const
             ).map((g) => (
               <Card
@@ -108,6 +111,10 @@ export default function PlayScreen() {
               </Card>
             ))}
           </View>
+        </MotionView>
+
+        <MotionView entering={FadeInDown.delay(60).springify()}>
+          <SectionHeader title="Brain Rush — pick a category" />
         </MotionView>
 
         <MotionView entering={FadeInDown.delay(100).springify()}>

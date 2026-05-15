@@ -1,29 +1,36 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { Colors, Spacing, FontSize, Radius } from '@/constants/theme';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence } from 'react-native-reanimated';
+import { Colors, Spacing, FontSize, Radius, Shadow } from '@/constants/theme';
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
 import { spawnTarget, windowMs, type Target } from '@/lib/games/reactionTap';
 import { haptics } from '@/lib/haptics';
 
 const ROUND_SECONDS = 20;
+const DOT_SIZE = 72;
 
 export default function ReactionTapScreen() {
-  const { width } = useWindowDimensions();
-  const playArea = Math.min(width, 480) - Spacing.md * 2;
   const [target, setTarget] = useState<Target>(spawnTarget());
   const [score, setScore] = useState(0);
   const [misses, setMisses] = useState(0);
   const [seconds, setSeconds] = useState(ROUND_SECONDS);
   const [phase, setPhase] = useState<'playing' | 'over'>('playing');
+  // We measure the play area via onLayout so we don't depend on
+  // useWindowDimensions, which returns 0 during SSR / first paint and
+  // collapsed the field on web.
+  const [fieldSize, setFieldSize] = useState(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const dotScale = useSharedValue(1);
+  const dotStyle = useAnimatedStyle(() => ({ transform: [{ scale: dotScale.value }] }));
 
   const respawn = (currentScore: number) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setTarget(spawnTarget());
+    dotScale.value = withSequence(withTiming(0.85, { duration: 80 }), withTiming(1, { duration: 220 }));
     timeoutRef.current = setTimeout(() => {
       setMisses((m) => m + 1);
       respawn(currentScore);
@@ -56,18 +63,46 @@ export default function ReactionTapScreen() {
     respawn(score + 1);
   };
 
+  const dotMax = Math.max(0, fieldSize - DOT_SIZE);
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <GameFrame title="Reaction Tap" accent={Colors.success} seconds={seconds} totalSeconds={ROUND_SECONDS} score={score} onExit={() => router.back()} />
+      <GameFrame
+        title="Reaction Tap"
+        accent={Colors.primary}
+        seconds={seconds}
+        totalSeconds={ROUND_SECONDS}
+        score={score}
+        onExit={() => router.replace('/play')}
+      />
       {phase === 'playing' ? (
         <View style={styles.body}>
-          <View style={[styles.field, { width: playArea, height: playArea }]}>
-            <Pressable
-              onPress={tap}
-              style={[styles.dot, { left: target.x * (playArea - 64), top: target.y * (playArea - 64) }]}
-            />
+          <View
+            style={styles.field}
+            onLayout={(e) => {
+              const { width, height } = e.nativeEvent.layout;
+              setFieldSize(Math.min(width, height));
+            }}
+          >
+            {fieldSize > 0 && (
+              <Animated.View
+                style={[
+                  styles.dotWrap,
+                  dotStyle,
+                  { left: target.x * dotMax, top: target.y * dotMax },
+                ]}
+              >
+                <Pressable onPress={tap} style={styles.dot} hitSlop={12} />
+              </Animated.View>
+            )}
           </View>
-          <Text style={styles.hint}>Misses: {misses}</Text>
+          <View style={styles.statsRow}>
+            <Text style={styles.statLabel}>Hits</Text>
+            <Text style={styles.statValue}>{score}</Text>
+            <Text style={styles.divider}>·</Text>
+            <Text style={styles.statLabel}>Misses</Text>
+            <Text style={[styles.statValue, misses > 0 && { color: Colors.danger }]}>{misses}</Text>
+          </View>
         </View>
       ) : (
         <View style={styles.body}>
@@ -80,7 +115,7 @@ export default function ReactionTapScreen() {
               { label: 'XP', value: (score * 2).toString() },
             ]}
             onPlayAgain={() => router.replace('/game/reaction-tap')}
-            onExit={() => router.back()}
+            onExit={() => router.replace('/play')}
           />
         </View>
       )}
@@ -90,8 +125,54 @@ export default function ReactionTapScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
-  body: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: Spacing.md, gap: Spacing.md },
-  field: { backgroundColor: Colors.bgCard, borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.border, position: 'relative' },
-  dot: { position: 'absolute', width: 64, height: 64, borderRadius: 32, backgroundColor: Colors.success, shadowColor: Colors.success, shadowOpacity: 0.4, shadowRadius: 10 },
-  hint: { color: Colors.textSecondary, fontFamily: 'PlusJakartaSans_600SemiBold' },
+  body: { flex: 1, padding: Spacing.md, gap: Spacing.md, alignItems: 'center' },
+  // Field is a 1:1 square that takes the full available width. We use
+  // aspectRatio (not useWindowDimensions) so it renders correctly under
+  // SSR where window dimensions are 0.
+  field: {
+    width: '100%',
+    aspectRatio: 1,
+    maxWidth: 480,
+    backgroundColor: Colors.bgCard,
+    borderRadius: Radius.lg,
+    borderWidth: 2,
+    borderColor: Colors.borderBright,
+    position: 'relative',
+    overflow: 'hidden',
+    ...Shadow.sm,
+  },
+  dotWrap: {
+    position: 'absolute',
+    width: DOT_SIZE,
+    height: DOT_SIZE,
+  },
+  dot: {
+    width: DOT_SIZE,
+    height: DOT_SIZE,
+    borderRadius: DOT_SIZE / 2,
+    backgroundColor: Colors.primary,
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 6,
+  },
+  statLabel: {
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+    fontFamily: 'PlusJakartaSans_600SemiBold',
+  },
+  statValue: {
+    fontSize: FontSize.lg,
+    color: Colors.textPrimary,
+    fontFamily: 'BricolageGrotesque_700Bold',
+    minWidth: 24,
+    textAlign: 'center',
+  },
+  divider: {
+    fontSize: FontSize.lg,
+    color: Colors.textMuted,
+  },
 });

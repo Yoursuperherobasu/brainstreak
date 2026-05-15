@@ -62,7 +62,7 @@ export default function MemoryMatchScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <GameFrame title="Memory Match" accent={Colors.gold} seconds={Math.max(0, 60 - round * 5)} totalSeconds={60} score={score} onExit={() => router.back()} />
+      <GameFrame title="Memory Match" accent={Colors.gold} seconds={Math.max(0, 60 - round * 5)} totalSeconds={60} score={score} onExit={() => router.replace('/play')} />
       {phase !== 'over' ? (
         <View style={styles.body}>
           <Text style={styles.round}>Round {round}</Text>
@@ -84,7 +84,7 @@ export default function MemoryMatchScreen() {
               { label: 'XP', value: Math.floor(score / 4).toString() },
             ]}
             onPlayAgain={() => { setSeq([]); setAttempt([]); setScore(0); setRound(1); }}
-            onExit={() => router.back()}
+            onExit={() => router.replace('/play')}
           />
         </View>
       )}

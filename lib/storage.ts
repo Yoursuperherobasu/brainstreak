@@ -36,20 +36,12 @@ export interface StreakData {
   lastPlayDate: string | null; // ISO date YYYY-MM-DD in device local timezone
 }
 
-export async function getStreakData(): Promise<StreakData> {
-  try {
-    const raw = await AsyncStorage.getItem(StorageKeys.STREAK);
-    if (!raw) return { current: 0, longest: 0, lastPlayDate: null };
-    return JSON.parse(raw) as StreakData;
-  } catch {
-    return { current: 0, longest: 0, lastPlayDate: null };
-  }
-}
-
-export async function saveStreakData(streak: StreakData): Promise<void> {
-  await AsyncStorage.setItem(StorageKeys.STREAK, JSON.stringify(streak));
-}
-
+// Pure streak math — the single source of truth for the algorithm. Storage
+// happens in `useUserStore` (Zustand + AsyncStorage persistence under
+// @brainstreak/profile). We deliberately removed the legacy raw-key writers
+// (saveStreakData / updateStreakAfterGame) because they collided with
+// Zustand's persisted shape and corrupted state into NaN. If a caller needs
+// the streak it should read from `useUserStore.getState().streak`.
 export function computeStreakAfterGame(prev: StreakData, today: string, yesterday: string): StreakData {
   let newCurrent = prev.current;
   if (prev.lastPlayDate === today) {
@@ -66,22 +58,16 @@ export function computeStreakAfterGame(prev: StreakData, today: string, yesterda
   };
 }
 
-export async function updateStreakAfterGame(): Promise<StreakData> {
-  const prev = await getStreakData();
-  const updated = computeStreakAfterGame(prev, todayISO(), yesterdayISO());
-  await saveStreakData(updated);
-  return updated;
+// Pure predicate: "did the user play today already?" Pass the in-memory
+// streak — typically from useUserStore.
+export function hasPlayedToday(streak: StreakData, today: string = todayISO()): boolean {
+  return streak.lastPlayDate === today;
 }
 
-export async function isStreakBroken(): Promise<boolean> {
-  const streak = await getStreakData();
+// Pure predicate: "is the streak broken (last play was older than yesterday)?"
+export function isStreakBroken(streak: StreakData, today: string = todayISO(), yesterday: string = yesterdayISO()): boolean {
   if (!streak.lastPlayDate) return false;
-  return streak.lastPlayDate !== todayISO() && streak.lastPlayDate !== yesterdayISO();
-}
-
-export async function hasPlayedToday(): Promise<boolean> {
-  const streak = await getStreakData();
-  return streak.lastPlayDate === todayISO();
+  return streak.lastPlayDate !== today && streak.lastPlayDate !== yesterday;
 }
 
 // "Ember" state for the streak flame: user has a streak, didn't play today,
@@ -102,38 +88,12 @@ export interface LocalProfile {
 
 export const DEFAULT_USERNAME = 'BrainPlayer';
 
-export async function getLocalProfile(): Promise<LocalProfile | null> {
-  try {
-    const raw = await AsyncStorage.getItem(StorageKeys.PROFILE);
-    if (!raw) return null;
-    return JSON.parse(raw) as LocalProfile;
-  } catch {
-    return null;
-  }
-}
-
-export async function saveLocalProfile(profile: LocalProfile): Promise<void> {
-  await AsyncStorage.setItem(StorageKeys.PROFILE, JSON.stringify(profile));
-}
-
-export async function updateXP(xpToAdd: number): Promise<LocalProfile> {
-  const profile = (await getLocalProfile()) ?? {
-    username: DEFAULT_USERNAME,
-    totalXP: 0,
-    level: 1,
-    gamesPlayed: 0,
-  };
-  const newXP = profile.totalXP + xpToAdd;
-  const newLevel = newXP <= 0 ? 1 : Math.floor(Math.sqrt(newXP / 50)) + 1;
-  const updated: LocalProfile = {
-    ...profile,
-    totalXP: newXP,
-    level: newLevel,
-    gamesPlayed: profile.gamesPlayed + 1,
-  };
-  await saveLocalProfile(updated);
-  return updated;
-}
+// Note: `getLocalProfile` / `saveLocalProfile` / `updateXP` were removed.
+// They wrote to `@brainstreak/profile` which is owned by Zustand's persist
+// middleware (`useUserStore`), so reads returned a `{state, version}`
+// wrapper instead of the bare profile and `.totalXP` was undefined →
+// `undefined + xp = NaN` permanently corrupted the user's XP and level.
+// All profile mutations now go through `useUserStore.setProfile()`.
 
 // ─── Recent Games (A11) ──────────────────────────────────────────────────────
 

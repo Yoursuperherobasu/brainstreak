@@ -14,21 +14,26 @@ import { Button } from '@/components/Button';
 import { MotionView } from '@/components/MotionView';
 import { Colors, Spacing, FontSize, Radius } from '@/constants/theme';
 import { useUserStore } from '@/store/useUserStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { DEFAULT_USERNAME } from '@/lib/storage';
 
 export default function UsernameScreen() {
   const currentUsername = useUserStore((s) => s.profile.username);
   const setUsername = useUserStore((s) => s.setUsername);
+  const setOnboarded = useSettingsStore((s) => s.setOnboarded);
   const [draft, setDraft] = useState(
     currentUsername === DEFAULT_USERNAME ? '' : currentUsername
   );
 
+  // Sign-in step is hidden until cloud sync ships. After username we mark
+  // the user onboarded and drop them straight on the Home tab.
   const handleNext = () => {
     const trimmed = draft.trim();
     if (trimmed) {
       setUsername(trimmed.slice(0, 20));
     }
-    router.push('/onboarding/sign-in-prompt');
+    setOnboarded(true);
+    router.replace('/(tabs)');
   };
 
   return (
@@ -39,7 +44,7 @@ export default function UsernameScreen() {
       >
         <View style={styles.body}>
           <MotionView entering={FadeInDown.springify()}>
-            <Text style={styles.step}>Step 2 of 3</Text>
+            <Text style={styles.step}>Last step</Text>
             <Text style={styles.title}>Pick a username</Text>
             <Text style={styles.subtitle}>
               Just for you — it shows up on your profile.

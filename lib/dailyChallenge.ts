@@ -1,6 +1,6 @@
-export type GameId = 'brain-rush' | 'word-sprint' | 'number-sense' | 'memory-match' | 'reaction-tap';
+export type GameId = 'brain-rush' | 'word-sprint' | 'number-sense' | 'memory-match' | 'reaction-tap' | 'road-rush';
 
-const GAMES: GameId[] = ['brain-rush', 'word-sprint', 'number-sense', 'memory-match', 'reaction-tap'];
+const GAMES: GameId[] = ['brain-rush', 'word-sprint', 'number-sense', 'memory-match', 'reaction-tap', 'road-rush'];
 
 function hash(s: string): number {
   let h = 0;

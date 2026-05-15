@@ -3,16 +3,17 @@ import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, {
+import {
   useSharedValue,
   useAnimatedStyle,
   withRepeat,
   withSequence,
   withTiming,
   Easing,
-  FadeIn,
 } from 'react-native-reanimated';
+import { MotionView } from '@/components/MotionView';
 import { Button } from '@/components/Button';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Colors, Gradients, Spacing, FontSize } from '@/constants/theme';
 
 export default function WelcomeScreen() {
@@ -41,23 +42,24 @@ export default function WelcomeScreen() {
 
   return (
     <LinearGradient colors={Gradients.hero} style={styles.bg}>
+      <AnimatedBackground intensity="normal" />
       <SafeAreaView style={styles.container}>
         <View style={styles.body}>
-          <Animated.View entering={FadeIn.duration(400)} style={floatStyle}>
+          <MotionView style={floatStyle}>
             <View style={styles.brandMark}>
               <Text style={styles.brandLetter}>B</Text>
             </View>
-          </Animated.View>
+          </MotionView>
           <Text style={styles.title}>BrainStreak</Text>
           <Text style={styles.tagline}>
-            60 seconds a day.{'\n'}Math, words, and the world.
+            Beat brain rot in 60 seconds a day.{'\n'}No doomscroll. Just wins.
           </Text>
 
           <View style={styles.points}>
             {[
-              ['01', '5 questions, 15 seconds each'],
-              ['02', 'Daily streaks without the clutter'],
-              ['03', 'Math, English, and general knowledge'],
+              ['01', '6 arcade games to flex your brain'],
+              ['02', 'Daily streak, zero clutter, fully offline'],
+              ['03', 'Sharpen logic, words & memory — beat the fog'],
             ].map(([step, text]) => (
               <View key={text} style={styles.point}>
                 <Text style={styles.pointStep}>{step}</Text>

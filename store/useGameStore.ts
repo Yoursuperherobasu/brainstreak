@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { TriviaQuestion, RoundResult, calculatePoints, calculateXP } from '@/lib/trivia';
-import { updateStreakAfterGame, updateXP, recordGame } from '@/lib/storage';
+import { TriviaQuestion, RoundResult, calculatePoints, calculateXP, getLevelFromXP } from '@/lib/trivia';
+import { computeStreakAfterGame, recordGame, todayISO, yesterdayISO, type LocalProfile } from '@/lib/storage';
 import { Config } from '@/constants/config';
 import { evaluate } from '@/lib/achievements';
 import { useAchievementsStore } from '@/store/useAchievementsStore';
@@ -142,18 +142,35 @@ export const useGameStore = create<GameState>((set, get) => ({
   finishGame: async () => {
     const { totalScore, correctCount, category, questions } = get();
 
-    // A9: capture pre-game level so we can detect a level-up.
+    // Zustand owns profile + streak. We READ the current values from
+    // useUserStore, compute the new values in memory, and write them back
+    // ONCE via setProfile/setStreak. The legacy lib/storage helpers
+    // (updateXP, updateStreakAfterGame) collide with Zustand's persist key
+    // and corrupt state to NaN — we no longer call them.
     // require() avoids a circular import between the two stores.
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { useUserStore } = require('@/store/useUserStore');
-    const previousLevel: number = useUserStore.getState().profile.level;
+    const user = useUserStore.getState();
+    const previousLevel: number = user.profile.level;
+    const previousStreak = user.streak;
 
     try {
-      const streak = await updateStreakAfterGame();
-      const xp = calculateXP(totalScore, streak.current);
-      const updatedProfile = await updateXP(xp);
+      // 1. Pure streak math from the in-memory streak.
+      const newStreak = computeStreakAfterGame(previousStreak, todayISO(), yesterdayISO());
 
-      // A11: persist this game to the recent-games ring buffer.
+      // 2. XP for this round (streak-multiplied).
+      const xp = calculateXP(totalScore, newStreak.current);
+
+      // 3. Updated profile (derive level from totalXP — no drift).
+      const newTotalXP = user.profile.totalXP + xp;
+      const updatedProfile: LocalProfile = {
+        ...user.profile,
+        totalXP: newTotalXP,
+        level: getLevelFromXP(newTotalXP),
+        gamesPlayed: user.profile.gamesPlayed + 1,
+      };
+
+      // 4. Append to the recent-games ring buffer (separate key — safe).
       const recent = await recordGame({
         category,
         score: totalScore,
@@ -163,13 +180,11 @@ export const useGameStore = create<GameState>((set, get) => ({
         at: new Date().toISOString(),
       });
 
-      // Phase 6: evaluate achievements against the post-game snapshot and
-      // record any newly-unlocked ones so the root toast can surface them.
-      const unlockedIds = evaluate({ profile: updatedProfile, streak, recent });
+      // 5. Evaluate achievements on the post-game snapshot.
+      const unlockedIds = evaluate({ profile: updatedProfile, streak: newStreak, recent });
       const fresh = useAchievementsStore.getState().recordUnlocked(unlockedIds);
 
-      // A8: set phase + xpEarned + leveledUp atomically so the recap renders
-      // the final values on first paint (no +0 XP flicker).
+      // 6. Atomic recap update (phase + xp + level-up + pending unlocks).
       set({
         phase: 'gameover',
         xpEarned: xp,
@@ -177,14 +192,14 @@ export const useGameStore = create<GameState>((set, get) => ({
         ...(fresh.length > 0 ? { pendingAchievementIds: fresh } : {}),
       });
 
-      // Sync useUserStore in-memory copy with persisted state.
-      useUserStore.getState().setProfile(updatedProfile);
-      useUserStore.getState().setStreak(streak);
-      // Cloud push is best-effort and must not block the UI.
-      useUserStore.getState().pushIfAuthed().catch(() => {});
+      // 7. Commit to Zustand-persisted state.
+      user.setProfile(updatedProfile);
+      user.setStreak(newStreak);
+
+      // 8. Cloud push is best-effort and must not block the UI.
+      user.pushIfAuthed().catch(() => {});
     } catch (err) {
-      console.warn('[GameStore] Failed to save results:', err);
-      // Still advance to recap so the player isn't stuck on the last question.
+      if (__DEV__) console.warn('[GameStore] Failed to save results:', err);
       set({ phase: 'gameover' });
     }
   },

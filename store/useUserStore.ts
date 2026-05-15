@@ -75,13 +75,24 @@ export const useUserStore = create<UserState>()(
       bootstrapAuth: async () => {
         if (get().bootstrapped) return;
         try {
-          const { userId } = await getCurrentSession();
-          if (userId) {
-            set({ authState: 'authenticated', authedUserId: userId });
-            await get().signInAndSync(userId);
+          // Race the session probe against a short timeout so a network
+          // hang doesn't leave us stuck on authState:'unknown' (which the
+          // root layout treats as "still loading"). If the network is dead
+          // or DNS hangs, we fall through to anonymous after 2.5s.
+          const session = await Promise.race([
+            getCurrentSession(),
+            new Promise<{ userId: null }>((resolve) =>
+              setTimeout(() => resolve({ userId: null }), 2500),
+            ),
+          ]);
+          if (session.userId) {
+            set({ authState: 'authenticated', authedUserId: session.userId });
+            await get().signInAndSync(session.userId);
           } else if (get().authState === 'unknown') {
             set({ authState: 'anonymous' });
           }
+        } catch {
+          if (get().authState === 'unknown') set({ authState: 'anonymous' });
         } finally {
           set({ bootstrapped: true });
         }

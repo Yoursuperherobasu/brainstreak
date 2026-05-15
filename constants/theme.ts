@@ -114,8 +114,17 @@ export const CATEGORIES = [
 ] as const;
 
 export const MOTIVATIONAL_QUOTES = [
-  { text: "Five quick questions. Keep the habit moving.", author: "BrainStreak" },
-  { text: "Small rounds add up when you come back daily.", author: "BrainStreak" },
-  { text: "A clean streak starts with one round.", author: "BrainStreak" },
-  { text: "Quick recall gets better with repetition.", author: "BrainStreak" },
+  // Brain-rot / brain-fog energy — short, punchy, gen-Z friendly.
+  { text: "Beat brain rot. One round a day keeps the algorithm at bay.", author: "BrainStreak" },
+  { text: "60 seconds of thinking > 60 minutes of scrolling.", author: "BrainStreak" },
+  { text: "Your brain called. It wants its dopamine back.", author: "BrainStreak" },
+  { text: "Skill issue? Fix it. One question at a time.", author: "BrainStreak" },
+  { text: "Brain fog hates this one simple trick.", author: "BrainStreak" },
+  { text: "Touch grass. Then touch this app. Balance.", author: "BrainStreak" },
+  { text: "Daily reps build a brain that doesn't quit.", author: "BrainStreak" },
+  { text: "Logged in to think, not to scroll. Let's go.", author: "BrainStreak" },
+  { text: "Small rounds compound. Streaks beat slumps.", author: "BrainStreak" },
+  { text: "Five quick questions. Brain on, fog off.", author: "BrainStreak" },
+  { text: "Stay sharp. The world is loud, your mind doesn't have to be.", author: "BrainStreak" },
+  { text: "No XP, no growth. Earn yours today.", author: "BrainStreak" },
 ];

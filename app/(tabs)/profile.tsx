@@ -12,8 +12,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Card, StatCard } from '@/components/Card';
-import { StreakBadge } from '@/components/StreakBadge';
 import { XPBar } from '@/components/XPBar';
 import { SectionHeader } from '@/components/SectionHeader';
 import { SettingsRow } from '@/components/SettingsRow';
@@ -99,6 +99,7 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <AnimatedBackground intensity="subtle" />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         <MotionView entering={FadeInDown.springify()}>
           <LinearGradient colors={Gradients.primary} style={styles.heroCard}>
@@ -141,7 +142,17 @@ export default function ProfileScreen() {
 
         <MotionView entering={FadeInDown.delay(80).springify()}>
           <Card style={styles.streakCard}>
-            <StreakBadge streak={streak.current} size="md" atRisk={atRisk} />
+            <View style={styles.streakLeft}>
+              <Text style={styles.streakBigNum}>{streak.current}</Text>
+              <Text style={styles.streakUnit}>
+                {streak.current === 0
+                  ? 'Start your streak'
+                  : atRisk
+                  ? 'Play today to keep it'
+                  : streak.current === 1 ? 'day streak' : 'day streak'}
+              </Text>
+            </View>
+            <View style={styles.streakDivider} />
             <View style={styles.streakRight}>
               <Text style={styles.streakBestLabel}>Best streak</Text>
               <Text style={styles.streakBest}>{streak.longest} {streak.longest === 1 ? 'day' : 'days'}</Text>
@@ -152,23 +163,8 @@ export default function ProfileScreen() {
           </Card>
         </MotionView>
 
-        {authState !== 'authenticated' && (
-          <MotionView entering={FadeInDown.delay(120).springify()}>
-            <Card style={styles.signInCard}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.signInTitle}>Sync across devices</Text>
-                <Text style={styles.signInBody}>
-                  Sign in to keep your XP, streak, and level safe on every device.
-                </Text>
-              </View>
-              <Button
-                label="Sign in"
-                size="sm"
-                onPress={() => router.push('/auth/sign-in')}
-              />
-            </Card>
-          </MotionView>
-        )}
+        {/* Sign-in CTA temporarily removed — app runs anonymous-only for now.
+            Re-enable when cloud sync is ready to ship. */}
 
         <MotionView entering={FadeInDown.delay(160).springify()}>
           <SectionHeader title="Stats" />
@@ -326,8 +322,32 @@ const styles = StyleSheet.create({
   streakCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.lg,
+    gap: Spacing.md,
     marginBottom: Spacing.md,
+  },
+  streakLeft: {
+    minWidth: 90,
+    alignItems: 'center',
+    gap: 2,
+  },
+  streakBigNum: {
+    fontSize: 44,
+    lineHeight: 48,
+    color: Colors.textPrimary,
+    fontFamily: 'BagelFatOne_400Regular',
+  },
+  streakUnit: {
+    fontSize: FontSize.xs,
+    color: Colors.textSecondary,
+    fontFamily: 'PlusJakartaSans_600SemiBold',
+    textAlign: 'center',
+    maxWidth: 110,
+  },
+  streakDivider: {
+    width: 1,
+    alignSelf: 'stretch',
+    backgroundColor: Colors.border,
+    marginVertical: 4,
   },
   streakRight: { flex: 1, gap: 4 },
   streakBestLabel: {

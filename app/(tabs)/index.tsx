@@ -16,24 +16,26 @@ import Animated, {
   FadeInDown,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StreakBadge, StreakPill } from '@/components/StreakBadge';
+import { StreakPill } from '@/components/StreakBadge';
 import { Card, StatCard } from '@/components/Card';
 import { XPBar } from '@/components/XPBar';
 import { Button } from '@/components/Button';
 import { SectionHeader } from '@/components/SectionHeader';
 import { MotionView } from '@/components/MotionView';
 import { Colors, Gradients, Spacing, FontSize, MOTIVATIONAL_QUOTES } from '@/constants/theme';
-import { hasPlayedToday, getStreakData, isStreakAtRisk, todayISO, yesterdayISO, getRecentGames, RecentGame } from '@/lib/storage';
+import { hasPlayedToday, isStreakAtRisk, todayISO, yesterdayISO, getRecentGames, RecentGame } from '@/lib/storage';
 import { useUserStore } from '@/store/useUserStore';
 import { getXPForNextLevel } from '@/lib/trivia';
 import { ssrSafeRandomIndex, ssrSafeTimeOfDay } from '@/lib/ssrSafe';
 import { DailyChallengeCard } from '@/components/DailyChallengeCard';
 import { SkeletonCard } from '@/components/SkeletonCard';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { HeroSheen } from '@/components/HeroSheen';
+import { audio } from '@/lib/audio';
 
 export default function HomeScreen() {
   const profile = useUserStore((s) => s.profile);
   const streak = useUserStore((s) => s.streak);
-  const setStreak = useUserStore((s) => s.setStreak);
 
   const [playedToday, setPlayedToday] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -56,15 +58,13 @@ export default function HomeScreen() {
     opacity: headerOpacity.value,
   }));
 
+  // Zustand owns the source of truth for streak + profile. Home just
+  // refreshes the recent-games ring buffer (separate AsyncStorage key) and
+  // re-evaluates the played-today flag against the in-memory streak.
   const refreshState = async () => {
-    const [s, played, rg] = await Promise.all([
-      getStreakData(),
-      hasPlayedToday(),
-      getRecentGames(),
-    ]);
-    setStreak(s);
-    setPlayedToday(played);
+    const rg = await getRecentGames();
     setRecent(rg);
+    setPlayedToday(hasPlayedToday(streak));
   };
 
   useFocusEffect(
@@ -91,6 +91,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <AnimatedBackground intensity="subtle" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
@@ -115,12 +116,13 @@ export default function HomeScreen() {
             end={{ x: 1, y: 1 }}
             style={styles.heroCard}
           >
-            <StreakBadge
-              streak={streak.current}
-              size="lg"
-              showLabel
-              atRisk={isStreakAtRisk(streak, todayISO(), yesterdayISO())}
-            />
+            <HeroSheen />
+            <View style={styles.heroLeft}>
+              <Text style={styles.heroStreakNumber}>{streak.current}</Text>
+              <Text style={styles.heroStreakUnit}>
+                {streak.current === 1 ? 'day' : 'days'}
+              </Text>
+            </View>
             <View style={styles.heroRight}>
               <Text style={styles.heroTitle}>{heroLabel}</Text>
               <Text style={styles.heroSub}>
@@ -151,6 +153,18 @@ export default function HomeScreen() {
             <SkeletonCard height={64} />
             <SkeletonCard height={64} />
             <SkeletonCard height={64} />
+          </MotionView>
+        )}
+
+        {recent !== null && recent.length === 0 && (
+          <MotionView entering={FadeInDown.delay(300).springify()}>
+            <SectionHeader title="Recent activity" />
+            <Card style={styles.recentEmptyCard}>
+              <Text style={styles.recentEmptyTitle}>No rounds yet</Text>
+              <Text style={styles.recentEmptySub}>
+                Finish a quick round and your last 5 games show up here.
+              </Text>
+            </Card>
           </MotionView>
         )}
 
@@ -230,6 +244,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.lg,
     marginBottom: Spacing.md,
+    overflow: 'hidden', // clip the HeroSheen streak to the card rounding
+    position: 'relative',
+  },
+  heroLeft: {
+    minWidth: 72,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+  },
+  heroStreakNumber: {
+    fontSize: 40,
+    lineHeight: 44,
+    color: '#FFFFFF',
+    fontFamily: 'BagelFatOne_400Regular',
+  },
+  heroStreakUnit: {
+    fontSize: FontSize.xs,
+    color: 'rgba(255,255,255,0.78)',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginTop: 2,
   },
   heroRight: { flex: 1 },
   heroTitle: {
@@ -259,6 +298,18 @@ const styles = StyleSheet.create({
   },
   ctaWrap: { marginTop: Spacing.sm },
   recentCard: { gap: 10, marginBottom: Spacing.md },
+  recentEmptyCard: { gap: 6, marginBottom: Spacing.md, alignItems: 'flex-start' },
+  recentEmptyTitle: {
+    fontSize: FontSize.md,
+    color: Colors.textPrimary,
+    fontFamily: 'BricolageGrotesque_700Bold',
+  },
+  recentEmptySub: {
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+    fontFamily: 'PlusJakartaSans_400Regular',
+    lineHeight: 20,
+  },
   recentRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   recentEmoji: {
     width: 28,

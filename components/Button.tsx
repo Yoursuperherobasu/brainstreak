@@ -16,6 +16,7 @@ import Animated, {
   withSequence,
 } from 'react-native-reanimated';
 import { haptics } from '@/lib/haptics';
+import { audio } from '@/lib/audio';
 import { Colors, Radius, FontSize, Shadow } from '@/constants/theme';
 
 interface ButtonProps {
@@ -58,6 +59,7 @@ export function Button({
       withSpring(1, { damping: 18, stiffness: 240 })
     );
     haptics.light();
+    audio.tap();
     onPress();
   };
 

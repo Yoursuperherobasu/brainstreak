@@ -40,6 +40,14 @@ describe('calculatePoints', () => {
   test('overshoot timeTaken (>limit) does not produce negative bonus', () => {
     expect(calculatePoints(true, 'easy', 30, 15)).toBe(100);
   });
+
+  test('sub-second answer time produces a different bonus than 1s answer', () => {
+    // FIX-3: previously timeTaken was Math.floor()-ed to integer seconds in
+    // the session screen, collapsing 100ms and 900ms to the same bonus.
+    const fast    = calculatePoints(true, 'easy', 0.1, 15);
+    const slower  = calculatePoints(true, 'easy', 0.9, 15);
+    expect(fast).toBeGreaterThan(slower);
+  });
 });
 
 describe('calculateXP', () => {

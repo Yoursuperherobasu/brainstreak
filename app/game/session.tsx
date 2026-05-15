@@ -7,6 +7,7 @@ import {
   ScrollView,
   Alert,
   BackHandler,
+  Platform,
 } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -56,6 +57,17 @@ export default function GameSessionScreen() {
 
   const profile = useUserStore((s) => s.profile);
 
+  // Guard: if a user navigates directly to /game/session without going
+  // through /play (e.g. by typing the URL or refreshing on the route),
+  // there are no questions in the store and the screen renders blank.
+  // Bounce them back to Play so they can pick a category.
+  useEffect(() => {
+    if (phase === 'idle' && questions.length === 0) {
+      const t = setTimeout(() => router.replace('/play'), 0);
+      return () => clearTimeout(t);
+    }
+  }, [phase, questions.length]);
+
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number>(Date.now());
   const tickedRef = useRef<Set<number>>(new Set());
@@ -66,23 +78,33 @@ export default function GameSessionScreen() {
   const [countdownNum, setCountdownNum] = useState<number>(Config.COUNTDOWN_SECONDS);
 
   // ── Quit confirmation (A12) ────────────────────────────────────────────
+  // Always returns to /play. On web, Alert.alert is a no-op so the dialog
+  // never shows and the screen feels frozen — fall back to window.confirm.
+  const quit = useCallback(() => {
+    resetGame();
+    // Replace (not back) so direct-linkers and refresh-on-game don't get
+    // stuck without a history entry.
+    router.replace('/play');
+  }, [resetGame]);
+
   const confirmQuit = useCallback(() => {
+    if (Platform.OS === 'web') {
+      // eslint-disable-next-line no-alert
+      const ok = typeof window !== 'undefined'
+        ? window.confirm('Quit the round? Your progress in this round will be lost.')
+        : true;
+      if (ok) quit();
+      return;
+    }
     Alert.alert(
       'Quit game?',
       'Your progress in this round will be lost.',
       [
         { text: 'Keep playing', style: 'cancel' },
-        {
-          text: 'Quit',
-          style: 'destructive',
-          onPress: () => {
-            resetGame();
-            router.back();
-          },
-        },
+        { text: 'Quit', style: 'destructive', onPress: quit },
       ]
     );
-  }, [resetGame]);
+  }, [quit]);
 
   // Hardware back button on Android during play / result (not gameover).
   useEffect(() => {
@@ -164,7 +186,10 @@ export default function GameSessionScreen() {
 
   const handleAnswer = (answer: string) => {
     if (timerRef.current) clearInterval(timerRef.current);
-    const timeTaken = Math.floor((Date.now() - startTimeRef.current) / 1000);
+    // Float seconds, NOT integer: 100ms and 900ms must produce different
+    // speed bonuses. Math.floor here previously collapsed every sub-second
+    // answer to 0s, making the speed bonus binary.
+    const timeTaken = (Date.now() - startTimeRef.current) / 1000;
     const isCorrect = answer === currentQuestion?.correct_answer;
     if (isCorrect) {
       correctStreakRef.current += 1;
@@ -187,6 +212,39 @@ export default function GameSessionScreen() {
   if (phase === 'countdown') {
     return (
       <LinearGradient colors={[Colors.bg, Colors.bgElevated]} style={styles.fullscreen}>
+        {/* Floating X close button — user can back out before the round starts. */}
+        <View style={styles.countdownExitWrap}>
+          {Platform.OS === 'web' ? (
+            // eslint-disable-next-line react/forbid-elements
+            <button
+              type="button"
+              onClick={confirmQuit}
+              aria-label="Quit round"
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 22,
+                border: 'none',
+                backgroundColor: Colors.bgElevated,
+                color: Colors.textSecondary,
+                fontSize: 20,
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 0,
+                fontFamily: 'BricolageGrotesque_700Bold',
+              }}
+            >
+              ✕
+            </button>
+          ) : (
+            <TouchableOpacity onPress={confirmQuit} style={styles.closeBtn} hitSlop={12}>
+              <Text style={styles.closeTxt}>✕</Text>
+            </TouchableOpacity>
+          )}
+        </View>
         <MotionView key={countdownNum} entering={ZoomIn.duration(400)} style={styles.countdownContainer}>
           <Text style={styles.countdownNumber}>{countdownNum}</Text>
           <Text style={styles.countdownLabel}>Get Ready!</Text>
@@ -211,7 +269,7 @@ export default function GameSessionScreen() {
 
     if (showConfetti && !fanfarePlayedRef.current) {
       fanfarePlayedRef.current = true;
-      audio.fanfare();
+      audio.levelup();
     }
 
     return (
@@ -315,9 +373,38 @@ export default function GameSessionScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.topBar}>
-        <TouchableOpacity onPress={confirmQuit} style={styles.closeBtn}>
-          <Text style={styles.closeTxt}>✕</Text>
-        </TouchableOpacity>
+        {/* Web uses a real <button> so the click is bulletproof; native
+            keeps TouchableOpacity for haptics/ripple. */}
+        {Platform.OS === 'web' ? (
+          // eslint-disable-next-line react/forbid-elements
+          <button
+            type="button"
+            onClick={confirmQuit}
+            aria-label="Quit round"
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 22,
+              border: 'none',
+              backgroundColor: Colors.bgElevated,
+              color: Colors.textSecondary,
+              fontSize: 20,
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 0,
+              fontFamily: 'BricolageGrotesque_700Bold',
+            }}
+          >
+            ✕
+          </button>
+        ) : (
+          <TouchableOpacity onPress={confirmQuit} style={styles.closeBtn} hitSlop={12}>
+            <Text style={styles.closeTxt}>✕</Text>
+          </TouchableOpacity>
+        )}
         <Text style={styles.progressLabel}>
           {currentIndex + 1} / {questions.length}
         </Text>
@@ -369,6 +456,7 @@ export default function GameSessionScreen() {
 
 const styles = StyleSheet.create({
   fullscreen: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  countdownExitWrap: { position: 'absolute', top: Spacing.lg, left: Spacing.md, zIndex: 10 },
   container: { flex: 1, backgroundColor: Colors.bg },
   countdownContainer: { alignItems: 'center' },
   countdownNumber: {

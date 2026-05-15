@@ -123,7 +123,14 @@ export default function RootLayout() {
           stretch into a wall of whitespace on desktop. On native the
           wrapper is a no-op flex passthrough. */}
       <View style={styles.frame} pointerEvents="box-none">
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.bg } }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: Colors.bg },
+          // Snappier than the 350ms default — feels more like a 2026 app.
+          animationDuration: 220,
+        }}
+      >
         <Stack.Screen name="(tabs)" />
         <Stack.Screen
           name="game/session"
@@ -169,6 +176,10 @@ export default function RootLayout() {
             animation: 'fade',
             presentation: 'fullScreenModal',
           }}
+        />
+        <Stack.Screen
+          name="game/road-rush"
+          options={{ animation: 'slide_from_bottom', gestureEnabled: false }}
         />
         <Stack.Screen
           name="+not-found"

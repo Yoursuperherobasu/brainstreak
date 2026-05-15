@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Colors, FontSize, Radius, Shadow } from '@/constants/theme';
 import { haptics } from '@/lib/haptics';
+import { audio } from '@/lib/audio';
 
 interface CategoryTileProps {
   label: string;
@@ -28,6 +29,7 @@ export function CategoryTile({ label, color, selected, onPress }: CategoryTilePr
       scale.value = withSpring(1, { damping: 12, stiffness: 300 });
     });
     haptics.selection();
+    audio.select();
     onPress();
   };
 

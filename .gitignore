@@ -46,3 +46,11 @@ graphify-out/
 
 # local env
 .env
+
+# Local screenshot/test artifacts
+/e2e-out/
+/smoke-out/
+/probe-out/
+/test_bug.js
+.claude/worktrees/
+.claude/agents/
