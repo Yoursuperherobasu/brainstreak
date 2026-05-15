@@ -10,6 +10,8 @@ import { Button } from '@/components/Button';
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { LetterTile } from '@/components/games/word/LetterTile';
+import { SolveHalo } from '@/components/games/word/SolveHalo';
 import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 import { usePausableInterval } from '@/lib/usePausableInterval';
@@ -29,6 +31,12 @@ export default function WordSprintScreen() {
   const [newBest, setNewBest] = useState(false);
   const [prevBest, setPrevBest] = useState(0);
   const recordedRef = useRef(false);
+  // Cartoon flourishes: bump `popKey` to trigger letter-tile slot pop on
+  // valid submit; bump `haloKey` for the golden halo behind the input row.
+  const [popKey, setPopKey] = useState(0);
+  const [haloKey, setHaloKey] = useState(0);
+  // Bumped when letters are reshuffled so the entrance staggers replay.
+  const [tilesKey, setTilesKey] = useState(0);
 
   useEffect(() => {
     setRound(generateAnagramRound({ minLetters: 5, maxLetters: 6, level: 1 }));
@@ -81,6 +89,11 @@ export default function WordSprintScreen() {
       setScore((s) => s + result.points);
       setUsed((u) => new Set(u).add(input.toLowerCase().trim()));
       haptics.success();
+      // Trigger cartoon flourishes only for valid solves so the screen stays
+      // calm on misses. popKey cascades a per-tile pop; haloKey expands a
+      // golden glow behind the answer row.
+      setPopKey((k) => k + 1);
+      setHaloKey((k) => k + 1);
     } else {
       haptics.error();
     }
@@ -91,6 +104,7 @@ export default function WordSprintScreen() {
     if (!round) return;
     const shuffled = [...round.letters].sort(() => Math.random() - 0.5);
     setRound({ ...round, letters: shuffled });
+    setTilesKey((k) => k + 1);
     haptics.light();
   };
 
@@ -112,22 +126,31 @@ export default function WordSprintScreen() {
           <Text style={styles.hint}>Make as many words as you can from these letters.</Text>
           <View style={styles.letters}>
             {round.letters.map((c, i) => (
-              <View key={i} style={styles.letterTile}><Text style={styles.letterText}>{c.toUpperCase()}</Text></View>
+              <LetterTile
+                key={`${tilesKey}-${i}`}
+                letter={c}
+                index={i}
+                popKey={popKey}
+                active={phase === 'playing'}
+              />
             ))}
           </View>
-          <TextInput
-            value={input}
-            onChangeText={setInput}
-            placeholder="Type a word…"
-            placeholderTextColor={Colors.textMuted}
-            autoCapitalize="none"
-            autoCorrect={false}
-            onSubmitEditing={submit}
-            style={styles.input}
-          />
-          <View style={styles.row}>
-            <Button label="Submit" onPress={submit} />
-            <Button label="Reshuffle" onPress={reshuffle} variant="secondary" />
+          <View style={styles.answerRow}>
+            <SolveHalo burstKey={haloKey} />
+            <TextInput
+              value={input}
+              onChangeText={setInput}
+              placeholder="Type a word…"
+              placeholderTextColor={Colors.textMuted}
+              autoCapitalize="none"
+              autoCorrect={false}
+              onSubmitEditing={submit}
+              style={styles.input}
+            />
+            <View style={styles.row}>
+              <Button label="Submit" onPress={submit} />
+              <Button label="Reshuffle" onPress={reshuffle} variant="secondary" />
+            </View>
           </View>
           {used.size > 0 && (
             <View style={styles.usedWrap}>
@@ -173,23 +196,9 @@ const styles = StyleSheet.create({
   body: { flex: 1, padding: Spacing.md, gap: Spacing.md, backgroundColor: PAPER_BG },
   hint: { color: PAPER_INK, fontSize: FontSize.sm, fontFamily: 'PlusJakartaSans_600SemiBold' },
   letters: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, justifyContent: 'center', paddingVertical: Spacing.sm },
-  letterTile: {
-    width: 56,
-    height: 64,
-    borderRadius: Radius.md,
-    backgroundColor: PAPER_TILE,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: PAPER_GOLD,
-    // Soft Scrabble-like shadow.
-    shadowColor: '#5A4A2A',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.18,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  letterText: { fontSize: FontSize.xxl, color: PAPER_INK, fontFamily: 'BagelFatOne_400Regular' },
+  // Wraps the input + action row so the SolveHalo (absolutely positioned)
+  // sits behind both and glows the whole answer area on solve.
+  answerRow: { position: 'relative', gap: Spacing.md },
   input: {
     backgroundColor: PAPER_TILE,
     color: PAPER_INK,
