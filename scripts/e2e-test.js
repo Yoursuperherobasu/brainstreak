@@ -84,14 +84,43 @@ async function run() {
   await page.waitForTimeout(1200);
   await shot(page, '02-play');
 
-  // 3. Verify the 5 mini-game tile titles are present on Play.
+  // 3. Verify all 8 mini-game tile titles are present on Play.
   step('3. Verify mini-game tiles are visible');
-  const mini = ['Word Sprint', 'Number Sense', 'Memory Match', 'Reaction Tap', 'Road Rush'];
+  const mini = [
+    'Word Sprint',
+    'Number Sense',
+    'Memory Match',
+    'Reaction Tap',
+    'Road Rush',
+    'Color Trap',
+    'Odd One Out',
+    'Pattern Recall',
+  ];
   for (const name of mini) {
     const count = await page.getByText(name, { exact: false }).count();
     log.push(`  tile "${name}": ${count} matches`);
     if (count === 0) errors.push(`MISSING TILE: ${name}`);
   }
+
+  // 3b. For each new game, navigate directly to /game/<id> and verify the
+  //     screen renders (no pageerror, screen title in DOM).
+  for (const pair of [
+    ['color-trap', 'Color Trap'],
+    ['odd-one-out', 'Odd One Out'],
+    ['pattern-recall', 'Pattern Recall'],
+  ]) {
+    const id = pair[0], title = pair[1];
+    step(`3b. Visit /game/${id}`);
+    await page.goto(BASE + `/game/${id}`, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1200);
+    await shot(page, `02b-${id}`);
+    const t = await page.getByText(title, { exact: false }).count();
+    log.push(`  title "${title}" matches: ${t}`);
+    if (t === 0) errors.push(`MISSING GAME SCREEN: ${title}`);
+  }
+  // Return to play before the click test.
+  await page.goto(BASE + '/play', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(800);
 
   // 4. Try clicking the Word Sprint tile by its visible text.
   step('4. Click "Word Sprint" tile');
