@@ -11,6 +11,8 @@ import { spawnTarget, windowMs, type Target } from '@/lib/games/reactionTap';
 import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 import { usePausableInterval } from '@/lib/usePausableInterval';
+import { ConfettiBurst } from '@/components/ConfettiBurst';
+import { audio } from '@/lib/audio';
 
 const ROUND_SECONDS = 20;
 const DOT_SIZE = 72;
@@ -21,6 +23,7 @@ export default function ReactionTapScreen() {
   const [misses, setMisses] = useState(0);
   const [seconds, setSeconds] = useState(ROUND_SECONDS);
   const [phase, setPhase] = useState<'playing' | 'over'>('playing');
+  const [leveledUp, setLeveledUp] = useState(false);
   // We measure the play area via onLayout so we don't depend on
   // useWindowDimensions, which returns 0 during SSR / first paint and
   // collapsed the field on web.
@@ -70,6 +73,11 @@ export default function ReactionTapScreen() {
       xp,
       total: score + misses,
       correct: score,
+    }).then((res) => {
+      if (res.leveledUp) {
+        setLeveledUp(true);
+        audio.levelup();
+      }
     }).catch(() => {});
   }, [phase, score, misses]);
 
@@ -123,6 +131,7 @@ export default function ReactionTapScreen() {
         </View>
       ) : (
         <View style={styles.body}>
+          {leveledUp && <ConfettiBurst trigger={true} />}
           <GameOverCard
             title="Time!"
             score={score}

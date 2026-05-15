@@ -13,6 +13,8 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 import { usePausableInterval } from '@/lib/usePausableInterval';
+import { ConfettiBurst } from '@/components/ConfettiBurst';
+import { audio } from '@/lib/audio';
 
 const ROUND_SECONDS = 60;
 
@@ -23,6 +25,7 @@ export default function WordSprintScreen() {
   const [used, setUsed] = useState<Set<string>>(new Set());
   const [secondsLeft, setSecondsLeft] = useState(ROUND_SECONDS);
   const [phase, setPhase] = useState<'playing' | 'over'>('playing');
+  const [leveledUp, setLeveledUp] = useState(false);
   const recordedRef = useRef(false);
 
   useEffect(() => {
@@ -52,6 +55,11 @@ export default function WordSprintScreen() {
       gameId: 'word-sprint',
       score,
       xp,
+    }).then((res) => {
+      if (res.leveledUp) {
+        setLeveledUp(true);
+        audio.levelup();
+      }
     }).catch(() => {/* swallow — UI already in over state */});
   }, [phase, score]);
 
@@ -119,6 +127,7 @@ export default function WordSprintScreen() {
         </MotionView>
       ) : (
         <MotionView entering={FadeIn} style={styles.body}>
+          {leveledUp && <ConfettiBurst trigger={true} />}
           <GameOverCard
             title="Time!"
             score={score}

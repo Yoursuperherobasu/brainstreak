@@ -23,6 +23,7 @@ import { haptics } from '@/lib/haptics';
 import { audio } from '@/lib/audio';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 import { usePausableInterval } from '@/lib/usePausableInterval';
+import { ConfettiBurst } from '@/components/ConfettiBurst';
 
 const ROUND_SECONDS = 60; // shown in the timer bar; the round usually ends earlier by crash
 const FRAME_MS = 30; // ~33 FPS — smooth enough, cheap enough
@@ -33,6 +34,7 @@ export default function RoadRushScreen() {
   // running (and crashing) the instant the screen mounts. It also satisfies
   // Chrome's autoplay policy — bgStart() only runs after the first user tap.
   const [phase, setPhase] = useState<'idle' | 'playing' | 'over'>('idle');
+  const [leveledUp, setLeveledUp] = useState(false);
   const [seconds, setSeconds] = useState(ROUND_SECONDS);
   const [fieldSize, setFieldSize] = useState({ w: 0, h: 0 });
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -101,6 +103,11 @@ export default function RoadRushScreen() {
       score: meters,
       xp,
       total: state.obstacles.length,
+    }).then((res) => {
+      if (res.leveledUp) {
+        setLeveledUp(true);
+        audio.levelup();
+      }
     }).catch(() => {});
   }, [phase, state.distance, state.obstacles.length]);
 
@@ -123,6 +130,7 @@ export default function RoadRushScreen() {
     // Start in idle so the player has a beat to focus before the loop fires.
     setPhase('idle');
     setSeconds(ROUND_SECONDS);
+    setLeveledUp(false);
     recordedRef.current = false;
   };
 
@@ -216,6 +224,7 @@ export default function RoadRushScreen() {
         </Pressable>
       ) : (
         <View style={styles.body}>
+          {leveledUp && <ConfettiBurst trigger={true} />}
           <GameOverCard
             title={state.alive ? 'Time!' : 'Crash'}
             score={score}

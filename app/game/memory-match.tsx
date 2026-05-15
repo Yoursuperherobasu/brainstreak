@@ -10,6 +10,8 @@ import { GameOverCard } from '@/components/games/GameOverCard';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
+import { ConfettiBurst } from '@/components/ConfettiBurst';
+import { audio } from '@/lib/audio';
 
 const TILES = [Colors.primary, Colors.accent, Colors.gold, Colors.success];
 const FLASH_MS = 480;
@@ -22,6 +24,7 @@ export default function MemoryMatchScreen() {
   const [round, setRound] = useState(1);
   const [score, setScore] = useState(0);
   const [activeTile, setActiveTile] = useState<number | null>(null);
+  const [leveledUp, setLeveledUp] = useState(false);
   const playingRef = useRef(false);
   const recordedRef = useRef(false);
 
@@ -42,6 +45,11 @@ export default function MemoryMatchScreen() {
       xp,
       total,
       correct,
+    }).then((res) => {
+      if (res.leveledUp) {
+        setLeveledUp(true);
+        audio.levelup();
+      }
     }).catch(() => {});
   }, [phase, score, seq.length]);
 
@@ -99,6 +107,7 @@ export default function MemoryMatchScreen() {
         </View>
       ) : (
         <View style={styles.body}>
+          {leveledUp && <ConfettiBurst trigger={true} />}
           <GameOverCard
             title="Game Over"
             score={score}
@@ -107,7 +116,7 @@ export default function MemoryMatchScreen() {
               { label: 'Length', value: seq.length.toString() },
               { label: 'XP', value: Math.floor(score / 4).toString() },
             ]}
-            onPlayAgain={() => { setSeq([]); setAttempt([]); setScore(0); setRound(1); recordedRef.current = false; }}
+            onPlayAgain={() => { setSeq([]); setAttempt([]); setScore(0); setRound(1); setLeveledUp(false); recordedRef.current = false; }}
             onExit={() => router.replace('/play')}
           />
         </View>

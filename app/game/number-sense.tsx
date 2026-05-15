@@ -12,6 +12,8 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 import { usePausableInterval } from '@/lib/usePausableInterval';
+import { ConfettiBurst } from '@/components/ConfettiBurst';
+import { audio } from '@/lib/audio';
 
 const ROUND_SECONDS = 30;
 
@@ -24,6 +26,7 @@ export default function NumberSenseScreen() {
   const [correctCount, setCorrectCount] = useState(0);
   const [seconds, setSeconds] = useState(ROUND_SECONDS);
   const [phase, setPhase] = useState<'playing' | 'over'>('playing');
+  const [leveledUp, setLeveledUp] = useState(false);
   const recordedRef = useRef(false);
 
   useEffect(() => {
@@ -52,6 +55,11 @@ export default function NumberSenseScreen() {
       gameId: 'number-sense',
       score,
       xp,
+    }).then((res) => {
+      if (res.leveledUp) {
+        setLeveledUp(true);
+        audio.levelup();
+      }
     }).catch(() => {});
   }, [phase, score]);
 
@@ -86,6 +94,7 @@ export default function NumberSenseScreen() {
         </MotionView>
       ) : (
         <View style={styles.body}>
+          {leveledUp && <ConfettiBurst trigger={true} />}
           <GameOverCard
             title="Time!"
             score={score}
