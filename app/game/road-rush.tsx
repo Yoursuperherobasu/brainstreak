@@ -268,9 +268,16 @@ export default function RoadRushScreen() {
                 since the car faces left). */}
             {fieldSize.h > 0 && (() => {
               const playerH = laneH * 0.82;
-              const carLeft = fieldSize.w - carW - 12;
+              // RIGHT_INSET keeps the player off the field's right border. The
+              // PlayerCar SVG renders wheels that extend to the full width of
+              // its box (right wheel at x = width - wheelW), so without enough
+              // breathing room the wheel + 1.5px body stroke visibly clips
+              // the 2px playfield border. 16px gives a clear visual gap.
+              const RIGHT_INSET = 16;
+              const carLeft = fieldSize.w - carW - RIGHT_INSET;
               const carTop = laneH * state.carLane + (laneH - playerH) / 2;
-              // Rear bumper anchor for puffs.
+              // Rear bumper anchor for puffs — just behind the car, still
+              // inside the field.
               const puffX = carLeft + carW + 2;
               const puffY = carTop + playerH / 2;
               return (
