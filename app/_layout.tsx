@@ -22,6 +22,8 @@ import { useUserStore } from '@/store/useUserStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { ensureForegroundHandler, getPermissionStatus } from '@/lib/notifications';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { AchievementToast } from '@/components/AchievementToast';
+import { useGameStore } from '@/store/useGameStore';
 
 // Dev-only diagnostic instrumentation — captures every click, error,
 // and unhandled rejection on web. Stripped entirely from production bundles
@@ -58,6 +60,11 @@ export default function RootLayout() {
   const dailyReminderTime = useSettingsStore((s) => s.dailyReminderTime);
   const applyReminder = useSettingsStore((s) => s.applyReminder);
   const segments = useSegments();
+
+  // Phase 6: pending achievement unlocks surface as a root-level floating toast
+  // that overlays every screen (Stack, modals, etc).
+  const pendingAchievementIds = useGameStore((s) => s.pendingAchievementIds);
+  const clearPendingAchievements = useGameStore((s) => s.clearPendingAchievements);
 
   // On native, we wait for fonts + stores to hydrate before showing UI to
   // avoid flicker. On web, useFonts() never resolves reliably for some
@@ -169,6 +176,10 @@ export default function RootLayout() {
         />
       </Stack>
       </View>
+      <AchievementToast
+        ids={pendingAchievementIds}
+        onHide={clearPendingAchievements}
+      />
     </GestureHandlerRootView>
     </ErrorBoundary>
   );
