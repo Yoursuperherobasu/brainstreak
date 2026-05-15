@@ -9,6 +9,7 @@ import { generateProblem, scoreAttempt, type Problem } from '@/lib/games/numberS
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
 import { haptics } from '@/lib/haptics';
+import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 
 const ROUND_SECONDS = 30;
 
@@ -22,6 +23,7 @@ export default function NumberSenseScreen() {
   const [seconds, setSeconds] = useState(ROUND_SECONDS);
   const [phase, setPhase] = useState<'playing' | 'over'>('playing');
   const intRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recordedRef = useRef(false);
 
   useEffect(() => {
     setProblem(generateProblem(1));
@@ -33,6 +35,19 @@ export default function NumberSenseScreen() {
     }, 1000);
     return () => { if (intRef.current) clearInterval(intRef.current); };
   }, []);
+
+  useEffect(() => {
+    if (phase !== 'over' || recordedRef.current) return;
+    recordedRef.current = true;
+    const xp = Math.floor(score / 2);
+    recordMiniGameResult({
+      gameId: 'number-sense',
+      score,
+      xp,
+      correct: correctCount,
+      total: correctCount,
+    }).catch(() => {});
+  }, [phase, score, correctCount]);
 
   const pick = (v: number) => {
     if (!problem) return;
