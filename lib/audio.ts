@@ -117,15 +117,15 @@ function stopBg() {
 // ─── Native (expo-audio with optional mp3s) ────────────────────────────────
 type NativePlayer = { seekTo: (s: number) => void; play: () => void; pause?: () => void };
 const SOURCES: Partial<Record<SoundKey, number>> = {
-  // Uncomment as each mp3 lands in assets/sounds/.
-  // tap: require('@/assets/sounds/tap.mp3'),
-  // select: require('@/assets/sounds/select.mp3'),
-  // tick: require('@/assets/sounds/tick.mp3'),
-  // correct: require('@/assets/sounds/correct.mp3'),
-  // wrong: require('@/assets/sounds/wrong.mp3'),
-  // levelup: require('@/assets/sounds/levelup.mp3'),
-  // crash: require('@/assets/sounds/crash.mp3'),
-  // bg: require('@/assets/sounds/bg.mp3'),
+  tap:     require('@/assets/sounds/tap.mp3'),
+  select:  require('@/assets/sounds/select.mp3'),
+  tick:    require('@/assets/sounds/tick.mp3'),
+  correct: require('@/assets/sounds/correct.mp3'),
+  wrong:   require('@/assets/sounds/wrong.mp3'),
+  levelup: require('@/assets/sounds/levelup.mp3'),
+  crash:   require('@/assets/sounds/crash.mp3'),
+  // bg deliberately omitted — web uses procedural drone; native gets silence
+  // on bg loop until a curated mp3 is sourced.
 };
 const nativePlayers: Partial<Record<SoundKey, NativePlayer | null>> = {};
 
