@@ -11,6 +11,8 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withSequence,
+  withTiming,
 } from 'react-native-reanimated';
 import { Colors, Radius, Spacing, FontSize, Shadow } from '@/constants/theme';
 
@@ -24,13 +26,22 @@ interface CardProps {
 
 export function Card({ children, style, onPress, gradient, noPadding }: CardProps) {
   const scale = useSharedValue(1);
+  const flashOpacity = useSharedValue(0);
 
   const animStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
+  const flashStyle = useAnimatedStyle(() => ({
+    opacity: flashOpacity.value,
+  }));
+
   const handlePressIn = () => {
     if (onPress) scale.value = withSpring(0.97, { damping: 12, stiffness: 300 });
+    flashOpacity.value = withSequence(
+      withTiming(0.18, { duration: 80 }),
+      withTiming(0, { duration: 220 }),
+    );
   };
   const handlePressOut = () => {
     scale.value = withSpring(1, { damping: 12, stiffness: 300 });
@@ -61,6 +72,10 @@ export function Card({ children, style, onPress, gradient, noPadding }: CardProp
           activeOpacity={1}
         >
           {inner}
+          <Animated.View
+            pointerEvents="none"
+            style={[StyleSheet.absoluteFillObject, { backgroundColor: Colors.primary, borderRadius: Radius.md }, flashStyle]}
+          />
         </TouchableOpacity>
       </Animated.View>
     );
