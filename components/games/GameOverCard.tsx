@@ -3,6 +3,9 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Colors, Spacing, FontSize, Radius } from '@/constants/theme';
 import { Button } from '@/components/Button';
 import { ConfettiBurst } from '@/components/ConfettiBurst';
+import { CountingNumber } from '@/components/CountingNumber';
+import { MotionView } from '@/components/MotionView';
+import { FadeInRight } from 'react-native-reanimated';
 
 interface Stat { label: string; value: string }
 
@@ -21,13 +24,22 @@ export function GameOverCard({ title, score, stats, onPlayAgain, onExit, newBest
   return (
     <View style={styles.card}>
       <Text style={styles.title}>{title}</Text>
-      <Text style={styles.score}>{score.toLocaleString()}</Text>
+      <CountingNumber
+        value={score}
+        durationMs={800}
+        formatter={(n) => n.toLocaleString()}
+        style={styles.score}
+      />
       <View style={styles.stats}>
-        {stats.map((s) => (
-          <View key={s.label} style={styles.stat}>
+        {stats.map((s, i) => (
+          <MotionView
+            key={s.label}
+            entering={FadeInRight.delay(150 + i * 80).springify()}
+            style={styles.stat}
+          >
             <Text style={styles.statValue}>{s.value}</Text>
             <Text style={styles.statLabel}>{s.label}</Text>
-          </View>
+          </MotionView>
         ))}
       </View>
       {newBest && (
