@@ -29,10 +29,32 @@ const DEFAULT_ORBS: OrbSpec[] = [
   { color: Colors.primaryLight, size: 160, top: '64%',  left: '58%',  driftX: 26, driftY: 20, durationMs: 10500, delayMs:  700, opacity: 0.12 },
 ];
 
-// Build a 4-orb spec list biased to a single tint color. Keeps the same
-// motion timing as DEFAULT_ORBS but paints all orbs from the tint.
+function shade(hex: string, percent: number): string {
+  // percent: -1..1, negative = darker, positive = lighter.
+  // Accepts #RRGGBB; if other format, returns hex unchanged.
+  const m = /^#([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return hex;
+  const num = parseInt(m[1], 16);
+  let r = (num >> 16) & 0xff;
+  let g = (num >> 8) & 0xff;
+  let b = num & 0xff;
+  if (percent >= 0) {
+    r = Math.round(r + (255 - r) * percent);
+    g = Math.round(g + (255 - g) * percent);
+    b = Math.round(b + (255 - b) * percent);
+  } else {
+    const p = 1 + percent;
+    r = Math.round(r * p);
+    g = Math.round(g * p);
+    b = Math.round(b * p);
+  }
+  const toHex = (n: number) => Math.max(0, Math.min(255, n)).toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
 function tintedOrbs(tint: string): OrbSpec[] {
-  return DEFAULT_ORBS.map((o) => ({ ...o, color: tint }));
+  const variants = [tint, shade(tint, 0.25), shade(tint, -0.15), shade(tint, 0.5)];
+  return DEFAULT_ORBS.map((o, i) => ({ ...o, color: variants[i] }));
 }
 
 interface OrbProps extends OrbSpec { parallax?: number }
