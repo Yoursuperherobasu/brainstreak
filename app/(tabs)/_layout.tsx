@@ -23,6 +23,8 @@ export default function TabsLayout() {
           headerShown: false,
           tabBarStyle: styles.tabBar,
           tabBarShowLabel: false,
+          // Slide-fade between tabs — more alive than the default instant swap.
+          animation: 'shift',
         }}
       >
         <Tabs.Screen
