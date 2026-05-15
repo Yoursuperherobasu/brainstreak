@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useFocusEffect } from 'expo-router';
+import Animated, {
+  FadeInDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withSequence,
+} from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Card, StatCard } from '@/components/Card';
@@ -31,6 +38,50 @@ import { ACHIEVEMENTS } from '@/lib/achievements';
 import { useAchievementsStore } from '@/store/useAchievementsStore';
 import { usePersonalBestStore } from '@/store/usePersonalBestStore';
 import { GAMES } from '@/constants/games';
+
+function BadgeItem({
+  achievement,
+  isUnlocked,
+  isHighlight,
+}: {
+  achievement: { id: string; title: string; description: string };
+  isUnlocked: boolean;
+  isHighlight: boolean;
+}) {
+  const scale = useSharedValue(1);
+  useEffect(() => {
+    if (isHighlight) {
+      scale.value = withSequence(
+        withSpring(1.1, { damping: 8, stiffness: 200 }),
+        withSpring(1, { damping: 12, stiffness: 180 })
+      );
+    }
+  }, [isHighlight]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        styles.badge,
+        isUnlocked ? styles.badgeUnlocked : styles.badgeLocked,
+        isHighlight && styles.badgeGlow,
+        animStyle,
+      ]}
+    >
+      <View style={[styles.badgeMark, { backgroundColor: isUnlocked ? Colors.primary : Colors.borderBright }]} />
+      <Text style={[styles.badgeTitle, !isUnlocked && styles.badgeTitleLocked]} numberOfLines={1}>
+        {achievement.title}
+      </Text>
+      <Text style={styles.badgeDesc} numberOfLines={2}>
+        {achievement.description}
+      </Text>
+      <Text style={styles.badgeState}>{isUnlocked ? 'Unlocked' : 'Locked'}</Text>
+    </Animated.View>
+  );
+}
 
 export default function ProfileScreen() {
   const profile = useUserStore((s) => s.profile);
@@ -87,6 +138,32 @@ export default function ProfileScreen() {
   };
 
   const unlocked = useAchievementsStore((s) => s.unlocked);
+
+  const prevUnlockedRef = useRef<Set<string> | null>(null);
+  const [newlyUnlocked, setNewlyUnlocked] = useState<Set<string>>(new Set());
+
+  useFocusEffect(
+    useCallback(() => {
+      const curr = new Set(unlocked);
+      if (prevUnlockedRef.current == null) {
+        // First focus: seed with current state; don't animate pre-existing unlocks.
+        prevUnlockedRef.current = curr;
+        return;
+      }
+      const fresh = new Set<string>();
+      curr.forEach((id) => {
+        if (!prevUnlockedRef.current!.has(id)) fresh.add(id);
+      });
+      if (fresh.size > 0) {
+        setNewlyUnlocked(fresh);
+        const t = setTimeout(() => setNewlyUnlocked(new Set()), 1400);
+        prevUnlockedRef.current = curr;
+        return () => clearTimeout(t);
+      }
+      prevUnlockedRef.current = curr;
+    }, [unlocked])
+  );
+
   const bests = usePersonalBestStore((s) => s.bests);
 
   const atRisk = isStreakAtRisk(streak, todayISO(), yesterdayISO());
@@ -205,19 +282,12 @@ export default function ProfileScreen() {
             {ACHIEVEMENTS.map((a) => {
               const isUnlocked = unlocked.includes(a.id);
               return (
-                <View
+                <BadgeItem
                   key={a.id}
-                  style={[styles.badge, isUnlocked ? styles.badgeUnlocked : styles.badgeLocked]}
-                >
-                  <View style={[styles.badgeMark, { backgroundColor: isUnlocked ? Colors.primary : Colors.borderBright }]} />
-                  <Text style={[styles.badgeTitle, !isUnlocked && styles.badgeTitleLocked]} numberOfLines={1}>
-                    {a.title}
-                  </Text>
-                  <Text style={styles.badgeDesc} numberOfLines={2}>
-                    {a.description}
-                  </Text>
-                  <Text style={styles.badgeState}>{isUnlocked ? 'Unlocked' : 'Locked'}</Text>
-                </View>
+                  achievement={a}
+                  isUnlocked={isUnlocked}
+                  isHighlight={newlyUnlocked.has(a.id)}
+                />
               );
             })}
           </View>
@@ -439,6 +509,14 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     borderStyle: 'dashed',
     opacity: 0.6,
+  },
+  badgeGlow: {
+    borderColor: Colors.gold,
+    borderWidth: 2,
+    shadowColor: Colors.gold,
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 0 },
   },
   badgeMark: {
     width: 24,
