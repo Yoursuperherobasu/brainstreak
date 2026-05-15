@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#F6F7F9"
+      "backgroundColor": "#FAF4E8"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -21,7 +21,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#F6F7F9"
+        "backgroundColor": "#FAF4E8"
       },
       "package": "com.brainstreak.app",
       "versionCode": 1,
@@ -46,7 +46,7 @@
         "expo-notifications",
         {
           "icon": "./assets/icon.png",
-          "color": "#2F6FED"
+          "color": "#7A3FF2"
         }
       ]
     ],

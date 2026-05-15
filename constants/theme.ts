@@ -1,55 +1,55 @@
 // BrainStreak — Color System, Theme & Design Tokens
 
 export const Colors = {
-  primary: '#2F6FED',
-  primaryLight: '#6EA1FF',
-  primaryDark: '#1E4FA8',
+  primary:       '#7A3FF2', // magenta-violet ink
+  primaryLight:  '#B596FF',
+  primaryDark:   '#4A1FB0',
 
-  accent: '#169B8F',
-  accentLight: '#7EDBD1',
+  accent:        '#FF7A2D', // tangerine
+  accentLight:   '#FFB585',
 
-  gold: '#D99921',
-  goldLight: '#F2C86B',
+  gold:          '#F2B233', // honey
+  goldLight:     '#FFD98A',
 
-  danger: '#D64B4B',
-  dangerLight: '#F6D3D3',
+  danger:        '#E84B3C', // tomato
+  dangerLight:   '#FBD2CD',
 
-  success: '#2B9B62',
-  successLight: '#C8EAD8',
+  success:       '#5BBF3B', // lime-grass
+  successLight:  '#CDEBC2',
 
-  bg: '#F6F7F9',
-  bgCard: '#FFFFFF',
-  bgElevated: '#ECEFF3',
-  bgOverlay: '#DDE3EA',
+  bg:            '#FAF4E8', // warm cream paper
+  bgCard:        '#FFFDF7',
+  bgElevated:    '#F2E9D6',
+  bgOverlay:     '#E8DCC2',
 
-  textPrimary: '#172033',
-  textSecondary: '#536174',
-  textMuted: '#8A95A5',
+  textPrimary:   '#1B1726', // warm near-black
+  textSecondary: '#5A4F6B',
+  textMuted:     '#9389A3',
 
-  border: '#E1E6EE',
-  borderBright: '#C8D1DE',
+  border:        '#E5D7C0',
+  borderBright:  '#D4BFA0',
 
-  catMath:      '#2F6FED',
-  catEnglish:   '#169B8F',
-  catGK:        '#D99921',
-  catScience:   '#169B8F',
-  catHistory:   '#D99921',
-  catTech:      '#6B5DD3',
-  catSports:    '#2B9B62',
-  catPop:       '#C75C9E',
-  catMixed:     '#6B5DD3',
-  catGeography: '#2B9B62',
+  catMath:      '#7A3FF2', // violet
+  catEnglish:   '#FF7A2D', // tangerine
+  catGK:        '#F2B233', // honey
+  catScience:   '#1FB8A8', // jade
+  catHistory:   '#C2410C', // burnt sienna
+  catTech:      '#3B82F6', // electric blue (the one sanctioned blue)
+  catSports:    '#5BBF3B', // lime
+  catPop:       '#EC4899', // hot pink
+  catMixed:     '#7A3FF2', // violet
+  catGeography: '#1FB8A8', // jade (same as science — keep it)
 };
 
 export const Gradients = {
-  primary: ['#2F6FED', '#1E4FA8'] as const,
-  accent: ['#169B8F', '#7EDBD1'] as const,
-  gold: ['#D99921', '#F2C86B'] as const,
-  hero: ['#FFFFFF', '#F6F7F9'] as const,
-  card: ['#FFFFFF', '#FBF5EA'] as const,
-  danger: ['#D64B4B', '#F07878'] as const,
-  success: ['#2B9B62', '#64C58E'] as const,
-  fire: ['#EF6A3A', '#D99921'] as const,
+  primary: ['#7A3FF2', '#4A1FB0'] as const,        // violet to deep violet
+  accent:  ['#FF7A2D', '#FFB585'] as const,         // tangerine to peach
+  gold:    ['#F2B233', '#FFD98A'] as const,         // honey to soft gold
+  hero:    ['#FAF4E8', '#F2E9D6'] as const,         // cream paper
+  card:    ['#FFFDF7', '#F2E9D6'] as const,
+  danger:  ['#E84B3C', '#FBD2CD'] as const,
+  success: ['#5BBF3B', '#CDEBC2'] as const,
+  fire:    ['#FF7A2D', '#F2B233'] as const,         // tangerine to honey
 };
 
 export const Shadow = {
