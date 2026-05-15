@@ -127,6 +127,22 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
+          name="game/word-sprint"
+          options={{ animation: 'slide_from_bottom', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="game/number-sense"
+          options={{ animation: 'slide_from_bottom', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="game/memory-match"
+          options={{ animation: 'slide_from_bottom', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="game/reaction-tap"
+          options={{ animation: 'slide_from_bottom', gestureEnabled: false }}
+        />
+        <Stack.Screen
           name="auth/sign-in"
           options={{
             animation: 'slide_from_bottom',
