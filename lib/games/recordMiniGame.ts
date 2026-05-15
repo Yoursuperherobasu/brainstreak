@@ -66,8 +66,7 @@ export async function recordMiniGameResult(r: MiniGameResult): Promise<RecordedR
   const unlockedIds = evaluate({ profile: updatedProfile, streak: newStreak, recent });
   const fresh = useAchievementsStore.getState().recordUnlocked(unlockedIds);
 
-  useUserStore.getState().setProfile(updatedProfile);
-  useUserStore.getState().setStreak(newStreak);
+  useUserStore.setState({ profile: updatedProfile, streak: newStreak });
   if (fresh.length > 0) {
     useGameStore.setState({ pendingAchievementIds: fresh });
   }
