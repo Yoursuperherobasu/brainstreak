@@ -10,6 +10,7 @@ import { Button } from '@/components/Button';
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
 import { haptics } from '@/lib/haptics';
+import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 
 const ROUND_SECONDS = 60;
 
@@ -21,6 +22,7 @@ export default function WordSprintScreen() {
   const [secondsLeft, setSecondsLeft] = useState(ROUND_SECONDS);
   const [phase, setPhase] = useState<'playing' | 'over'>('playing');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recordedRef = useRef(false);
 
   useEffect(() => {
     setRound(generateAnagramRound({ minLetters: 5, maxLetters: 6, level: 1 }));
@@ -39,6 +41,19 @@ export default function WordSprintScreen() {
     }, 1000);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, []);
+
+  useEffect(() => {
+    if (phase !== 'over' || recordedRef.current) return;
+    recordedRef.current = true;
+    const xp = Math.floor(score / 4);
+    recordMiniGameResult({
+      gameId: 'word-sprint',
+      score,
+      xp,
+      total: used.size,
+      correct: used.size,
+    }).catch(() => {/* swallow — UI already in over state */});
+  }, [phase, score, used.size]);
 
   const submit = () => {
     if (!round) return;
