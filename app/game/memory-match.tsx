@@ -1,14 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Spacing, FontSize, Radius, Shadow } from '@/constants/theme';
 import { extendSequence, isCorrectSoFar } from '@/lib/games/memoryMatch';
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { TilePulse } from '@/components/games/memory/TilePulse';
+import { ComboBanner } from '@/components/games/memory/ComboBanner';
 import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 import { audio } from '@/lib/audio';
@@ -33,8 +40,15 @@ export default function MemoryMatchScreen() {
   const [leveledUp, setLeveledUp] = useState(false);
   const [newBest, setNewBest] = useState(false);
   const [prevBest, setPrevBest] = useState(0);
+  const [comboTick, setComboTick] = useState(0);     // bumps each time a combo fires
+  const [comboBadge, setComboBadge] = useState('');  // banner label (e.g. "+3 COMBO")
+  const streakRef = useRef(0);                       // rounds-in-a-row counter
   const playingRef = useRef(false);
   const recordedRef = useRef(false);
+
+  // Grid shake for wrong tap — translateX oscillation via Reanimated.
+  const shakeX = useSharedValue(0);
+  const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shakeX.value }] }));
 
   useGameBackHandler({ enabled: phase !== 'over', onExit: () => router.replace('/play') });
 
@@ -89,18 +103,37 @@ export default function MemoryMatchScreen() {
     setPhase('input');
   };
 
+  const triggerShake = () => {
+    // 4 oscillations × 80ms = 320ms total. ±6px translateX.
+    shakeX.value = withSequence(
+      withTiming(-6, { duration: 80 }),
+      withTiming(6, { duration: 80 }),
+      withTiming(-6, { duration: 80 }),
+      withTiming(6, { duration: 80 }),
+      withTiming(0, { duration: 80 })
+    );
+  };
+
   const press = (idx: number) => {
     if (phase !== 'input') return;
     const next = [...attempt, idx];
     setAttempt(next);
     if (!isCorrectSoFar(seq, next)) {
       haptics.error();
+      triggerShake();
+      streakRef.current = 0;
       setPhase('over');
       return;
     }
     haptics.success();
     if (next.length === seq.length) {
       setScore((s) => s + seq.length * 10);
+      // Round cleared → bump streak. Every 3 in a row, flash a combo banner.
+      streakRef.current += 1;
+      if (streakRef.current > 0 && streakRef.current % 3 === 0) {
+        setComboBadge(`+${streakRef.current} COMBO`);
+        setComboTick((t) => t + 1);
+      }
       setTimeout(() => setRound((r) => r + 1), 500);
     }
   };
@@ -109,6 +142,7 @@ export default function MemoryMatchScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <AnimatedBackground intensity="subtle" tint="#6B5DD3" />
       <GameFrame title="Memory Match" accent="#6B5DD3" seconds={Math.max(0, 60 - round * 5)} totalSeconds={60} score={score} onExit={() => router.replace('/play')} />
+      <ComboBanner comboCount={comboTick} label={comboBadge} />
       {phase !== 'over' ? (
         <View style={styles.body}>
           <Text style={styles.round}>Round {round}</Text>
@@ -119,23 +153,17 @@ export default function MemoryMatchScreen() {
             end={{ x: 1, y: 1 }}
             style={styles.boardFrame}
           >
-            <View style={styles.grid}>
+            <Animated.View style={[styles.grid, shakeStyle]}>
               {TILES.map((c, i) => (
-                <Pressable
+                <TilePulse
                   key={i}
-                  onPress={() => press(i)}
+                  color={c}
+                  active={activeTile === i}
                   disabled={phase !== 'input'}
-                  style={[
-                    styles.tile,
-                    {
-                      backgroundColor: c,
-                      opacity: activeTile === i ? 1 : 0.45,
-                      transform: [{ scale: activeTile === i ? 1.04 : 1 }],
-                    },
-                  ]}
+                  onPress={() => press(i)}
                 />
               ))}
-            </View>
+            </Animated.View>
           </LinearGradient>
           <Text style={styles.hint}>{phase === 'show' ? 'Watch the sequence…' : 'Now repeat it!'}</Text>
         </View>
@@ -149,7 +177,7 @@ export default function MemoryMatchScreen() {
               { label: 'Length', value: seq.length.toString() },
               { label: 'XP', value: Math.floor(score / 4).toString() },
             ]}
-            onPlayAgain={() => { setSeq([]); setAttempt([]); setScore(0); setRound(1); setLeveledUp(false); setNewBest(false); setPrevBest(0); recordedRef.current = false; }}
+            onPlayAgain={() => { setSeq([]); setAttempt([]); setScore(0); setRound(1); setLeveledUp(false); setNewBest(false); setPrevBest(0); recordedRef.current = false; streakRef.current = 0; setComboTick(0); setComboBadge(''); }}
             onExit={() => router.replace('/play')}
             newBest={newBest}
             delta={score - prevBest}
@@ -171,12 +199,5 @@ const styles = StyleSheet.create({
     ...Shadow.lg,
   },
   grid: { width: 280, height: 280, flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
-  tile: {
-    width: 132,
-    height: 132,
-    borderRadius: Radius.lg,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.25)',
-  },
   hint: { color: Colors.textSecondary, fontFamily: 'PlusJakartaSans_600SemiBold' },
 });
