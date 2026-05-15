@@ -2,12 +2,22 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withRepeat,
+  withSequence,
+  Easing,
+  cancelAnimation,
+} from 'react-native-reanimated';
 import { Colors, Spacing, FontSize, Radius, Shadow } from '@/constants/theme';
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import { PlayerCar, Obstacle as ObstacleSvg } from '@/components/games/road/RoadVehicles';
+import { PlayerCar, Obstacle as ObstacleSvg, obstacleKindFor } from '@/components/games/road/RoadVehicles';
+import { ExhaustPuffs } from '@/components/games/road/ExhaustPuffs';
+import { CrashFlash } from '@/components/games/road/CrashFlash';
 import {
   createInitialState,
   cycleLane,
@@ -43,6 +53,11 @@ export default function RoadRushScreen() {
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordedRef = useRef(false);
   const stripeOffset = useSharedValue(0);
+  // Car bob — gentle vertical sine, ±2px on a 600ms cycle. Drives the
+  // player and (cheap copy) all enemy cars too.
+  const carBob = useSharedValue(0);
+  // Each collision bumps this counter, which retriggers <CrashFlash />.
+  const [crashTrigger, setCrashTrigger] = useState(0);
 
   // Animate the lane stripes scrolling — pure visual.
   useEffect(() => {
@@ -52,6 +67,26 @@ export default function RoadRushScreen() {
     return () => clearInterval(id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Car bob — runs only while playing. ±2px / 600ms cycle, smoothed with a
+  // sin-feel easing. Paused on game over / idle so the car looks "engine off".
+  useEffect(() => {
+    if (phase === 'playing') {
+      carBob.value = 0;
+      carBob.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 300, easing: Easing.inOut(Easing.sin) }),
+          withTiming(-1, { duration: 300, easing: Easing.inOut(Easing.sin) }),
+        ),
+        -1,
+        false,
+      );
+    } else {
+      cancelAnimation(carBob);
+      carBob.value = withTiming(0, { duration: 120 });
+    }
+    return () => cancelAnimation(carBob);
+  }, [phase, carBob]);
 
   // Background music while the round is live. Start on transition INTO
   // 'playing' (the first tap), stop on cleanup.
@@ -98,6 +133,9 @@ export default function RoadRushScreen() {
   useEffect(() => {
     if (!state.alive && phase === 'playing') {
       setPhase('over');
+      // One crash flash per collision — bump the trigger so <CrashFlash />
+      // animates exactly once.
+      setCrashTrigger((c) => c + 1);
     }
   }, [state.alive, phase]);
 
@@ -136,6 +174,15 @@ export default function RoadRushScreen() {
   const stripeStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: -stripeOffset.value }],
   }));
+  // ±2px bob driven by carBob (-1..1).
+  const carBobStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: carBob.value * 2 }],
+  }));
+  // Enemies bob at half amplitude with an inverted phase so the road feels
+  // alive without becoming visually noisy.
+  const enemyBobStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: -carBob.value * 1 }],
+  }));
 
   const restart = () => {
     setState(createInitialState());
@@ -146,6 +193,8 @@ export default function RoadRushScreen() {
     setNewBest(false);
     setPrevBest(0);
     recordedRef.current = false;
+    // Reset crash flash so a future crash retriggers it cleanly.
+    setCrashTrigger(0);
   };
 
   const score = distanceMeters(state.distance);
@@ -183,46 +232,75 @@ export default function RoadRushScreen() {
               </View>
             ))}
 
-            {/* obstacles: cone / enemy car / barrier, picked stably per id */}
+            {/* obstacles: cone / enemy car / barrier, picked stably per id.
+                Enemy cars get a tiny inverted bob so traffic feels alive;
+                cones/barriers stay stock-still (they're static props on the
+                road). */}
             {fieldSize.h > 0 && state.obstacles.map((o) => {
               const obH = laneH * 0.78;
+              const isEnemy = obstacleKindFor(o.id) === 'enemy';
+              const boxStyle = [
+                styles.obstacleBox,
+                {
+                  width: obW,
+                  height: obH,
+                  left: o.x * fieldSize.w - obW,
+                  top: laneH * o.lane + (laneH - obH) / 2,
+                },
+              ];
+              if (isEnemy) {
+                return (
+                  <Animated.View key={o.id} style={[boxStyle, enemyBobStyle]}>
+                    <ObstacleSvg id={o.id} width={obW} height={obH} />
+                  </Animated.View>
+                );
+              }
               return (
-                <View
-                  key={o.id}
-                  style={[
-                    styles.obstacleBox,
-                    {
-                      width: obW,
-                      height: obH,
-                      left: o.x * fieldSize.w - obW,
-                      top: laneH * o.lane + (laneH - obH) / 2,
-                    },
-                  ]}
-                >
+                <View key={o.id} style={boxStyle}>
                   <ObstacleSvg id={o.id} width={obW} height={obH} />
                 </View>
               );
             })}
 
-            {/* player car: top-down SVG (body, cabin, windshield, wheels, headlights) */}
+            {/* player car: top-down SVG (body, cabin, windshield, wheels,
+                headlights). Wheels spin and the whole box gently bobs while
+                playing. Exhaust puffs spawn from the rear bumper (right side,
+                since the car faces left). */}
             {fieldSize.h > 0 && (() => {
               const playerH = laneH * 0.82;
+              const carLeft = fieldSize.w - carW - 12;
+              const carTop = laneH * state.carLane + (laneH - playerH) / 2;
+              // Rear bumper anchor for puffs.
+              const puffX = carLeft + carW + 2;
+              const puffY = carTop + playerH / 2;
               return (
-                <View
-                  style={[
-                    styles.carBox,
-                    {
-                      width: carW,
-                      height: playerH,
-                      left: fieldSize.w - carW - 12,
-                      top: laneH * state.carLane + (laneH - playerH) / 2,
-                    },
-                  ]}
-                >
-                  <PlayerCar width={carW} height={playerH} />
-                </View>
+                <>
+                  <Animated.View
+                    style={[
+                      styles.carBox,
+                      {
+                        width: carW,
+                        height: playerH,
+                        left: carLeft,
+                        top: carTop,
+                      },
+                      carBobStyle,
+                    ]}
+                  >
+                    <PlayerCar width={carW} height={playerH} spinning={phase === 'playing'} />
+                  </Animated.View>
+                  <ExhaustPuffs
+                    anchor={{ x: puffX, y: puffY }}
+                    active={phase === 'playing'}
+                  />
+                </>
               );
             })()}
+
+            {/* Crash flash sits above everything inside the field. Mounted
+                always so its trigger-counter prop drives a single animation
+                cycle per collision. */}
+            <CrashFlash trigger={crashTrigger} />
 
             {/* Tap-to-start overlay — sits ON TOP of the lane/car preview
                 so the player sees what the round will look like before

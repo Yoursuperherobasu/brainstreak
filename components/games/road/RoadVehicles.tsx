@@ -4,10 +4,19 @@
 // every density, weighs grams. Each component takes width/height and renders
 // to fill that box; the screen still controls absolute positioning.
 //
-// Node budget for the whole file: < 50 SVG nodes (see comment per component).
+// Node budget for the whole file: < 60 SVG nodes (see comment per component).
 
-import React from 'react';
-import Svg, { Rect, Circle, Path, G, Polygon, Line } from 'react-native-svg';
+import React, { useEffect } from 'react';
+import { View } from 'react-native';
+import Svg, { Rect, Circle, Path, Polygon, Line } from 'react-native-svg';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withRepeat,
+  cancelAnimation,
+  Easing,
+} from 'react-native-reanimated';
 import { Colors } from '@/constants/theme';
 
 interface BoxProps {
@@ -15,33 +24,109 @@ interface BoxProps {
   height: number;
 }
 
+// ── Single wheel: a dark tyre with two thin spokes. When `spinning` is true
+//   we rotate the whole thing on a repeating linear loop. We rotate the
+//   wrapping Animated.View (not an SVG attribute) which lets Reanimated drive
+//   it on the UI thread without any reanimated-svg gymnastics.
+function SpinningWheel({
+  width,
+  height,
+  spinning,
+  reverse = false,
+}: {
+  width: number;
+  height: number;
+  spinning: boolean;
+  reverse?: boolean;
+}) {
+  const rot = useSharedValue(0);
+
+  useEffect(() => {
+    if (spinning) {
+      // 360ms per full turn — visibly spinning but not seizure-fast.
+      rot.value = 0;
+      rot.value = withRepeat(
+        withTiming(reverse ? -360 : 360, { duration: 360, easing: Easing.linear }),
+        -1,
+        false,
+      );
+    } else {
+      cancelAnimation(rot);
+      // Land on a fixed angle so static wheels don't look mid-spin.
+      rot.value = 0;
+    }
+    return () => cancelAnimation(rot);
+  }, [spinning, reverse, rot]);
+
+  const style = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rot.value}deg` }],
+  }));
+
+  return (
+    <Animated.View style={[{ width, height }, style]}>
+      <Svg width={width} height={height} viewBox="0 0 20 40" preserveAspectRatio="none">
+        {/* tyre */}
+        <Rect x="0" y="0" width="20" height="40" rx="6" fill="#1B1F2A" />
+        {/* hub */}
+        <Circle cx="10" cy="20" r="3" fill="#3A3F4A" />
+        {/* two crossed spokes — when this wrapper rotates the spokes "spin" */}
+        <Line x1="10" y1="6" x2="10" y2="34" stroke="#5A6070" strokeWidth="1.4" />
+        <Line x1="3" y1="20" x2="17" y2="20" stroke="#5A6070" strokeWidth="1.4" />
+      </Svg>
+    </Animated.View>
+  );
+}
+
 // ── Player car: blue cabin, white windshield, 4 wheels, twin headlights.
 //   Top-down view. Faces LEFT (the game scrolls obstacles right→left toward
 //   the car which sits on the right edge). 14 nodes.
-export function PlayerCar({ width, height }: BoxProps) {
+//
+//   The wheels are rendered as separate Animated.View overlays so they can
+//   spin via Reanimated on the UI thread without re-rendering the SVG.
+export function PlayerCar({
+  width,
+  height,
+  spinning = false,
+}: BoxProps & { spinning?: boolean }) {
+  // Wheel layout matches the original 60×100 viewBox coordinates so the
+  // sprite is visually unchanged for static rendering.
+  const ww = (6 / 60) * width;
+  const wh = (14 / 100) * height;
+  const wheels: Array<{ left: number; top: number; reverse?: boolean }> = [
+    { left: 0, top: (20 / 100) * height },
+    { left: (54 / 60) * width, top: (20 / 100) * height, reverse: true },
+    { left: 0, top: (70 / 100) * height },
+    { left: (54 / 60) * width, top: (70 / 100) * height, reverse: true },
+  ];
+
   return (
-    <Svg width={width} height={height} viewBox="0 0 60 100" preserveAspectRatio="none">
-      {/* shadow under car */}
-      <Rect x="6" y="10" width="48" height="84" rx="14" fill="#0008" />
-      {/* body */}
-      <Rect x="4" y="6" width="52" height="86" rx="14" fill={Colors.primary} stroke="#0A1A3A" strokeWidth="1.5" />
-      {/* hood vents */}
-      <Rect x="14" y="12" width="32" height="3" rx="1.5" fill="#1E4FA8" />
-      {/* windshield (front, top in this orientation) */}
-      <Path d="M10 24 L50 24 L46 40 L14 40 Z" fill="#7EC8FF" stroke="#0A1A3A" strokeWidth="1" />
-      {/* roof */}
-      <Rect x="14" y="40" width="32" height="22" rx="3" fill="#2452B8" />
-      {/* rear window */}
-      <Path d="M14 62 L46 62 L50 78 L10 78 Z" fill="#7EC8FF" stroke="#0A1A3A" strokeWidth="1" />
-      {/* wheels */}
-      <Rect x="0" y="20" width="6" height="14" rx="2" fill="#1B1F2A" />
-      <Rect x="54" y="20" width="6" height="14" rx="2" fill="#1B1F2A" />
-      <Rect x="0" y="70" width="6" height="14" rx="2" fill="#1B1F2A" />
-      <Rect x="54" y="70" width="6" height="14" rx="2" fill="#1B1F2A" />
-      {/* headlights */}
-      <Circle cx="14" cy="9" r="2.2" fill="#FFE89E" />
-      <Circle cx="46" cy="9" r="2.2" fill="#FFE89E" />
-    </Svg>
+    <View style={{ width, height }}>
+      <Svg width={width} height={height} viewBox="0 0 60 100" preserveAspectRatio="none">
+        {/* shadow under car */}
+        <Rect x="6" y="10" width="48" height="84" rx="14" fill="#0008" />
+        {/* body */}
+        <Rect x="4" y="6" width="52" height="86" rx="14" fill={Colors.primary} stroke="#0A1A3A" strokeWidth="1.5" />
+        {/* hood vents */}
+        <Rect x="14" y="12" width="32" height="3" rx="1.5" fill="#1E4FA8" />
+        {/* windshield (front, top in this orientation) */}
+        <Path d="M10 24 L50 24 L46 40 L14 40 Z" fill="#7EC8FF" stroke="#0A1A3A" strokeWidth="1" />
+        {/* roof */}
+        <Rect x="14" y="40" width="32" height="22" rx="3" fill="#2452B8" />
+        {/* rear window */}
+        <Path d="M14 62 L46 62 L50 78 L10 78 Z" fill="#7EC8FF" stroke="#0A1A3A" strokeWidth="1" />
+        {/* headlights */}
+        <Circle cx="14" cy="9" r="2.2" fill="#FFE89E" />
+        <Circle cx="46" cy="9" r="2.2" fill="#FFE89E" />
+      </Svg>
+      {wheels.map((w, i) => (
+        <View
+          key={i}
+          style={{ position: 'absolute', left: w.left, top: w.top, width: ww, height: wh }}
+        >
+          <SpinningWheel width={ww} height={wh} spinning={spinning} reverse={w.reverse} />
+        </View>
+      ))}
+    </View>
   );
 }
 
