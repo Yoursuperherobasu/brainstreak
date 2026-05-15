@@ -22,3 +22,30 @@ describe('achievements', () => {
     expect(out).toContain('week-streak');
   });
 });
+
+describe('achievements catalog additions', () => {
+  it('unlocks "streak-3" at a 3-day streak', () => {
+    const out = evaluate({
+      profile: { username: 'x', totalXP: 30, level: 1, gamesPlayed: 3 },
+      streak: { current: 3, longest: 3, lastPlayDate: '2026-05-15' },
+      recent: [],
+    });
+    expect(out).toContain('streak-3');
+  });
+  it('unlocks "xp-100" at 100 XP', () => {
+    const out = evaluate({
+      profile: { username: 'x', totalXP: 100, level: 2, gamesPlayed: 4 },
+      streak: { current: 1, longest: 1, lastPlayDate: '2026-05-15' },
+      recent: [],
+    });
+    expect(out).toContain('xp-100');
+  });
+  it('unlocks "xp-500" at 500 XP', () => {
+    const out = evaluate({
+      profile: { username: 'x', totalXP: 500, level: 3, gamesPlayed: 20 },
+      streak: { current: 1, longest: 5, lastPlayDate: '2026-05-15' },
+      recent: [],
+    });
+    expect(out).toContain('xp-500');
+  });
+});
