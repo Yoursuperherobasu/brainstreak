@@ -17,6 +17,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StreakPill } from '@/components/StreakBadge';
+import { RollingNumber } from '@/components/RollingNumber';
 import { Card, StatCard } from '@/components/Card';
 import { XPBar } from '@/components/XPBar';
 import { Button } from '@/components/Button';
@@ -118,7 +119,7 @@ export default function HomeScreen() {
           >
             <HeroSheen />
             <View style={styles.heroLeft}>
-              <Text style={styles.heroStreakNumber}>{streak.current}</Text>
+              <RollingNumber value={streak.current} style={styles.heroStreakNumber} />
               <Text style={styles.heroStreakUnit}>
                 {streak.current === 1 ? 'day' : 'days'}
               </Text>

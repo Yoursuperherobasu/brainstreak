@@ -20,6 +20,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { RollingNumber } from '@/components/RollingNumber';
 import { Card, StatCard } from '@/components/Card';
 import { CountingNumber } from '@/components/CountingNumber';
 import { XPBar } from '@/components/XPBar';
@@ -216,7 +217,7 @@ export default function ProfileScreen() {
         <MotionView entering={FadeInDown.delay(80).springify()}>
           <Card style={styles.streakCard}>
             <View style={styles.streakLeft}>
-              <Text style={styles.streakBigNum}>{streak.current}</Text>
+              <RollingNumber value={streak.current} style={styles.streakBigNum} />
               <Text style={styles.streakUnit}>
                 {streak.current === 0
                   ? 'Start your streak'

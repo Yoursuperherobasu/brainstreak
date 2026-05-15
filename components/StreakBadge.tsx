@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { RollingNumber } from '@/components/RollingNumber';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -88,11 +89,10 @@ export function StreakBadge({
             },
           ]}
         />
-        <Text
+        <RollingNumber
+          value={streak}
           style={[styles.number, { fontSize: s.number, color: numberColor }]}
-        >
-          {streak}
-        </Text>
+        />
       </Animated.View>
       {showLabel && (
         <Text style={[styles.label, { fontSize: s.label }]}>
