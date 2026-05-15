@@ -86,11 +86,11 @@ export default function PlayScreen() {
       >
         <MotionView entering={FadeInDown.springify()} style={styles.header}>
           <Text style={styles.title}>Play</Text>
-          <Text style={styles.subtitle}>6 ways to flex your brain — no doomscroll required.</Text>
+          <Text style={styles.subtitle}>9 ways to flex your brain — no doomscroll required.</Text>
         </MotionView>
 
         <MotionView entering={FadeInDown.delay(40).springify()}>
-          <SectionHeader title="Arcade — 5 mini-games" />
+          <SectionHeader title="Arcade — 8 mini-games" />
           <View style={styles.miniGrid}>
             {MINI_GAMES.map((g) => (
               <Card

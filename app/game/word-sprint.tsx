@@ -14,6 +14,7 @@ import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 import { usePausableInterval } from '@/lib/usePausableInterval';
 import { audio } from '@/lib/audio';
+import { useGameBackHandler } from '@/lib/useGameBackHandler';
 
 const ROUND_SECONDS = 60;
 
@@ -42,6 +43,11 @@ export default function WordSprintScreen() {
       setPhase('over');
       setSecondsLeft(0);
     },
+  });
+
+  useGameBackHandler({
+    enabled: phase === 'playing',
+    onExit: () => router.replace('/play'),
   });
 
   useEffect(() => {

@@ -19,6 +19,7 @@ import { haptics } from '@/lib/haptics';
 import { audio } from '@/lib/audio';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 import { usePausableInterval } from '@/lib/usePausableInterval';
+import { useGameBackHandler } from '@/lib/useGameBackHandler';
 
 const ROUND_SECONDS = 30;
 const ACCENT = Colors.catTech; // violet — distinct from blue/teal default
@@ -52,6 +53,8 @@ export default function ColorTrapScreen() {
       setSeconds(0);
     },
   });
+
+  useGameBackHandler({ enabled: phase === 'playing', onExit: () => router.replace('/play') });
 
   useEffect(() => {
     if (phase !== 'over' || recordedRef.current) return;

@@ -12,6 +12,7 @@ import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 import { usePausableInterval } from '@/lib/usePausableInterval';
 import { audio } from '@/lib/audio';
+import { useGameBackHandler } from '@/lib/useGameBackHandler';
 
 const ROUND_SECONDS = 20;
 const DOT_SIZE = 72;
@@ -63,6 +64,8 @@ export default function ReactionTapScreen() {
       setSeconds(0);
     },
   });
+
+  useGameBackHandler({ enabled: phase === 'playing', onExit: () => router.replace('/play') });
 
   useEffect(() => {
     if (phase !== 'over' || recordedRef.current) return;

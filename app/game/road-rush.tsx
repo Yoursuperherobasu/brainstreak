@@ -24,6 +24,7 @@ import { haptics } from '@/lib/haptics';
 import { audio } from '@/lib/audio';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 import { usePausableInterval } from '@/lib/usePausableInterval';
+import { useGameBackHandler } from '@/lib/useGameBackHandler';
 
 const ROUND_SECONDS = 60; // shown in the timer bar; the round usually ends earlier by crash
 const FRAME_MS = 30; // ~33 FPS — smooth enough, cheap enough
@@ -86,6 +87,11 @@ export default function RoadRushScreen() {
       setPhase('over');
       setSeconds(0);
     },
+  });
+
+  useGameBackHandler({
+    enabled: phase === 'playing',
+    onExit: () => { audio.bgStop(); router.replace('/play'); },
   });
 
   // End condition: crash.

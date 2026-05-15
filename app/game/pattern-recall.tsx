@@ -21,6 +21,7 @@ import { ShapeIcon, SHAPE_COLORS } from '@/components/games/pattern/ShapeIcon';
 import { haptics } from '@/lib/haptics';
 import { audio } from '@/lib/audio';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
+import { useGameBackHandler } from '@/lib/useGameBackHandler';
 
 const ACCENT = Colors.accent;
 const FLASH_MS = 520;
@@ -65,6 +66,8 @@ export default function PatternRecallScreen() {
     playingRef.current = false;
     setPhase('input');
   };
+
+  useGameBackHandler({ enabled: phase !== 'over', onExit: () => router.replace('/play') });
 
   // Game over: record the result.
   useEffect(() => {

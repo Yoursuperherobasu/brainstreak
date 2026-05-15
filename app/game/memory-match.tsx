@@ -12,6 +12,7 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 import { audio } from '@/lib/audio';
+import { useGameBackHandler } from '@/lib/useGameBackHandler';
 
 // Memory Match visual identity: violet/jewel palette. The default tile
 // palette was generic blue+teal+gold+green which looks identical to every
@@ -34,6 +35,8 @@ export default function MemoryMatchScreen() {
   const [prevBest, setPrevBest] = useState(0);
   const playingRef = useRef(false);
   const recordedRef = useRef(false);
+
+  useGameBackHandler({ enabled: phase !== 'over', onExit: () => router.replace('/play') });
 
   useEffect(() => {
     if (phase !== 'over' || recordedRef.current) return;
