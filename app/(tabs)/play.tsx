@@ -18,6 +18,7 @@ import { SectionHeader } from '@/components/SectionHeader';
 import { MotionView } from '@/components/MotionView';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Colors, Spacing, FontSize, CATEGORIES, Radius } from '@/constants/theme';
+import { MINI_GAMES } from '@/constants/games';
 import { fetchTriviaQuestions } from '@/lib/trivia';
 import { generateBrainRush } from '@/lib/quiz-bank';
 import { useGameStore } from '@/store/useGameStore';
@@ -91,15 +92,7 @@ export default function PlayScreen() {
         <MotionView entering={FadeInDown.delay(40).springify()}>
           <SectionHeader title="Arcade — 5 mini-games" />
           <View style={styles.miniGrid}>
-            {(
-              [
-                { id: 'word-sprint',  title: 'Word Sprint',  sub: '60s anagram chase',       color: Colors.accent  },
-                { id: 'number-sense', title: 'Number Sense', sub: '30s math drill',          color: Colors.primaryLight },
-                { id: 'memory-match', title: 'Memory Match', sub: 'Simon-style sequence',    color: Colors.gold    },
-                { id: 'reaction-tap', title: 'Reaction Tap', sub: 'Tap before it vanishes',  color: Colors.success },
-                { id: 'road-rush',    title: 'Road Rush',    sub: 'Dodge traffic, no chill', color: Colors.danger  },
-              ] as const
-            ).map((g) => (
+            {MINI_GAMES.map((g) => (
               <Card
                 key={g.id}
                 onPress={() => router.push(`/game/${g.id}` as any)}

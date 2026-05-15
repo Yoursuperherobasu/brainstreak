@@ -14,15 +14,11 @@ import { Button } from '@/components/Button';
 import { Colors, Spacing, FontSize } from '@/constants/theme';
 import { pickDailyGame, DAILY_BONUS_XP, type GameId } from '@/lib/dailyChallenge';
 import { todayISO } from '@/lib/storage';
+import { GAMES } from '@/constants/games';
 
-const TITLES: Record<GameId, string> = {
-  'brain-rush': 'Brain Rush',
-  'word-sprint': 'Word Sprint',
-  'number-sense': 'Number Sense',
-  'memory-match': 'Memory Match',
-  'reaction-tap': 'Reaction Tap',
-  'road-rush': 'Road Rush',
-};
+const TITLES: Record<string, string> = Object.fromEntries(
+  GAMES.map((g) => [g.id, g.title]),
+);
 
 export function DailyChallengeCard() {
   const id = pickDailyGame(todayISO());
