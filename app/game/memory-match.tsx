@@ -8,6 +8,7 @@ import { extendSequence, isCorrectSoFar } from '@/lib/games/memoryMatch';
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
 import { haptics } from '@/lib/haptics';
+import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 
 const TILES = [Colors.primary, Colors.accent, Colors.gold, Colors.success];
 const FLASH_MS = 480;
@@ -21,6 +22,20 @@ export default function MemoryMatchScreen() {
   const [score, setScore] = useState(0);
   const [activeTile, setActiveTile] = useState<number | null>(null);
   const playingRef = useRef(false);
+  const recordedRef = useRef(false);
+
+  useEffect(() => {
+    if (phase !== 'over' || recordedRef.current) return;
+    recordedRef.current = true;
+    const xp = Math.floor(score / 4);
+    recordMiniGameResult({
+      gameId: 'memory-match',
+      score,
+      xp,
+      total: seq.length,
+      correct: seq.length,
+    }).catch(() => {});
+  }, [phase, score, seq.length]);
 
   useEffect(() => {
     const next = extendSequence(seq, TILES.length);
@@ -83,7 +98,7 @@ export default function MemoryMatchScreen() {
               { label: 'Length', value: seq.length.toString() },
               { label: 'XP', value: Math.floor(score / 4).toString() },
             ]}
-            onPlayAgain={() => { setSeq([]); setAttempt([]); setScore(0); setRound(1); }}
+            onPlayAgain={() => { setSeq([]); setAttempt([]); setScore(0); setRound(1); recordedRef.current = false; }}
             onExit={() => router.replace('/play')}
           />
         </View>
