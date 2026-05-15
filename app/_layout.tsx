@@ -15,17 +15,21 @@ import {
   PlusJakartaSans_700Bold,
 } from '@expo-google-fonts/plus-jakarta-sans';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { Colors } from '@/constants/theme';
 import { useUserStore } from '@/store/useUserStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { ensureForegroundHandler, getPermissionStatus } from '@/lib/notifications';
-import { installDebug } from '@/lib/debug';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
-// Dense diagnostic instrumentation — captures every click, error,
-// and unhandled rejection on web. Native is a no-op.
-installDebug();
+// Dev-only diagnostic instrumentation — captures every click, error,
+// and unhandled rejection on web. Stripped entirely from production bundles
+// (Metro's dead-code elimination drops the import + call when __DEV__ is false).
+if (__DEV__) {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require('@/lib/debug').installDebug();
+}
 
 // Install foreground notification handler at module load — needs to run
 // before any notification arrives, including ones the OS shows on cold start.
@@ -104,8 +108,14 @@ export default function RootLayout() {
   // so the global wrapper was redundant.)
 
   return (
-    <GestureHandlerRootView style={styles.root}>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={styles.root}>
       <StatusBar style="dark" backgroundColor={Colors.bg} />
+      {/* On web, BrainStreak is a phone-shaped app. On wide viewports we
+          center the content in a 480px-wide column so the layout doesn't
+          stretch into a wall of whitespace on desktop. On native the
+          wrapper is a no-op flex passthrough. */}
+      <View style={styles.frame} pointerEvents="box-none">
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.bg } }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen
@@ -137,11 +147,32 @@ export default function RootLayout() {
             presentation: 'fullScreenModal',
           }}
         />
+        <Stack.Screen
+          name="+not-found"
+          options={{ title: 'Page not found' }}
+        />
       </Stack>
+      </View>
     </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.bg },
+  frame: Platform.select({
+    web: {
+      flex: 1,
+      width: '100%',
+      maxWidth: 480,
+      marginLeft: 'auto',
+      marginRight: 'auto',
+      backgroundColor: Colors.bg,
+      // Side rails on wide viewports.
+      borderLeftWidth: 1,
+      borderRightWidth: 1,
+      borderColor: Colors.border,
+    },
+    default: { flex: 1, backgroundColor: Colors.bg },
+  }) as any,
 });
