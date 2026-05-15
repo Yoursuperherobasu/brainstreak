@@ -6,7 +6,10 @@ export type GameId =
   | 'number-sense'
   | 'memory-match'
   | 'reaction-tap'
-  | 'road-rush';
+  | 'road-rush'
+  | 'color-trap'
+  | 'odd-one-out'
+  | 'pattern-recall';
 
 export interface GameMeta {
   id: GameId;
@@ -25,6 +28,11 @@ export const GAMES: ReadonlyArray<GameMeta> = [
   { id: 'memory-match', title: 'Memory Match', sub: 'Simon-style sequence',     color: Colors.gold,         path: '/game/memory-match' },
   { id: 'reaction-tap', title: 'Reaction Tap', sub: 'Tap before it vanishes',   color: Colors.success,      path: '/game/reaction-tap' },
   { id: 'road-rush',    title: 'Road Rush',    sub: 'Dodge traffic, no chill',  color: Colors.danger,       path: '/game/road-rush' },
+  // New character-driven mini-games. Color Trap = attention (Stroop),
+  // Odd One Out = perception, Pattern Recall = working memory with shapes.
+  { id: 'color-trap',     title: 'Color Trap',     sub: 'Trust the ink, not the word', color: Colors.catTech,    path: '/game/color-trap' },
+  { id: 'odd-one-out',    title: 'Odd One Out',    sub: 'Spot the imposter shade',     color: Colors.catPop,     path: '/game/odd-one-out' },
+  { id: 'pattern-recall', title: 'Pattern Recall', sub: 'Watch shapes, repeat shapes', color: Colors.accentLight,path: '/game/pattern-recall' },
 ];
 
 export function gameMeta(id: GameId): GameMeta | undefined {

@@ -17,7 +17,10 @@ export type MiniGameId =
   | 'number-sense'
   | 'memory-match'
   | 'reaction-tap'
-  | 'road-rush';
+  | 'road-rush'
+  | 'color-trap'
+  | 'odd-one-out'
+  | 'pattern-recall';
 
 export interface MiniGameResult {
   gameId: MiniGameId;
@@ -35,11 +38,14 @@ export interface RecordedResult {
 }
 
 const PRETTY: Record<MiniGameId, string> = {
-  'word-sprint':  'Word Sprint',
-  'number-sense': 'Number Sense',
-  'memory-match': 'Memory Match',
-  'reaction-tap': 'Reaction Tap',
-  'road-rush':    'Road Rush',
+  'word-sprint':    'Word Sprint',
+  'number-sense':   'Number Sense',
+  'memory-match':   'Memory Match',
+  'reaction-tap':   'Reaction Tap',
+  'road-rush':      'Road Rush',
+  'color-trap':     'Color Trap',
+  'odd-one-out':    'Odd One Out',
+  'pattern-recall': 'Pattern Recall',
 };
 
 export async function recordMiniGameResult(r: MiniGameResult): Promise<RecordedResult> {

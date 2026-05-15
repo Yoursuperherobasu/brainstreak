@@ -182,6 +182,18 @@ export default function RootLayout() {
           options={{ animation: 'slide_from_bottom', gestureEnabled: false }}
         />
         <Stack.Screen
+          name="game/color-trap"
+          options={{ animation: 'slide_from_bottom', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="game/odd-one-out"
+          options={{ animation: 'slide_from_bottom', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="game/pattern-recall"
+          options={{ animation: 'slide_from_bottom', gestureEnabled: false }}
+        />
+        <Stack.Screen
           name="+not-found"
           options={{ title: 'Page not found' }}
         />
