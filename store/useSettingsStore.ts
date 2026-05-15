@@ -1,3 +1,15 @@
+// Settings state surface. Every persisted field except internal flags
+// (`hydrated`, `onboarded`) MUST be exposed in the Profile screen OR a
+// dedicated settings sub-screen. Audit performed 2026-05-16:
+//
+//   soundOn             → Profile SettingsRow "Sound effects" (line ~232)
+//   hapticsOn           → Profile SettingsRow "Haptics" (line ~239)
+//   dailyReminderTime   → /settings/reminder + Profile SettingsRow rightLabel (line ~246)
+//   onboarded           → internal, set by onboarding flow
+//
+// When adding a new persisted setting, also add its UI surface and update
+// this audit comment.
+
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
