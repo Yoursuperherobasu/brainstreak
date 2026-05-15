@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -26,6 +26,7 @@ import { Colors, Gradients, Spacing, FontSize, MOTIVATIONAL_QUOTES } from '@/con
 import { hasPlayedToday, getStreakData, isStreakAtRisk, todayISO, yesterdayISO, getRecentGames, RecentGame } from '@/lib/storage';
 import { useUserStore } from '@/store/useUserStore';
 import { getXPForNextLevel } from '@/lib/trivia';
+import { ssrSafeRandomIndex, ssrSafeTimeOfDay } from '@/lib/ssrSafe';
 
 export default function HomeScreen() {
   const profile = useUserStore((s) => s.profile);
@@ -35,9 +36,12 @@ export default function HomeScreen() {
   const [playedToday, setPlayedToday] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [recent, setRecent] = useState<RecentGame[]>([]);
-  const [quote] = useState(
-    () => MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)]
-  );
+  // Deterministic during SSR/first paint; rotate to a real random quote after mount.
+  const [quoteIdx, setQuoteIdx] = useState(0);
+  useEffect(() => {
+    setQuoteIdx(ssrSafeRandomIndex(MOTIVATIONAL_QUOTES.length));
+  }, []);
+  const quote = MOTIVATIONAL_QUOTES[quoteIdx];
 
   // Start at the visible state so the header is rendered even if the
   // entrance animation never fires (e.g. on web). useFocusEffect below
@@ -78,10 +82,10 @@ export default function HomeScreen() {
   const xpForNext = getXPForNextLevel(profile.level);
 
   const heroLabel = streak.current === 0
-    ? 'Start today! 🚀'
+    ? 'Start today'
     : playedToday
-    ? "Today's done! 🎉"
-    : "Don't break it! 💪";
+    ? "Today's round is done"
+    : 'Keep the streak alive';
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -92,7 +96,7 @@ export default function HomeScreen() {
       >
         <MotionView style={[styles.header, headerStyle]}>
           <View>
-            <Text style={styles.greeting}>Good {getTimeOfDay()} ✨</Text>
+            <Text style={styles.greeting}>Good {ssrSafeTimeOfDay()}</Text>
             <Text style={styles.username}>{profile.username}</Text>
           </View>
           <StreakPill streak={streak.current} />
@@ -123,9 +127,9 @@ export default function HomeScreen() {
         <MotionView entering={FadeInDown.delay(200).springify()}>
           <SectionHeader title="Your stats" />
           <View style={styles.statsRow}>
-            <StatCard label="Level" value={profile.level} emoji="⚡" color={Colors.primaryLight} />
-            <StatCard label="Total XP" value={profile.totalXP.toLocaleString()} emoji="🧠" color={Colors.accent} />
-            <StatCard label="Games" value={profile.gamesPlayed} emoji="🎮" color={Colors.gold} />
+            <StatCard label="Level" value={profile.level} color={Colors.primaryLight} />
+            <StatCard label="Total XP" value={profile.totalXP.toLocaleString()} color={Colors.accent} />
+            <StatCard label="Games" value={profile.gamesPlayed} color={Colors.gold} />
           </View>
         </MotionView>
 
@@ -144,7 +148,7 @@ export default function HomeScreen() {
                 return (
                   <View key={g.at} style={styles.recentRow}>
                     <Text style={styles.recentEmoji}>
-                      {accuracy >= 80 ? '🌟' : accuracy >= 60 ? '🎉' : accuracy >= 40 ? '👍' : '💪'}
+                      {accuracy >= 80 ? 'A' : accuracy >= 60 ? 'B' : accuracy >= 40 ? 'C' : 'D'}
                     </Text>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.recentTitle}>
@@ -164,7 +168,6 @@ export default function HomeScreen() {
 
         <MotionView entering={FadeInDown.delay(350).springify()}>
           <Card style={styles.quoteCard}>
-            <Text style={styles.quoteEmoji}>💡</Text>
             <Text style={styles.quoteText}>"{quote.text}"</Text>
             <Text style={styles.quoteAuthor}>— {quote.author}</Text>
           </Card>
@@ -172,9 +175,8 @@ export default function HomeScreen() {
 
         <MotionView entering={FadeInDown.delay(400).springify()} style={styles.ctaWrap}>
           <Button
-            label={playedToday ? 'Play another round 🎮' : "Start today's game 🚀"}
+            label={playedToday ? 'Play another round' : "Start today's game"}
             onPress={() => {
-              console.log('[Home] CTA tapped — navigating to /play');
               router.push('/play');
             }}
             size="lg"
@@ -185,13 +187,6 @@ export default function HomeScreen() {
       </ScrollView>
     </SafeAreaView>
   );
-}
-
-function getTimeOfDay() {
-  const h = new Date().getHours();
-  if (h < 12) return 'Morning';
-  if (h < 17) return 'Afternoon';
-  return 'Evening';
 }
 
 const styles = StyleSheet.create({
@@ -214,7 +209,7 @@ const styles = StyleSheet.create({
     fontFamily: 'BricolageGrotesque_700Bold',
   },
   heroCard: {
-    borderRadius: 20,
+    borderRadius: 16,
     padding: Spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
@@ -224,7 +219,7 @@ const styles = StyleSheet.create({
   heroRight: { flex: 1 },
   heroTitle: {
     fontSize: FontSize.xl,
-    color: Colors.textPrimary,
+    color: '#FFFFFF',
     fontFamily: 'BricolageGrotesque_700Bold',
   },
   heroSub: {
@@ -235,7 +230,6 @@ const styles = StyleSheet.create({
   statsRow: { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.md },
   xpCard: { marginBottom: Spacing.md },
   quoteCard: { marginBottom: Spacing.md, gap: 6 },
-  quoteEmoji: { fontSize: 20 },
   quoteText: {
     fontSize: FontSize.md,
     color: Colors.textPrimary,
@@ -251,7 +245,17 @@ const styles = StyleSheet.create({
   ctaWrap: { marginTop: Spacing.sm },
   recentCard: { gap: 10, marginBottom: Spacing.md },
   recentRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  recentEmoji: { fontSize: 22, width: 28 },
+  recentEmoji: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.bgElevated,
+    color: Colors.textSecondary,
+    fontSize: FontSize.xs,
+    fontFamily: 'BricolageGrotesque_700Bold',
+    textAlign: 'center',
+    lineHeight: 28,
+  },
   recentTitle: {
     fontSize: FontSize.sm,
     color: Colors.textPrimary,
