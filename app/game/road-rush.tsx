@@ -7,6 +7,7 @@ import { Colors, Spacing, FontSize, Radius, Shadow } from '@/constants/theme';
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { PlayerCar, Obstacle as ObstacleSvg } from '@/components/games/road/RoadVehicles';
 import {
   createInitialState,
   cycleLane,
@@ -176,38 +177,46 @@ export default function RoadRushScreen() {
               </View>
             ))}
 
-            {/* obstacles */}
-            {fieldSize.h > 0 && state.obstacles.map((o) => (
-              <View
-                key={o.id}
-                style={[
-                  styles.obstacle,
-                  {
-                    width: obW,
-                    height: laneH * 0.62,
-                    left: o.x * fieldSize.w - obW,
-                    top: laneH * o.lane + (laneH * 0.19),
-                  },
-                ]}
-              />
-            ))}
+            {/* obstacles: cone / enemy car / barrier, picked stably per id */}
+            {fieldSize.h > 0 && state.obstacles.map((o) => {
+              const obH = laneH * 0.78;
+              return (
+                <View
+                  key={o.id}
+                  style={[
+                    styles.obstacleBox,
+                    {
+                      width: obW,
+                      height: obH,
+                      left: o.x * fieldSize.w - obW,
+                      top: laneH * o.lane + (laneH - obH) / 2,
+                    },
+                  ]}
+                >
+                  <ObstacleSvg id={o.id} width={obW} height={obH} />
+                </View>
+              );
+            })}
 
-            {/* car */}
-            {fieldSize.h > 0 && (
-              <View
-                style={[
-                  styles.car,
-                  {
-                    width: carW,
-                    height: laneH * 0.7,
-                    left: fieldSize.w - carW - 12,
-                    top: laneH * state.carLane + (laneH * 0.15),
-                  },
-                ]}
-              >
-                <View style={styles.carRoof} />
-              </View>
-            )}
+            {/* player car: top-down SVG (body, cabin, windshield, wheels, headlights) */}
+            {fieldSize.h > 0 && (() => {
+              const playerH = laneH * 0.82;
+              return (
+                <View
+                  style={[
+                    styles.carBox,
+                    {
+                      width: carW,
+                      height: playerH,
+                      left: fieldSize.w - carW - 12,
+                      top: laneH * state.carLane + (laneH - playerH) / 2,
+                    },
+                  ]}
+                >
+                  <PlayerCar width={carW} height={playerH} />
+                </View>
+              );
+            })()}
 
             {/* Tap-to-start overlay — sits ON TOP of the lane/car preview
                 so the player sees what the round will look like before
@@ -285,27 +294,11 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: '#F2C86B', // road dashes
   },
-  car: {
+  carBox: {
     position: 'absolute',
-    backgroundColor: Colors.primary,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  carRoof: {
-    width: '60%',
-    height: '40%',
-    backgroundColor: '#FFFFFF55',
-    borderRadius: 4,
-  },
-  obstacle: {
+  obstacleBox: {
     position: 'absolute',
-    backgroundColor: Colors.danger,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: '#FFFFFF22',
   },
   hint: {
     textAlign: 'center',
