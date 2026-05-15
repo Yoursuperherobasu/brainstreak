@@ -86,6 +86,30 @@ export default function PlayScreen() {
           <Text style={styles.subtitle}>{Config.QUESTIONS_PER_GAME} questions · {Config.ROUND_TIME_SECONDS} seconds each</Text>
         </MotionView>
 
+        <MotionView entering={FadeInDown.delay(50).springify()}>
+          <SectionHeader title="Mini-games" />
+          <View style={styles.miniGrid}>
+            {(
+              [
+                { id: 'word-sprint', title: 'Word Sprint', sub: '60s anagrams', color: Colors.accent },
+                { id: 'number-sense', title: 'Number Sense', sub: '30s math drill', color: Colors.primary },
+                { id: 'memory-match', title: 'Memory Match', sub: 'Simon-style', color: Colors.gold },
+                { id: 'reaction-tap', title: 'Reaction Tap', sub: 'Tap the target', color: Colors.success },
+              ] as const
+            ).map((g) => (
+              <Card
+                key={g.id}
+                onPress={() => router.push(`/game/${g.id}` as any)}
+                style={styles.miniCard}
+              >
+                <View style={[styles.miniMarker, { backgroundColor: g.color }]} />
+                <Text style={styles.miniTitle}>{g.title}</Text>
+                <Text style={styles.miniSub}>{g.sub}</Text>
+              </Card>
+            ))}
+          </View>
+        </MotionView>
+
         <MotionView entering={FadeInDown.delay(100).springify()}>
           <View style={styles.categoryGrid}>
             {CATEGORIES.map((cat) => (
@@ -260,4 +284,31 @@ const styles = StyleSheet.create({
     fontFamily: 'BricolageGrotesque_700Bold',
   },
   playBtn: { marginTop: Spacing.lg },
+  miniGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  miniCard: {
+    flexBasis: '48%',
+    flexGrow: 1,
+  },
+  miniMarker: {
+    width: 24,
+    height: 4,
+    borderRadius: 2,
+    marginBottom: 8,
+  },
+  miniTitle: {
+    fontFamily: 'BricolageGrotesque_700Bold',
+    fontSize: FontSize.md,
+    color: Colors.textPrimary,
+  },
+  miniSub: {
+    fontFamily: 'PlusJakartaSans_400Regular',
+    fontSize: FontSize.xs,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
 });
