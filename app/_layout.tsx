@@ -194,6 +194,10 @@ export default function RootLayout() {
           options={{ animation: 'slide_from_bottom', gestureEnabled: false }}
         />
         <Stack.Screen
+          name="stats"
+          options={{ animation: 'slide_from_right', presentation: 'card' }}
+        />
+        <Stack.Screen
           name="+not-found"
           options={{ title: 'Page not found' }}
         />
