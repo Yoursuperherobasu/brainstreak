@@ -27,6 +27,7 @@ import { hasPlayedToday, getStreakData, isStreakAtRisk, todayISO, yesterdayISO, 
 import { useUserStore } from '@/store/useUserStore';
 import { getXPForNextLevel } from '@/lib/trivia';
 import { ssrSafeRandomIndex, ssrSafeTimeOfDay } from '@/lib/ssrSafe';
+import { DailyChallengeCard } from '@/components/DailyChallengeCard';
 
 export default function HomeScreen() {
   const profile = useUserStore((s) => s.profile);
@@ -100,6 +101,10 @@ export default function HomeScreen() {
             <Text style={styles.username}>{profile.username}</Text>
           </View>
           <StreakPill streak={streak.current} />
+        </MotionView>
+
+        <MotionView entering={FadeInDown.delay(75).springify()}>
+          <DailyChallengeCard />
         </MotionView>
 
         <MotionView entering={FadeInDown.delay(100).springify()}>
