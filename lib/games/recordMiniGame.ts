@@ -71,6 +71,11 @@ export async function recordMiniGameResult(r: MiniGameResult): Promise<RecordedR
     useGameStore.setState({ pendingAchievementIds: fresh });
   }
 
+  // Best-effort cloud sync — matches useGameStore.finishGame (Brain Rush).
+  // No-op when the user is anonymous, when Supabase isn't configured, or
+  // when offline. Must not block the UI.
+  useUserStore.getState().pushIfAuthed().catch(() => {});
+
   return {
     leveledUp: updatedProfile.level > previousLevel,
     freshUnlocks: fresh,

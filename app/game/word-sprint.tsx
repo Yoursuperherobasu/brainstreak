@@ -47,14 +47,16 @@ export default function WordSprintScreen() {
     if (phase !== 'over' || recordedRef.current) return;
     recordedRef.current = true;
     const xp = Math.floor(score / 4);
+    // Word Sprint doesn't track invalid submissions, so reporting
+    // total == correct would auto-unlock the "Flawless" perfect-round
+    // achievement every time. Omit both fields so the predicate
+    // (`g.total > 0 && g.correct === g.total`) skips this row.
     recordMiniGameResult({
       gameId: 'word-sprint',
       score,
       xp,
-      total: used.size,
-      correct: used.size,
     }).catch(() => {/* swallow — UI already in over state */});
-  }, [phase, score, used.size]);
+  }, [phase, score]);
 
   const submit = () => {
     if (!round) return;

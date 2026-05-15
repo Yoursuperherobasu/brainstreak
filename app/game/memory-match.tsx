@@ -29,12 +29,19 @@ export default function MemoryMatchScreen() {
     if (phase !== 'over' || recordedRef.current) return;
     recordedRef.current = true;
     const xp = Math.floor(score / 4);
+    // Game-over in Memory Match means the player failed the last tile.
+    // total = seq.length (rounds the player saw), correct = seq.length - 1
+    // (they got all but the last). This way "Flawless" can ONLY unlock if
+    // somehow correct === total (it never can here), and the recent-games
+    // row truthfully reflects what happened.
+    const total = seq.length;
+    const correct = Math.max(0, seq.length - 1);
     recordMiniGameResult({
       gameId: 'memory-match',
       score,
       xp,
-      total: seq.length,
-      correct: seq.length,
+      total,
+      correct,
     }).catch(() => {});
   }, [phase, score, seq.length]);
 

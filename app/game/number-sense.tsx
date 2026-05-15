@@ -41,14 +41,15 @@ export default function NumberSenseScreen() {
     if (phase !== 'over' || recordedRef.current) return;
     recordedRef.current = true;
     const xp = Math.floor(score / 2);
+    // Number Sense doesn't track wrong-pick count separately, so reporting
+    // total == correct would auto-unlock the "Flawless" perfect-round
+    // achievement every round. Omit both fields.
     recordMiniGameResult({
       gameId: 'number-sense',
       score,
       xp,
-      correct: correctCount,
-      total: correctCount,
     }).catch(() => {});
-  }, [phase, score, correctCount]);
+  }, [phase, score]);
 
   const pick = (v: number) => {
     if (!problem) return;
