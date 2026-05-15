@@ -15,6 +15,7 @@ import { MotionView } from '@/components/MotionView';
 import { Button } from '@/components/Button';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Colors, Gradients, Spacing, FontSize } from '@/constants/theme';
+import { OnboardingDots } from '@/components/OnboardingDots';
 
 export default function WelcomeScreen() {
   const [tapped, setTapped] = useState(false);
@@ -45,6 +46,9 @@ export default function WelcomeScreen() {
       <AnimatedBackground intensity="normal" />
       <SafeAreaView style={styles.container}>
         <View style={styles.body}>
+          <View style={{ alignItems: 'center', marginTop: Spacing.lg, marginBottom: Spacing.md }}>
+            <OnboardingDots step={1} total={2} />
+          </View>
           <MotionView style={floatStyle}>
             <View style={styles.brandMark}>
               <Text style={styles.brandLetter}>B</Text>

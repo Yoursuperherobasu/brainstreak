@@ -13,6 +13,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Button } from '@/components/Button';
 import { MotionView } from '@/components/MotionView';
 import { Colors, Spacing, FontSize, Radius } from '@/constants/theme';
+import { OnboardingDots } from '@/components/OnboardingDots';
 import { useUserStore } from '@/store/useUserStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { DEFAULT_USERNAME } from '@/lib/storage';
@@ -43,6 +44,9 @@ export default function UsernameScreen() {
         style={{ flex: 1 }}
       >
         <View style={styles.body}>
+          <View style={{ alignItems: 'center', marginTop: Spacing.lg, marginBottom: Spacing.md }}>
+            <OnboardingDots step={2} total={2} />
+          </View>
           <MotionView entering={FadeInDown.springify()}>
             <Text style={styles.step}>Last step</Text>
             <Text style={styles.title}>Pick a username</Text>
