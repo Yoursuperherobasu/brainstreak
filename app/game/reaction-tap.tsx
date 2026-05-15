@@ -8,6 +8,7 @@ import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
 import { spawnTarget, windowMs, type Target } from '@/lib/games/reactionTap';
 import { haptics } from '@/lib/haptics';
+import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 
 const ROUND_SECONDS = 20;
 const DOT_SIZE = 72;
@@ -24,6 +25,7 @@ export default function ReactionTapScreen() {
   const [fieldSize, setFieldSize] = useState(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recordedRef = useRef(false);
   const dotScale = useSharedValue(1);
   const dotStyle = useAnimatedStyle(() => ({ transform: [{ scale: dotScale.value }] }));
 
@@ -56,6 +58,19 @@ export default function ReactionTapScreen() {
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (phase !== 'over' || recordedRef.current) return;
+    recordedRef.current = true;
+    const xp = score * 2;
+    recordMiniGameResult({
+      gameId: 'reaction-tap',
+      score,
+      xp,
+      total: score + misses,
+      correct: score,
+    }).catch(() => {});
+  }, [phase, score, misses]);
 
   const tap = () => {
     setScore((s) => s + 1);
