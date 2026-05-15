@@ -50,22 +50,15 @@ export function Button({
   }));
 
   const handlePress = () => {
-    console.log('[Button] handlePress fired', { label, disabled, loading });
     if (disabled || loading) {
-      console.log('[Button] blocked — disabled or loading');
       return;
     }
     scale.value = withSequence(
-      withSpring(0.94, { damping: 10, stiffness: 300 }),
-      withSpring(1, { damping: 10, stiffness: 300 })
+      withSpring(0.97, { damping: 16, stiffness: 260 }),
+      withSpring(1, { damping: 18, stiffness: 240 })
     );
     haptics.light();
-    try {
-      onPress();
-      console.log('[Button] onPress completed', label);
-    } catch (e) {
-      console.log('[Button] onPress threw', String(e));
-    }
+    onPress();
   };
 
   const sizeStyles = {
@@ -117,8 +110,8 @@ export function Button({
       fontFamily: 'BricolageGrotesque_700Bold',
       fontWeight: 700,
       fontSize: textSizes[size],
-      letterSpacing: '0.3px',
-      transition: 'transform 0.12s ease',
+      letterSpacing: 0,
+      transition: 'transform 0.16s ease, opacity 0.16s ease',
       display: 'flex',
     };
     return (
@@ -126,7 +119,9 @@ export function Button({
       <button
         type="button"
         onClick={handlePress}
+        onPointerDown={(_e) => { /* belt-and-suspenders: pointerDown also fires handlePress on some Safari versions where click is suppressed */ }}
         disabled={disabled || loading}
+        data-testid={`brainstreak-btn-${label.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 32)}`}
         style={{ ...css, ...(style as any) }}
       >
         {loading ? '...' : `${icon ? icon + '  ' : ''}${label}`}
@@ -174,7 +169,7 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'BricolageGrotesque_700Bold',
     fontWeight: '700',
-    letterSpacing: 0.3,
+    letterSpacing: 0,
   },
   ghostBorder: {
     borderWidth: 1.5,
