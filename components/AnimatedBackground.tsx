@@ -23,10 +23,10 @@ interface OrbSpec {
 }
 
 const DEFAULT_ORBS: OrbSpec[] = [
-  { color: Colors.primary,      size: 280, top: '-12%', left: '-18%', driftX: 24, driftY: 18, durationMs: 9000,  delayMs:    0, opacity: 0.14 },
-  { color: Colors.accent,       size: 220, top: '14%',  left: '60%',  driftX: 30, driftY: 22, durationMs: 11000, delayMs: 1200, opacity: 0.12 },
-  { color: Colors.gold,         size: 180, top: '52%',  left: '-12%', driftX: 22, driftY: 28, durationMs: 12500, delayMs: 2400, opacity: 0.10 },
-  { color: Colors.primaryLight, size: 160, top: '64%',  left: '58%',  driftX: 26, driftY: 20, durationMs: 10500, delayMs:  700, opacity: 0.12 },
+  { color: Colors.primary,      size: 340, top: '-14%', left: '-20%', driftX: 18, driftY: 14, durationMs: 13000, delayMs:    0, opacity: 0.22 },
+  { color: Colors.accent,       size: 280, top: '10%',  left: '58%',  driftX: 22, driftY: 16, durationMs: 15000, delayMs: 1400, opacity: 0.20 },
+  { color: Colors.catPop,       size: 220, top: '50%',  left: '-14%', driftX: 18, driftY: 22, durationMs: 16500, delayMs: 2800, opacity: 0.18 },
+  { color: Colors.gold,         size: 200, top: '62%',  left: '56%',  driftX: 20, driftY: 16, durationMs: 14000, delayMs:  900, opacity: 0.22 },
 ];
 
 function shade(hex: string, percent: number): string {
@@ -76,7 +76,7 @@ function Orb({ color, size, top, left, driftX, driftY, durationMs, delayMs, opac
     const s = 0.95 + 0.08 * Math.sin(phase + Math.PI / 3);
     return { transform: [{ translateX: dx }, { translateY: dy }, { scale: s }] };
   });
-  const webBlur = Platform.OS === 'web' ? { filter: 'blur(48px)' } : null;
+  const webBlur = Platform.OS === 'web' ? { filter: 'blur(64px)' } : null;
   return (
     <Animated.View
       pointerEvents="none"
