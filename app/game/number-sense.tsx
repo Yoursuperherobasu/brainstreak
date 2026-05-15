@@ -8,6 +8,7 @@ import { Colors, Spacing, FontSize, Radius } from '@/constants/theme';
 import { generateProblem, scoreAttempt, type Problem } from '@/lib/games/numberSense';
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 
@@ -59,6 +60,7 @@ export default function NumberSenseScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <AnimatedBackground intensity="subtle" tint={Colors.primary} />
       <GameFrame title="Number Sense" accent={Colors.primary} seconds={seconds} totalSeconds={ROUND_SECONDS} score={score} onExit={() => router.replace('/play')} />
       {phase === 'playing' ? (
         <MotionView entering={FadeIn} style={styles.body}>

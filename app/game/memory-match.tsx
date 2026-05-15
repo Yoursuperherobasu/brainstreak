@@ -7,6 +7,7 @@ import { Colors, Spacing, FontSize, Radius } from '@/constants/theme';
 import { extendSequence, isCorrectSoFar } from '@/lib/games/memoryMatch';
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 
@@ -77,6 +78,7 @@ export default function MemoryMatchScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <AnimatedBackground intensity="subtle" tint={Colors.gold} />
       <GameFrame title="Memory Match" accent={Colors.gold} seconds={Math.max(0, 60 - round * 5)} totalSeconds={60} score={score} onExit={() => router.replace('/play')} />
       {phase !== 'over' ? (
         <View style={styles.body}>

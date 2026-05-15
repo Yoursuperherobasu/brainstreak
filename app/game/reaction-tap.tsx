@@ -6,6 +6,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence } 
 import { Colors, Spacing, FontSize, Radius, Shadow } from '@/constants/theme';
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { spawnTarget, windowMs, type Target } from '@/lib/games/reactionTap';
 import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
@@ -82,6 +83,7 @@ export default function ReactionTapScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <AnimatedBackground intensity="subtle" tint={Colors.success} />
       <GameFrame
         title="Reaction Tap"
         accent={Colors.primary}

@@ -18,6 +18,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { TimerRing } from '@/components/TimerRing';
 import { QuestionCard } from '@/components/QuestionCard';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { BubbleField } from '@/components/BubbleField';
 import { XPBar } from '@/components/XPBar';
 import { ConfettiBurst } from '@/components/ConfettiBurst';
@@ -212,6 +213,7 @@ export default function GameSessionScreen() {
   if (phase === 'countdown') {
     return (
       <LinearGradient colors={[Colors.bg, Colors.bgElevated]} style={styles.fullscreen}>
+        <AnimatedBackground intensity="subtle" tint={Colors.primary} />
         {/* Floating X close button — user can back out before the round starts. */}
         <View style={styles.countdownExitWrap}>
           {Platform.OS === 'web' ? (
@@ -274,6 +276,7 @@ export default function GameSessionScreen() {
 
     return (
       <SafeAreaView style={styles.container}>
+        <AnimatedBackground intensity="subtle" tint={Colors.primary} />
         {showConfetti && <ConfettiBurst trigger={true} />}
         <ScrollView contentContainerStyle={styles.gameoverScroll} showsVerticalScrollIndicator={false}>
           <MotionView entering={ZoomIn.springify()}>
@@ -372,6 +375,7 @@ export default function GameSessionScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <AnimatedBackground intensity="subtle" tint={Colors.primary} />
       <View style={styles.topBar}>
         {/* Web uses a real <button> so the click is bulletproof; native
             keeps TouchableOpacity for haptics/ripple. */}

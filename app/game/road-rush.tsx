@@ -6,6 +6,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-na
 import { Colors, Spacing, FontSize, Radius, Shadow } from '@/constants/theme';
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import {
   createInitialState,
   cycleLane,
@@ -136,6 +137,7 @@ export default function RoadRushScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <AnimatedBackground intensity="subtle" tint={Colors.danger} />
       <GameFrame
         title="Road Rush"
         accent={Colors.danger}

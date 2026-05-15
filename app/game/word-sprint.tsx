@@ -9,6 +9,7 @@ import { generateAnagramRound, scoreAnagramAttempt, type AnagramRound } from '@/
 import { Button } from '@/components/Button';
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 
@@ -79,6 +80,7 @@ export default function WordSprintScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <AnimatedBackground intensity="subtle" tint={Colors.accent} />
       <GameFrame
         title="Word Sprint"
         accent={Colors.accent}
