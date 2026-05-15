@@ -14,6 +14,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Card, StatCard } from '@/components/Card';
+import { CountingNumber } from '@/components/CountingNumber';
 import { XPBar } from '@/components/XPBar';
 import { SectionHeader } from '@/components/SectionHeader';
 import { SettingsRow } from '@/components/SettingsRow';
@@ -161,9 +162,21 @@ export default function ProfileScreen() {
         <MotionView entering={FadeInDown.delay(160).springify()}>
           <SectionHeader title="Stats" />
           <View style={styles.statsRow}>
-            <StatCard label="Level" value={profile.level} color={Colors.primaryLight} />
-            <StatCard label="Total XP" value={profile.totalXP.toLocaleString()} color={Colors.accent} />
-            <StatCard label="Games" value={profile.gamesPlayed} color={Colors.gold} />
+            <StatCard
+              label="Level"
+              value={<CountingNumber value={profile.level} style={styles.statValueText} />}
+              color={Colors.primaryLight}
+            />
+            <StatCard
+              label="Total XP"
+              value={<CountingNumber value={profile.totalXP} style={styles.statValueText} />}
+              color={Colors.accent}
+            />
+            <StatCard
+              label="Games"
+              value={<CountingNumber value={profile.gamesPlayed} style={styles.statValueText} />}
+              color={Colors.gold}
+            />
           </View>
         </MotionView>
 
@@ -378,6 +391,13 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   statsRow: { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.md },
+  statValueText: {
+    fontSize: FontSize.xl,
+    fontWeight: '800',
+    fontFamily: 'BricolageGrotesque_700Bold',
+    color: Colors.textPrimary,
+    textAlign: 'center',
+  },
   badgesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',

@@ -72,7 +72,7 @@ export function Card({ children, style, onPress, gradient, noPadding }: CardProp
 // Stat Card for profile/dashboard
 interface StatCardProps {
   label: string;
-  value: string | number;
+  value: string | number | React.ReactNode;
   color?: string;
 }
 
@@ -80,9 +80,11 @@ export function StatCard({ label, value, color }: StatCardProps) {
   return (
     <View style={[styles.statCard, { borderColor: color ?? Colors.border }]}>
       <View style={[styles.statMarker, { backgroundColor: color ?? Colors.primary }]} />
-      <Text style={[styles.statValue, { color: color ?? Colors.textPrimary }]}>
-        {value}
-      </Text>
+      {typeof value === 'string' || typeof value === 'number' ? (
+        <Text style={[styles.statValue, { color: color ?? Colors.textPrimary }]}>{value}</Text>
+      ) : (
+        value
+      )}
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
