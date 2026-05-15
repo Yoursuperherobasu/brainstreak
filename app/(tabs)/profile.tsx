@@ -6,6 +6,7 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
+  Pressable,
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -259,6 +260,24 @@ export default function ProfileScreen() {
               color={Colors.gold}
             />
           </View>
+        </MotionView>
+
+        <MotionView entering={FadeInDown.delay(140).springify()}>
+          <Pressable onPress={() => router.push('/stats' as any)}>
+            <Card>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: FontSize.md, color: Colors.textPrimary, fontFamily: 'BricolageGrotesque_700Bold' }}>
+                    See full stats
+                  </Text>
+                  <Text style={{ fontSize: FontSize.xs, color: Colors.textSecondary, marginTop: 2 }}>
+                    Streak heatmap, category radar, high-score chart
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 22, color: Colors.primary, marginLeft: 8 }}>→</Text>
+              </View>
+            </Card>
+          </Pressable>
         </MotionView>
 
         <MotionView entering={FadeInDown.delay(180).springify()}>
