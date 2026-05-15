@@ -11,6 +11,7 @@ import { GameOverCard } from '@/components/games/GameOverCard';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
+import { usePausableInterval } from '@/lib/usePausableInterval';
 
 const ROUND_SECONDS = 30;
 
@@ -23,19 +24,22 @@ export default function NumberSenseScreen() {
   const [correctCount, setCorrectCount] = useState(0);
   const [seconds, setSeconds] = useState(ROUND_SECONDS);
   const [phase, setPhase] = useState<'playing' | 'over'>('playing');
-  const intRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordedRef = useRef(false);
 
   useEffect(() => {
     setProblem(generateProblem(1));
-    intRef.current = setInterval(() => {
-      setSeconds((s) => {
-        if (s <= 1) { clearInterval(intRef.current!); setPhase('over'); return 0; }
-        return s - 1;
-      });
-    }, 1000);
-    return () => { if (intRef.current) clearInterval(intRef.current); };
   }, []);
+
+  usePausableInterval({
+    durationMs: ROUND_SECONDS * 1000,
+    tickMs: 1000,
+    enabled: phase === 'playing',
+    onTick: (remainingMs) => setSeconds(Math.ceil(remainingMs / 1000)),
+    onComplete: () => {
+      setPhase('over');
+      setSeconds(0);
+    },
+  });
 
   useEffect(() => {
     if (phase !== 'over' || recordedRef.current) return;

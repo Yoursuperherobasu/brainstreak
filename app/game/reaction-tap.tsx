@@ -10,6 +10,7 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { spawnTarget, windowMs, type Target } from '@/lib/games/reactionTap';
 import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
+import { usePausableInterval } from '@/lib/usePausableInterval';
 
 const ROUND_SECONDS = 20;
 const DOT_SIZE = 72;
@@ -25,7 +26,6 @@ export default function ReactionTapScreen() {
   // collapsed the field on web.
   const [fieldSize, setFieldSize] = useState(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordedRef = useRef(false);
   const dotScale = useSharedValue(1);
   const dotStyle = useAnimatedStyle(() => ({ transform: [{ scale: dotScale.value }] }));
@@ -42,23 +42,23 @@ export default function ReactionTapScreen() {
 
   useEffect(() => {
     respawn(0);
-    tickRef.current = setInterval(() => {
-      setSeconds((s) => {
-        if (s <= 1) {
-          clearInterval(tickRef.current!);
-          if (timeoutRef.current) clearTimeout(timeoutRef.current);
-          setPhase('over');
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      if (tickRef.current) clearInterval(tickRef.current);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  usePausableInterval({
+    durationMs: ROUND_SECONDS * 1000,
+    tickMs: 1000,
+    enabled: phase === 'playing',
+    onTick: (remainingMs) => setSeconds(Math.ceil(remainingMs / 1000)),
+    onComplete: () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      setPhase('over');
+      setSeconds(0);
+    },
+  });
 
   useEffect(() => {
     if (phase !== 'over' || recordedRef.current) return;

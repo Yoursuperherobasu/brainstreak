@@ -12,6 +12,7 @@ import { GameOverCard } from '@/components/games/GameOverCard';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
+import { usePausableInterval } from '@/lib/usePausableInterval';
 
 const ROUND_SECONDS = 60;
 
@@ -22,26 +23,22 @@ export default function WordSprintScreen() {
   const [used, setUsed] = useState<Set<string>>(new Set());
   const [secondsLeft, setSecondsLeft] = useState(ROUND_SECONDS);
   const [phase, setPhase] = useState<'playing' | 'over'>('playing');
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordedRef = useRef(false);
 
   useEffect(() => {
     setRound(generateAnagramRound({ minLetters: 5, maxLetters: 6, level: 1 }));
   }, []);
 
-  useEffect(() => {
-    intervalRef.current = setInterval(() => {
-      setSecondsLeft((s) => {
-        if (s <= 1) {
-          if (intervalRef.current) clearInterval(intervalRef.current);
-          setPhase('over');
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, []);
+  usePausableInterval({
+    durationMs: ROUND_SECONDS * 1000,
+    tickMs: 1000,
+    enabled: phase === 'playing',
+    onTick: (remainingMs) => setSecondsLeft(Math.ceil(remainingMs / 1000)),
+    onComplete: () => {
+      setPhase('over');
+      setSecondsLeft(0);
+    },
+  });
 
   useEffect(() => {
     if (phase !== 'over' || recordedRef.current) return;

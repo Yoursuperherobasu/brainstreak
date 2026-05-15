@@ -22,6 +22,7 @@ import {
 import { haptics } from '@/lib/haptics';
 import { audio } from '@/lib/audio';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
+import { usePausableInterval } from '@/lib/usePausableInterval';
 
 const ROUND_SECONDS = 60; // shown in the timer bar; the round usually ends earlier by crash
 const FRAME_MS = 30; // ~33 FPS — smooth enough, cheap enough
@@ -35,7 +36,6 @@ export default function RoadRushScreen() {
   const [seconds, setSeconds] = useState(ROUND_SECONDS);
   const [fieldSize, setFieldSize] = useState({ w: 0, h: 0 });
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const secRef  = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordedRef = useRef(false);
   const stripeOffset = useSharedValue(0);
 
@@ -73,27 +73,23 @@ export default function RoadRushScreen() {
   }, [phase]);
 
   // Round timer.
-  useEffect(() => {
-    if (phase !== 'playing') return;
-    secRef.current = setInterval(() => {
-      setSeconds((s) => {
-        if (s <= 1) { clearInterval(secRef.current!); return 0; }
-        return s - 1;
-      });
-    }, 1000);
-    return () => { if (secRef.current) clearInterval(secRef.current); };
-  }, [phase]);
+  usePausableInterval({
+    durationMs: ROUND_SECONDS * 1000,
+    tickMs: 1000,
+    enabled: phase === 'playing',
+    onTick: (remainingMs) => setSeconds(Math.ceil(remainingMs / 1000)),
+    onComplete: () => {
+      setPhase('over');
+      setSeconds(0);
+    },
+  });
 
-  // End condition: time runs out OR crash.
+  // End condition: crash.
   useEffect(() => {
     if (!state.alive && phase === 'playing') {
       setPhase('over');
     }
   }, [state.alive, phase]);
-
-  useEffect(() => {
-    if (seconds === 0 && phase === 'playing') setPhase('over');
-  }, [seconds, phase]);
 
   useEffect(() => {
     if (phase !== 'over' || recordedRef.current) return;
