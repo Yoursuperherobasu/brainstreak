@@ -1,15 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { FadeIn } from 'react-native-reanimated';
 import { MotionView } from '@/components/MotionView';
-import { Colors, Spacing, FontSize, Radius } from '@/constants/theme';
+import { Colors, Spacing, FontSize } from '@/constants/theme';
 import { generateProblem, scoreAttempt, type Problem } from '@/lib/games/numberSense';
 import { GameFrame } from '@/components/games/GameFrame';
 import { GameOverCard } from '@/components/games/GameOverCard';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { GraphPaperBackground } from '@/components/games/GraphPaperBackground';
+import { CountingOperand } from '@/components/games/number/CountingOperand';
+import { ChoiceButton, type ChoiceFlash } from '@/components/games/number/ChoiceButton';
+import { FloatingXP } from '@/components/games/number/FloatingXP';
 import { haptics } from '@/lib/haptics';
 import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 import { usePausableInterval } from '@/lib/usePausableInterval';
@@ -31,6 +34,15 @@ export default function NumberSenseScreen() {
   const [newBest, setNewBest] = useState(false);
   const [prevBest, setPrevBest] = useState(0);
   const recordedRef = useRef(false);
+  // Cartoon flourishes: which choice (by index) is flashing, and the kind
+  // of flash (correct/wrong). `flashKey` bumps each pick so the same index
+  // can be flashed twice in a row (e.g., pick wrong then pick wrong again).
+  const [flashIdx, setFlashIdx] = useState<number | null>(null);
+  const [flashKind, setFlashKind] = useState<ChoiceFlash>(null);
+  const [flashKey, setFlashKey] = useState(0);
+  const [xpBurst, setXpBurst] = useState(0);
+  // Bumped on new problem to reset CountingOperand from 0 and clear halos.
+  const [problemKey, setProblemKey] = useState(0);
 
   useEffect(() => {
     setProblem(generateProblem(1));
@@ -72,12 +84,35 @@ export default function NumberSenseScreen() {
     }).catch(() => {});
   }, [phase, score]);
 
-  const pick = (v: number) => {
-    if (!problem) return;
+  const pick = (v: number, idx: number) => {
+    if (!problem || phase !== 'playing') return;
     const r = scoreAttempt(problem, v);
     setScore((s) => Math.max(0, s + r.points));
-    if (r.ok) { setCorrectCount((c) => c + 1); haptics.success(); } else haptics.error();
-    setProblem(generateProblem(1 + Math.floor(correctCount / 5)));
+    setFlashIdx(idx);
+    setFlashKind(r.ok ? 'correct' : 'wrong');
+    setFlashKey((k) => k + 1);
+    if (r.ok) {
+      setCorrectCount((c) => c + 1);
+      haptics.success();
+      setXpBurst((k) => k + 1);
+      // Advance after the halo finishes (350ms) so the player sees the win.
+      setTimeout(() => {
+        setProblem(generateProblem(1 + Math.floor((correctCount + 1) / 5)));
+        setProblemKey((k) => k + 1);
+        setFlashIdx(null);
+        setFlashKind(null);
+      }, 380);
+    } else {
+      haptics.error();
+      // Wrong-answer shake runs ~420ms; advance just after so the shake
+      // finishes on the original wrong choice.
+      setTimeout(() => {
+        setProblem(generateProblem(1 + Math.floor(correctCount / 5)));
+        setProblemKey((k) => k + 1);
+        setFlashIdx(null);
+        setFlashKind(null);
+      }, 450);
+    }
   };
 
   return (
@@ -91,13 +126,25 @@ export default function NumberSenseScreen() {
         <MotionView entering={FadeIn} style={styles.body}>
           {problem ? (
             <>
-              <Text style={styles.q}>{problem.a} {problem.op} {problem.b} = ?</Text>
-              <View style={styles.choices}>
-                {problem.choices.map((c) => (
-                  <Pressable key={c} onPress={() => pick(c)} style={styles.choice}>
-                    <Text style={styles.choiceText}>{c}</Text>
-                  </Pressable>
-                ))}
+              <Text style={styles.q}>
+                <CountingOperand value={problem.a} resetKey={problemKey} />
+                {` ${problem.op} `}
+                <CountingOperand value={problem.b} resetKey={problemKey} />
+                {' = ?'}
+              </Text>
+              <View style={styles.choicesWrap}>
+                <FloatingXP burstKey={xpBurst} amount={10} />
+                <View style={styles.choices}>
+                  {problem.choices.map((c, i) => (
+                    <ChoiceButton
+                      key={`${problemKey}-${i}-${c}`}
+                      value={c}
+                      onPress={() => pick(c, i)}
+                      flash={flashIdx === i ? flashKind : null}
+                      resetKey={flashKey}
+                    />
+                  ))}
+                </View>
               </View>
             </>
           ) : (
@@ -138,22 +185,9 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
+  // `choicesWrap` provides a relative anchor so the FloatingXP can absolute-
+  // position itself centred above the row.
+  choicesWrap: { position: 'relative', alignItems: 'center', justifyContent: 'center' },
   choices: { flexDirection: 'row', gap: Spacing.md, justifyContent: 'center' },
-  choice: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: Colors.primary,
-    paddingVertical: 18,
-    paddingHorizontal: 28,
-    borderRadius: Radius.lg,
-    minWidth: 84,
-    alignItems: 'center',
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.18,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  choiceText: { fontSize: FontSize.xxl, color: Colors.primary, fontFamily: 'BricolageGrotesque_800ExtraBold' },
   loading: { textAlign: 'center', fontSize: FontSize.md, color: Colors.textMuted, fontFamily: 'PlusJakartaSans_600SemiBold' },
 });
