@@ -5,6 +5,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withRepeat,
+  withSequence,
   withTiming,
   Easing,
   cancelAnimation,
@@ -15,6 +16,7 @@ import { Colors, Spacing, FontSize } from '@/constants/theme';
 import { pickDailyGame, DAILY_BONUS_XP, type GameId } from '@/lib/dailyChallenge';
 import { todayISO } from '@/lib/storage';
 import { GAMES } from '@/constants/games';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 const TITLES: Record<string, string> = Object.fromEntries(
   GAMES.map((g) => [g.id, g.title]),
@@ -44,6 +46,35 @@ export function DailyChallengeCard() {
     opacity: 0.6 + pulse.value * 0.4,
   }));
 
+  const lastTapped = useSettingsStore((s) => s.lastDailyChallengeTappedDate);
+  const setLastTapped = useSettingsStore((s) => s.setLastDailyChallengeTappedDate);
+  const today = todayISO();
+  const isFreshChallenge = lastTapped !== today;
+
+  const rot = useSharedValue(0);
+  useEffect(() => {
+    if (!isFreshChallenge) {
+      cancelAnimation(rot);
+      rot.value = 0;
+      return;
+    }
+    rot.value = withRepeat(
+      withSequence(
+        withTiming(8, { duration: 110 }),
+        withTiming(-8, { duration: 110 }),
+        withTiming(0, { duration: 110 }),
+        withTiming(0, { duration: 3500 }),
+      ),
+      -1,
+      false,
+    );
+    return () => { cancelAnimation(rot); };
+  }, [isFreshChallenge]);
+
+  const wiggleStyle = useAnimatedStyle(() => ({
+    transform: [{ rotateZ: `${rot.value}deg` }],
+  }));
+
   return (
     <Card style={styles.card}>
       <View style={styles.tagRow}>
@@ -53,7 +84,15 @@ export function DailyChallengeCard() {
       <Text style={styles.title}>{TITLES[id]}</Text>
       <Text style={styles.sub}>One round. +{DAILY_BONUS_XP} XP. Brain unfried.</Text>
       <View style={{ marginTop: Spacing.sm }}>
-        <Button label="Start" onPress={() => router.push(path as any)} />
+        <Animated.View style={wiggleStyle}>
+          <Button
+            label="Start"
+            onPress={() => {
+              setLastTapped(today);
+              router.push(path as any);
+            }}
+          />
+        </Animated.View>
       </View>
     </Card>
   );

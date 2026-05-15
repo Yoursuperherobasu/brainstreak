@@ -31,8 +31,21 @@ export default function WelcomeScreen() {
       true
     );
   }, []);
+
+  const pulse = useSharedValue(1);
+  React.useEffect(() => {
+    pulse.value = withRepeat(
+      withTiming(1.06, { duration: 1750, easing: Easing.inOut(Easing.sin) }),
+      -1,
+      true,
+    );
+  }, []);
+
   const floatStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: float.value }],
+    transform: [
+      { translateY: float.value },
+      { scale: pulse.value },
+    ],
   }));
 
   const handleStart = () => {
