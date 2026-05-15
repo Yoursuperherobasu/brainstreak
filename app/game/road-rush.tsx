@@ -20,6 +20,7 @@ import {
 } from '@/lib/games/roadRush';
 import { haptics } from '@/lib/haptics';
 import { audio } from '@/lib/audio';
+import { recordMiniGameResult } from '@/lib/games/recordMiniGame';
 
 const ROUND_SECONDS = 60; // shown in the timer bar; the round usually ends earlier by crash
 const FRAME_MS = 30; // ~33 FPS — smooth enough, cheap enough
@@ -34,6 +35,7 @@ export default function RoadRushScreen() {
   const [fieldSize, setFieldSize] = useState({ w: 0, h: 0 });
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const secRef  = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recordedRef = useRef(false);
   const stripeOffset = useSharedValue(0);
 
   // Animate the lane stripes scrolling — pure visual.
@@ -92,6 +94,19 @@ export default function RoadRushScreen() {
     if (seconds === 0 && phase === 'playing') setPhase('over');
   }, [seconds, phase]);
 
+  useEffect(() => {
+    if (phase !== 'over' || recordedRef.current) return;
+    recordedRef.current = true;
+    const meters = distanceMeters(state.distance);
+    const xp = xpForRun(state.distance);
+    recordMiniGameResult({
+      gameId: 'road-rush',
+      score: meters,
+      xp,
+      total: state.obstacles.length,
+    }).catch(() => {});
+  }, [phase, state.distance, state.obstacles.length]);
+
   const tap = useCallback(() => {
     haptics.light();
     audio.tap();
@@ -111,6 +126,7 @@ export default function RoadRushScreen() {
     // Start in idle so the player has a beat to focus before the loop fires.
     setPhase('idle');
     setSeconds(ROUND_SECONDS);
+    recordedRef.current = false;
   };
 
   const score = distanceMeters(state.distance);
