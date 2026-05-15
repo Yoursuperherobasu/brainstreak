@@ -28,6 +28,7 @@ import { useUserStore } from '@/store/useUserStore';
 import { getXPForNextLevel } from '@/lib/trivia';
 import { ssrSafeRandomIndex, ssrSafeTimeOfDay } from '@/lib/ssrSafe';
 import { DailyChallengeCard } from '@/components/DailyChallengeCard';
+import { SkeletonCard } from '@/components/SkeletonCard';
 
 export default function HomeScreen() {
   const profile = useUserStore((s) => s.profile);
@@ -36,7 +37,7 @@ export default function HomeScreen() {
 
   const [playedToday, setPlayedToday] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [recent, setRecent] = useState<RecentGame[]>([]);
+  const [recent, setRecent] = useState<RecentGame[] | null>(null);
   // Deterministic during SSR/first paint; rotate to a real random quote after mount.
   const [quoteIdx, setQuoteIdx] = useState(0);
   useEffect(() => {
@@ -144,7 +145,16 @@ export default function HomeScreen() {
           </Card>
         </MotionView>
 
-        {recent.length > 0 && (
+        {recent === null && (
+          <MotionView entering={FadeInDown.delay(300).springify()}>
+            <SectionHeader title="Recent activity" />
+            <SkeletonCard height={64} />
+            <SkeletonCard height={64} />
+            <SkeletonCard height={64} />
+          </MotionView>
+        )}
+
+        {recent !== null && recent.length > 0 && (
           <MotionView entering={FadeInDown.delay(300).springify()}>
             <SectionHeader title="Recent activity" />
             <Card style={styles.recentCard}>
