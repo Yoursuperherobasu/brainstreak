@@ -1,1 +1,0 @@
-(none — app made zero external network calls)

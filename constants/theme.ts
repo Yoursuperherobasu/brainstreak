@@ -29,15 +29,16 @@ export const Colors = {
   border: '#E1E6EE',
   borderBright: '#C8D1DE',
 
-  catMath:    '#2F6FED',
-  catEnglish: '#169B8F',
-  catGK:      '#D99921',
-  catScience: '#169B8F',
-  catHistory: '#D99921',
-  catTech:    '#6B5DD3',
-  catSports:  '#2B9B62',
-  catPop:     '#C75C9E',
-  catMixed:   '#6B5DD3',
+  catMath:      '#2F6FED',
+  catEnglish:   '#169B8F',
+  catGK:        '#D99921',
+  catScience:   '#169B8F',
+  catHistory:   '#D99921',
+  catTech:      '#6B5DD3',
+  catSports:    '#2B9B62',
+  catPop:       '#C75C9E',
+  catMixed:     '#6B5DD3',
+  catGeography: '#2B9B62',
 };
 
 export const Gradients = {
@@ -105,12 +106,13 @@ export const FontSize = {
 
 export const CATEGORIES = [
   // BrainRush — the new default. Math + English + GK, no network needed.
-  { id: 'brain',   label: 'BrainRush', color: Colors.primary,   apiId: -1 },
-  { id: 'mixed',   label: 'Mixed',     color: Colors.catMixed,   apiId: 0 },
-  { id: 'science', label: 'Science',   color: Colors.catScience, apiId: 17 },
-  { id: 'history', label: 'History',   color: Colors.catHistory, apiId: 23 },
-  { id: 'tech',    label: 'Tech',      color: Colors.catTech,    apiId: 18 },
-  { id: 'pop',     label: 'Pop',       color: Colors.catPop,     apiId: 11 },
+  { id: 'brain',     label: 'BrainRush',  color: Colors.primary,       apiId: -1 },
+  { id: 'mixed',     label: 'Mixed',      color: Colors.catMixed,      apiId: 0 },
+  { id: 'science',   label: 'Science',    color: Colors.catScience,    apiId: 17 },
+  { id: 'history',   label: 'History',    color: Colors.catHistory,    apiId: 23 },
+  { id: 'tech',      label: 'Tech',       color: Colors.catTech,       apiId: 18 },
+  { id: 'pop',       label: 'Pop',        color: Colors.catPop,        apiId: 11 },
+  { id: 'geography', label: 'Geography',  color: Colors.catGeography,  apiId: 22 },
 ] as const;
 
 export const MOTIVATIONAL_QUOTES = [
