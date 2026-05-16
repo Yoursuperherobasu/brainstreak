@@ -74,9 +74,8 @@ export function CategoryTile({ label, color, selected, onPress }: CategoryTilePr
 
 const styles = StyleSheet.create({
   outer: {
-    flex: 1,
-    minWidth: '30%',
-    aspectRatio: 1,
+    width: '100%',
+    height: '100%',
     borderRadius: Radius.md,
     borderWidth: 1.5,
     overflow: 'hidden',

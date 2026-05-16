@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Pressable,
   Alert,
 } from 'react-native';
 import { router } from 'expo-router';
@@ -17,7 +18,8 @@ import { CategoryTile } from '@/components/CategoryTile';
 import { SectionHeader } from '@/components/SectionHeader';
 import { MotionView } from '@/components/MotionView';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import { Colors, Spacing, FontSize, CATEGORIES, Radius } from '@/constants/theme';
+import { HeroSheen } from '@/components/HeroSheen';
+import { Colors, Spacing, FontSize, CATEGORIES, Radius, Shadow, Gradients } from '@/constants/theme';
 import { MINI_GAMES } from '@/constants/games';
 import { fetchTriviaQuestions } from '@/lib/trivia';
 import { generateBrainRush } from '@/lib/quiz-bank';
@@ -79,7 +81,7 @@ export default function PlayScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <AnimatedBackground intensity="subtle" />
+      <AnimatedBackground intensity="normal" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
@@ -110,16 +112,42 @@ export default function PlayScreen() {
           <SectionHeader title="Brain Rush — pick a category" />
         </MotionView>
 
+        {/* Brain Rush hero card — the limelight pick. Tapping selects it. */}
         <MotionView entering={FadeInDown.delay(100).springify()}>
+          <Pressable onPress={() => setSelectedCategory('brain')}>
+            <LinearGradient
+              colors={[Colors.primary, Colors.primaryDark]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={[
+                styles.brainHero,
+                Shadow.md,
+                selectedCategory === 'brain' && styles.brainHeroActive,
+              ]}
+            >
+              <HeroSheen />
+              <View style={styles.brainHeroBody}>
+                <Text style={styles.brainHeroTag}>★ FEATURED</Text>
+                <Text style={styles.brainHeroTitle}>Brain Rush</Text>
+                <Text style={styles.brainHeroSub}>Math · GK · Pop — your daily 5</Text>
+              </View>
+              <View style={styles.brainHeroDot} />
+            </LinearGradient>
+          </Pressable>
+        </MotionView>
+
+        <MotionView entering={FadeInDown.delay(150).springify()}>
+          <Text style={styles.orPick}>or pick a topic</Text>
           <View style={styles.categoryGrid}>
-            {CATEGORIES.map((cat) => (
-              <CategoryTile
-                key={cat.id}
-                label={cat.label}
-                color={cat.color}
-                selected={selectedCategory === cat.id}
-                onPress={() => setSelectedCategory(cat.id)}
-              />
+            {CATEGORIES.filter((c) => c.id !== 'brain').map((cat) => (
+              <View key={cat.id} style={styles.categoryCell}>
+                <CategoryTile
+                  label={cat.label}
+                  color={cat.color}
+                  selected={selectedCategory === cat.id}
+                  onPress={() => setSelectedCategory(cat.id)}
+                />
+              </View>
             ))}
           </View>
         </MotionView>
@@ -215,11 +243,70 @@ const styles = StyleSheet.create({
     fontFamily: 'PlusJakartaSans_400Regular',
     marginTop: 4,
   },
+  brainHero: {
+    borderRadius: Radius.lg,
+    paddingVertical: Spacing.md + 4,
+    paddingHorizontal: Spacing.md,
+    marginBottom: Spacing.sm,
+    overflow: 'hidden',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  brainHeroActive: {
+    borderColor: '#FFFFFF66',
+  },
+  brainHeroBody: {
+    flex: 1,
+    gap: 2,
+  },
+  brainHeroTag: {
+    fontSize: FontSize.xs,
+    color: Colors.goldLight,
+    fontFamily: 'BricolageGrotesque_700Bold',
+    letterSpacing: 1.2,
+    marginBottom: 2,
+  },
+  brainHeroTitle: {
+    fontSize: FontSize.xxl,
+    color: '#FFFFFF',
+    fontFamily: 'BagelFatOne_400Regular',
+    letterSpacing: 0,
+  },
+  brainHeroSub: {
+    fontSize: FontSize.sm,
+    color: '#FFFFFFCC',
+    fontFamily: 'PlusJakartaSans_400Regular',
+    marginTop: 2,
+  },
+  brainHeroDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: Colors.gold,
+    marginLeft: Spacing.sm,
+  },
+  orPick: {
+    fontSize: FontSize.xs,
+    color: Colors.textMuted,
+    fontFamily: 'BricolageGrotesque_700Bold',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    marginTop: Spacing.sm,
+    marginBottom: Spacing.sm,
+    textAlign: 'center',
+  },
   categoryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.sm,
     marginBottom: Spacing.md,
+  },
+  categoryCell: {
+    width: '31.5%',
+    aspectRatio: 1,
   },
   diffRow: {
     flexDirection: 'row',
