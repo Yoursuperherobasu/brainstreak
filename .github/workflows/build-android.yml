@@ -1,0 +1,76 @@
+name: Build Android (Production AAB)
+
+# How to trigger:
+#   1. Manually — go to the Actions tab on GitHub, pick this workflow,
+#      click "Run workflow" → builds a new AAB.
+#   2. Automatically — push a git tag like "v1.0.1" or "v1.1.0":
+#        git tag v1.0.1
+#        git push --tags
+#      The workflow runs automatically and produces an AAB tied to that tag.
+#
+# This workflow hands off to Expo's cloud builders via EAS. The actual
+# compilation happens on Expo's servers, not GitHub. The workflow finishes
+# in ~1 minute (just kicks off the build), but Expo takes ~15-20 minutes to
+# produce the AAB and emails you the download link.
+#
+# Required secret:
+#   EXPO_TOKEN — add at https://github.com/<you>/brainstreak/settings/secrets/actions
+
+on:
+  workflow_dispatch:        # manual trigger from the Actions tab
+    inputs:
+      profile:
+        description: 'EAS build profile'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - preview
+  push:
+    tags:
+      - 'v*'                # auto-trigger on version tags like v1.0.1
+
+jobs:
+  build:
+    name: Submit AAB build to EAS
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Set up Expo + EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Trigger EAS production build
+        run: |
+          PROFILE="${{ github.event.inputs.profile || 'production' }}"
+          echo "Submitting build with profile: $PROFILE"
+          eas build \
+            --platform android \
+            --profile "$PROFILE" \
+            --non-interactive \
+            --no-wait
+
+      - name: Summary
+        run: |
+          echo "### Build kicked off" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "EAS is now compiling your AAB on Expo's servers." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- You will receive an email from Expo when the build finishes (~15-20 min)." >> $GITHUB_STEP_SUMMARY
+          echo "- Or watch live progress at https://expo.dev/accounts/basusingh/projects/brainstreak/builds" >> $GITHUB_STEP_SUMMARY
