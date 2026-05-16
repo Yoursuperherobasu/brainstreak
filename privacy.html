@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BrainStreak — Privacy Policy</title>
+  <meta name="description" content="BrainStreak privacy policy. We collect zero personal data. All progress is stored locally on your device.">
+  <style>
+    :root {
+      --bg: #FAF4E8;
+      --card: #FFFDF7;
+      --ink: #1B1726;
+      --muted: #5A4F6B;
+      --accent: #7A3FF2;
+      --border: #E5D7C0;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      padding: 32px 16px 64px;
+    }
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px 28px;
+      box-shadow: 0 6px 18px rgba(23, 32, 51, 0.06);
+    }
+    h1 {
+      font-size: 28px;
+      margin: 0 0 8px;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+    .meta { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+    h2 { font-size: 20px; margin: 28px 0 8px; color: var(--ink); }
+    p { margin: 8px 0; }
+    a { color: var(--accent); }
+    ul { padding-left: 22px; }
+    li { margin: 4px 0; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 14px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: var(--bg); font-weight: 600; }
+    code {
+      background: var(--bg);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13px;
+    }
+    strong { color: var(--ink); }
+    .tldr {
+      background: #F2E9D6;
+      border-left: 4px solid var(--accent);
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin: 16px 0 20px;
+    }
+    footer {
+      max-width: 720px;
+      margin: 24px auto 0;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>BrainStreak — Privacy Policy</h1>
+    <p class="meta"><strong>Last updated:</strong> May 16, 2026 · <strong>App:</strong> BrainStreak · <strong>Contact:</strong> <a href="mailto:flip2empower@gmail.com">flip2empower@gmail.com</a></p>
+
+    <p>This privacy policy describes how BrainStreak ("the app", "we", "our") handles information when you use the BrainStreak mobile application on Android.</p>
+
+    <div class="tldr">
+      <strong>TL;DR — what data we collect: None.</strong> BrainStreak does not collect, store, sell, share, or transmit any personal information. There is no account. There is no login. There is no analytics SDK. We do not know who you are and we do not want to.
+    </div>
+
+    <h2>How the app works</h2>
+    <p>BrainStreak is a brain-training game that runs entirely on your device. Everything you do in the app — your username, XP, level, streak, games played, recent activity, settings — is stored <strong>locally on your device only</strong>, using Android's standard on-device storage (AsyncStorage).</p>
+    <p>We do not have a server that holds your data. We do not have an account system. If you uninstall the app, your data is gone forever, because it only ever lived on your phone.</p>
+
+    <h2>What we do NOT do</h2>
+    <ul>
+      <li>We do <strong>not</strong> collect your name, email, phone number, address, or any other personal identifier.</li>
+      <li>We do <strong>not</strong> use Google Analytics, Firebase Analytics, Facebook SDK, Mixpanel, Amplitude, or any other analytics or advertising SDK.</li>
+      <li>We do <strong>not</strong> show advertisements.</li>
+      <li>We do <strong>not</strong> sell or share any data with any third party (because we don't have any to share).</li>
+      <li>We do <strong>not</strong> track your location.</li>
+      <li>We do <strong>not</strong> access your contacts, photos, microphone, or camera.</li>
+      <li>We do <strong>not</strong> require you to create an account.</li>
+    </ul>
+
+    <h2>Network usage</h2>
+    <p>BrainStreak is designed to work fully offline. The "Brain Rush" mode and all eight mini-games run 100% on your device with zero network access.</p>
+    <p>The only network requests the app may make are <strong>optional trivia fetches</strong> to the public Open Trivia Database (<code>opentdb.com</code>) when you select a non-Brain-Rush trivia category (Mixed, Science, History, Tech, Pop, Geography). These requests fetch general-knowledge questions only. They contain <strong>no personal data</strong> — only the requested category, count, and difficulty. The questions you receive are not personalized. Open Trivia Database is a free public API; their policies are at <a href="https://opentdb.com">https://opentdb.com</a>.</p>
+    <p>If you never select a non-Brain-Rush category, the app never connects to the internet.</p>
+
+    <h2>Permissions the app requests</h2>
+    <table>
+      <thead><tr><th>Permission</th><th>Why we need it</th></tr></thead>
+      <tbody>
+        <tr><td><code>INTERNET</code>, <code>ACCESS_NETWORK_STATE</code></td><td>To fetch trivia questions from Open Trivia Database when you select a non-Brain-Rush category. Used only when you initiate that action.</td></tr>
+        <tr><td><code>VIBRATE</code></td><td>To provide haptic feedback when you tap buttons in the game.</td></tr>
+        <tr><td><code>POST_NOTIFICATIONS</code></td><td>To send you an optional daily reminder to play (only if you turn the reminder on in Settings). Notifications are scheduled locally on your device. No notification is ever sent from a server.</td></tr>
+        <tr><td><code>SCHEDULE_EXACT_ALARM</code></td><td>To schedule the optional daily reminder at the exact time you choose. Used only if you enable the reminder.</td></tr>
+      </tbody>
+    </table>
+    <p>You can revoke any of these permissions at any time in your phone's Settings → Apps → BrainStreak → Permissions. The app will keep working; only the corresponding feature (haptics, daily reminder, online trivia fetch) will be disabled.</p>
+
+    <h2>Children's privacy</h2>
+    <p>BrainStreak is suitable for general audiences and contains no objectionable content. It is not specifically directed at children under 13. Because we collect no personal information from anyone, we collect no personal information from children. We do not knowingly collect data from any user of any age, and we cannot — there is no mechanism in the app to send data off the device.</p>
+
+    <h2>Data deletion</h2>
+    <p>Because all your data lives only on your device, you can delete all of it at any time by either:</p>
+    <ol>
+      <li>Tapping "Reset progress" in the app's Settings screen, or</li>
+      <li>Uninstalling the app from your phone.</li>
+    </ol>
+    <p>There is no server-side data to delete because there is no server.</p>
+
+    <h2>Changes to this policy</h2>
+    <p>If we ever change how the app handles data (for example, if a future version adds an optional cloud sync feature), we will update this policy and the "Last updated" date at the top. Any new data-collection feature will be optional and clearly described to you before you opt in.</p>
+
+    <h2>Contact</h2>
+    <p>Questions, concerns, or feedback about privacy: <a href="mailto:flip2empower@gmail.com"><strong>flip2empower@gmail.com</strong></a></p>
+
+    <h2>Jurisdiction</h2>
+    <p>We aim to comply with the GDPR (EU), CCPA (California), and Google Play's User Data policy. Because we collect no personal data, most of these obligations do not apply in the first place — but we honor the spirit of them: data minimization, transparency, and user control.</p>
+  </main>
+  <footer>BrainStreak — © 2026</footer>
+</body>
+</html>
