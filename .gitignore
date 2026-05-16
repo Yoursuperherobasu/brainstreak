@@ -55,5 +55,23 @@ graphify-out/
 /viewport-out/
 /qa-out/
 /test_bug.js
-.claude/worktrees/
-.claude/agents/
+.claude/
+
+# Android build artifacts (EAS produces these — never commit)
+*.aab
+*.apk
+*.keystore
+*.jks
+*.pepk
+upload-keystore.*
+app-release.*
+
+# Play Store service-account JSON (used by `eas submit` — never commit)
+google-play-service-account*.json
+play-service-account*.json
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
